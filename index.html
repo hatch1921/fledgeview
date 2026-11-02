@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FledgeView – Free photo culling for burst shooters</title>
+<meta name="description" content="FledgeView is a free photo viewer and culler for burst shooters, built by a wildlife photographer. Cull, organize by lens, make quick edits, and share, right in your browser. Nothing is uploaded.">
+<meta name="author" content="Frank Hatcher, HatchApps LLC">
+<meta name="theme-color" content="#16171a">
+<link rel="canonical" href="https://fledgeview.com/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://fledgeview.com/">
+<meta property="og:title" content="FledgeView – Free photo culling for burst shooters">
+<meta property="og:description" content="Find the sharp frame, sort by lens, finish, and share, right in your browser. Free, and nothing is uploaded.">
+<meta property="og:image" content="https://fledgeview.com/assets/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<style>
+:root{--bg:#121315;--panel:#1b1c20;--line:#2c2e33;--text:#ecebe7;--muted:#a3a6ab;--amber:#f2b53b;--amber2:#e9a53b;--green:#b6eaa0}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:18px;line-height:1.6;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+a{color:var(--amber)}
+img{max-width:100%;height:auto;display:block}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+h1,h2,h3{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:600;line-height:1.1;margin:0}
+nav{display:flex;align-items:center;gap:18px;padding:18px 0}
+.logo{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:28px;color:#fff;text-decoration:none;margin-right:auto}
+.logo span{color:var(--amber)}
+nav a.nl{color:var(--muted);text-decoration:none;font-size:16px}
+nav a.nl:hover{color:var(--text)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;padding:12px 22px;font-weight:600;font-size:17px;text-decoration:none;border:1px solid var(--line);color:var(--text);background:var(--panel);white-space:nowrap}
+.btn:hover{border-color:var(--amber)}
+.btn.go{background:var(--green);border-color:var(--green);color:#132010}
+.btn.go:hover{filter:brightness(1.05)}
+.btn.sm{padding:8px 14px;font-size:15px}
+.hero{padding:40px 0 30px;text-align:center}
+.hero h1{font-size:clamp(42px,6vw,72px)}
+.hero h1 em{font-style:normal;color:var(--amber)}
+.hero p.lead{max-width:760px;margin:18px auto 0;color:#d8d6d0;font-size:20px}
+.ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:26px}
+.fine{color:var(--muted);font-size:15px;margin-top:14px}
+.shot{border-radius:14px;border:1px solid var(--line);overflow:hidden;box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
+.herosh{margin:34px auto 0;max-width:1100px}
+section{padding:70px 0}
+.row{display:grid;grid-template-columns:1fr 1.25fr;gap:44px;align-items:center}
+.row.flip{grid-template-columns:1.25fr 1fr}
+.row.flip .txt{order:2}
+.row h2{font-size:clamp(32px,4vw,44px)}
+.row p{color:#d8d6d0}
+.row ul{padding-left:20px;margin:10px 0 0;color:#d8d6d0}
+.row li{margin:6px 0}
+.kick{color:var(--amber);font-family:'Barlow Condensed',sans-serif;font-size:17px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:28px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}
+.card h3{font-size:24px;margin-bottom:6px}
+.card p{margin:0;color:#cfcdc7;font-size:16px}
+.center{text-align:center}
+.center h2{font-size:clamp(32px,4vw,44px)}
+.story{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:34px 38px;max-width:860px;margin:0 auto}
+.story p{font-size:20px;color:#e2e0da;margin:0 0 14px}
+.story .who{color:var(--muted);font-size:16px;margin:0}
+.video{max-width:860px;margin:0 auto}
+details{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:10px 0}
+details summary{cursor:pointer;font-weight:600;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:'+';display:inline-block;width:22px;color:var(--amber)}
+details[open] summary::before{content:'\2212'}
+details p{margin:10px 0 2px 22px;color:#cfcdc7;font-size:17px}
+.faq{max-width:860px;margin:24px auto 0}
+.final{text-align:center;padding:60px 0 70px}
+.final h2{font-size:clamp(34px,4.5vw,50px)}
+footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--muted);font-size:15px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center}
+footer .sp{margin-right:auto}
+footer a{color:var(--muted)}
+footer a:hover{color:var(--text)}
+[hidden]{display:none!important}
+@media (max-width:860px){.row,.row.flip{grid-template-columns:1fr}.row.flip .txt{order:0}.grid{grid-template-columns:1fr}section{padding:48px 0}nav a.nl{display:none}.story{padding:24px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="logo" href="./">Fledge<span>View</span></a>
+    <a class="nl" href="#features">Features</a>
+    <a class="nl" href="#faq">Questions</a>
+    <a class="nl" id="navVideo" href="#video" hidden>Video</a>
+    <a class="btn sm go" href="app/">Open FledgeView</a>
+  </nav>
+
+  <header class="hero">
+    <h1>Find the <em>sharp</em> frame. Fast.</h1>
+    <p class="lead">FledgeView is a free photo viewer and culler for burst shooters, built by a wildlife photographer. Cull, organize by lens, make quick edits, and share, right in your browser. Nothing is uploaded.</p>
+    <div class="ctas">
+      <a class="btn go" href="app/">Open FledgeView</a>
+      <a class="btn" href="download/FledgeView.html" download>Download the file</a>
+      <a class="btn" id="heroVideo" href="#" target="_blank" rel="noopener" hidden>Watch the walkthrough</a>
+    </div>
+    <p class="fine">Free &middot; No account &middot; Your photos stay on your computer &middot; Best in Chrome or Edge</p>
+    <div class="shot herosh"><img src="assets/img/viewer.jpg" width="1600" height="900" alt="FledgeView showing a hummingbird on a camera-style screen with its shutter speed, aperture, ISO, and teleconverter."></div>
+  </header>
+</div>
+
+<section id="features">
+  <div class="wrap">
+    <div class="row">
+      <div class="txt">
+        <div class="kick">Culling</div>
+        <h2>Bursts in minutes, not evenings</h2>
+        <p>FledgeView groups each burst and scores how sharp every frame is, so the keeper stands out.</p>
+        <ul>
+          <li><strong>4-up</strong> shows four frames side by side, zoomed together. Press P to pick the best and move on.</li>
+          <li><strong>Auto-pick sharpest</strong> chooses the keeper from every burst for you.</li>
+          <li>Rate with the keyboard: 1 to 5, P to pick, X to reject.</li>
+        </ul>
+      </div>
+      <div class="shot"><img src="assets/img/fourup.jpg" width="1600" height="900" loading="lazy" alt="Four frames of a hummingbird burst side by side, with the sharpest frame marked."></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="row flip">
+      <div class="txt">
+        <div class="kick">Quick finish</div>
+        <h2>Simple edits, done well</h2>
+        <p>A slide-out panel with the adjustments most photos need: exposure, contrast, highlights, shadows, whites and blacks, color, sharpening, and vignette.</p>
+        <ul>
+          <li>A live histogram, with optional warnings for blown highlights and crushed blacks.</li>
+          <li>Copy edits and paste them onto a whole series at once.</li>
+          <li>Your originals never change. Edits apply when you export.</li>
+        </ul>
+      </div>
+      <div class="shot"><img src="assets/img/edit.jpg" width="1600" height="900" loading="lazy" alt="The Quick finish panel open beside a doe portrait, with a histogram and sliders."></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="row">
+      <div class="txt">
+        <div class="kick">Sharing</div>
+        <h2>One photo, every platform</h2>
+        <p>Export the right size for Instagram, Stories and Reels, Facebook, and YouTube in one step, each with its own crop, starting on your subject.</p>
+        <ul>
+          <li>An optional info bar with your camera settings and website.</li>
+          <li>Web galleries where friends and clients pick favorites and email you their choices.</li>
+          <li>Location data removed by default, to protect sensitive sites.</li>
+        </ul>
+      </div>
+      <div class="shot"><img src="assets/img/share.jpg" width="1600" height="900" loading="lazy" alt="The export window making every social media size at once, showing a 9:16 crop of a hawk in flight."></div>
+    </div>
+
+    <div class="grid">
+      <div class="card"><h3>Organize by lens</h3><p>Move a card dump into folders by lens, with teleconverter shots in their own subfolder. See the plan first; sidecars move along; undo anytime.</p></div>
+      <div class="card"><h3>A camera-back screen</h3><p>Your settings as your camera shows them, including effective focal length with a TC or crop mode. Blinkies, focus peaking, and Sony focus points.</p></div>
+      <div class="card"><h3>Works with Lightroom</h3><p>Write ratings to .xmp sidecars, organize before you import, and keep using the editor you already know.</p></div>
+      <div class="card"><h3>Frame mode</h3><p>See a photo framed and hanging on a wall, with real frame and mat choices, and a check that the file is big enough for the print.</p></div>
+      <div class="card"><h3>DOF calculator</h3><p>Depth of field filled in from the photo you&rsquo;re viewing: focal length, teleconverter, aperture, and sensor.</p></div>
+      <div class="card"><h3>Private by design</h3><p>No account, no uploads, no tracking in the app. It works offline after your first visit, or download the single file.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="story">
+      <div class="kick">Why I built it</div>
+      <p>There are plenty of photo apps out there. I wanted something light, that anyone with a web browser could use, and free.</p>
+      <p>My favorite feature sorted fifty thousand of my photos into folders by lens, raw files and all. Now my FledgeView picks arrive in Lightroom already organized.</p>
+      <p class="who">Frank Hatcher, wildlife photographer &middot; <a href="https://www.frankhatcher.com" target="_blank" rel="noopener">www.frankhatcher.com</a></p>
+    </div>
+  </div>
+</section>
+
+<section id="video" hidden>
+  <div class="wrap center">
+    <h2>See it in action</h2>
+    <p class="fine">A short walkthrough of culling, editing, and sharing.</p>
+    <p style="margin-top:20px"><a class="btn go" id="videoLink" href="#" target="_blank" rel="noopener">Watch on YouTube</a></p>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="center"><h2>Questions</h2></div>
+    <div class="faq">
+      <details><summary>Is it really free?</summary><p>Yes, every feature, with no account and no trial. If FledgeView saves you time, you can leave a tip on <a href="https://ko-fi.com/J5Q729VR3X" target="_blank" rel="noopener">Ko-fi</a>. Tips are optional and nothing is locked.</p></details>
+      <details><summary>Are my photos uploaded anywhere?</summary><p>No. FledgeView runs in your browser and reads photos directly from your computer. There&rsquo;s no server to send them to.</p></details>
+      <details><summary>Which browsers does it work in?</summary><p>Everything works in Chrome and Edge, on Windows and Mac, including moving files and saving to folders. Safari and Firefox can view, rate, edit, and export, but can&rsquo;t move files.</p></details>
+      <details><summary>Does it work with RAW files?</summary><p>Yes, for viewing and culling: FledgeView shows the preview your camera stores inside each RAW file, and writes ratings to .xmp sidecars for Lightroom. It isn&rsquo;t a raw developer, so do heavy editing in Lightroom, DxO, or similar. Quick finish works best on JPEGs.</p></details>
+      <details><summary>I use Lightroom. Will moving files cause problems?</summary><p>Organize in FledgeView before you import into Lightroom and everything lines up. If photos were already imported, Lightroom marks them as missing after a move; FledgeView explains how to relink them, and Undo puts everything back.</p></details>
+      <details><summary>Can I use it offline, or as an app?</summary><p>Yes. After your first visit, fledgeview.com works without internet, and Chrome or Edge can install it from the address bar. You can also download the single file and open it on your computer.</p></details>
+      <details><summary>Where are my ratings and edits kept?</summary><p>In your browser on that computer. Clearing your browsing data removes them, so use Write ratings, Move picks and rejects, or exports for a lasting record.</p></details>
+    </div>
+  </div>
+</section>
+
+<div class="wrap final">
+  <h2>Your next card is waiting</h2>
+  <div class="ctas"><a class="btn go" href="app/">Open FledgeView</a><a class="btn" href="download/FledgeView.html" download>Download the file</a></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span class="sp">&copy; 2026 HatchApps LLC</span>
+    <a href="https://www.frankhatcher.com" target="_blank" rel="noopener">www.frankhatcher.com</a>
+    <a href="https://hatchappsllc.com" target="_blank" rel="noopener">hatchappsllc.com</a>
+    <a href="https://ko-fi.com/J5Q729VR3X" target="_blank" rel="noopener">&hearts; Support FledgeView</a>
+  </div>
+</footer>
+
+<script>
+/* When the walkthrough is on YouTube, paste its link here and the video buttons appear. */
+const YOUTUBE_URL = '';
+if (YOUTUBE_URL) {
+  ['heroVideo', 'videoLink'].forEach(id => { document.getElementById(id).href = YOUTUBE_URL; });
+  ['heroVideo', 'video', 'navVideo'].forEach(id => { document.getElementById(id).hidden = false; });
+}
+</script>
+</body>
+</html>
