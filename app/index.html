@@ -1081,6 +1081,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
           <li><strong>Organize before you import.</strong> Lightroom Classic remembers where each photo lives. Run Organize into lens folders and Move picks and rejects on the card dump first, then import into Lightroom, and everything lines up.</li>
           <li><strong>Moved photos that were already imported?</strong> Lightroom marks them missing (a ! on the thumbnail). Nothing is lost: choose Library → Find Missing Photos, click the !, choose Locate, and pick the file in its new folder with Find nearby missing photos checked. Repeat once per folder.</li>
           <li><strong>Ratings carry over for raw files</strong> when you use Cull ▾ → Write ratings, which saves them in .xmp sidecars that Lightroom reads when it imports raw files. (Lightroom ignores sidecars for JPEGs.)</li>
+          <li><strong>Ratings come back too:</strong> when you open a folder, FledgeView picks up star ratings and rejects from .xmp sidecars and from ratings stored inside photos. A sidecar takes priority over a rating inside the file, and anything you’ve rated in FledgeView is never overwritten.</li>
           <li><strong>Undo last organize</strong> in the Organize window puts photos back where they were.</li>
         </ul>
       </section>
@@ -1252,9 +1253,10 @@ const cur = () => state.view[state.idx];
 /* ---------- loading files ---------- */
 function addFiles(list, focusNew = false) {
   const seen = new Set(state.items.map(i => i.key));
-  const fresh = [];
+  const fresh = [], sidecars = new Map();
   for (const en of list) {
     const f = en.file || en;
+    if (en.xmp || (extOf(f.name) === 'xmp' && !f.name.startsWith('._'))) { sidecars.set(sideKey(en, f.name), f); continue; }
     const ext = extOf(f.name), key = keyOf(f);
     if (!SUPPORTED.has(ext) || seen.has(key) || f.name.startsWith('._')) continue;
     seen.add(key);
@@ -1262,6 +1264,11 @@ function addFiles(list, focusNew = false) {
       meta: null, metaP: null, orient: 1, thumb: null, el: null, cache: null, sharp: SHARP[key] ?? null, af: undefined, burst: null });
   }
   if (!fresh.length) { toast(list.length ? 'No supported photos found' : 'No files selected'); return; }
+  if (sidecars.size) {
+    /* note which photos have a sidecar now, so a sidecar's rating takes priority over one stored inside the photo */
+    const byFile = new Map(list.map(en => [en.file || en, en]));
+    for (const it of fresh) { const en = byFile.get(it.file) || it, base = it.name.replace(/\.[^.]+$/, ''); it._side = sidecars.get(sideKey(en, base + '.xmp')) || sidecars.get(sideKey(en, it.name + '.xmp')) || null; }
+  }
   for (const it of fresh) if (it.zone) { const c = cullOf(it), f = it.zone === 'picks' ? 1 : -1; if (c.f !== f) CULL[it.key] = { ...c, f }; }
   saveCull();
   const keep = focusNew ? [...fresh].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))[0] : cur();
@@ -1273,13 +1280,46 @@ function addFiles(list, focusNew = false) {
   rebuildView(keep);
   queueThumbs(fresh);
   queueMeta(fresh);
+  if (sidecars.size) readSidecarRatings(fresh, list, sidecars);
+}
+/* ---------- ratings already made elsewhere (Lightroom sidecars, or stored in the photo) ---------- */
+const dirIds = new WeakMap(); let dirSeq = 0;
+function dirKeyOf(en) {
+  if (en.dir) { if (!dirIds.has(en.dir)) dirIds.set(en.dir, 'd' + (++dirSeq)); return dirIds.get(en.dir); }
+  const f = en.file || en, rp = f.webkitRelativePath || '';
+  return 'p:' + rp.slice(0, rp.lastIndexOf('/') + 1);
+}
+function sideKey(en, name) { return dirKeyOf(en) + '|' + name.toLowerCase(); }
+const untouched = it => !Object.prototype.hasOwnProperty.call(CULL, it.key);
+let foundRatings = 0, foundTimer = 0;
+function applyFoundRating(it, r) {
+  r = Math.round(Number(r));
+  if (!Number.isFinite(r) || !untouched(it) || (r !== -1 && (r < 1 || r > 5))) return false;
+  CULL[it.key] = r === -1 ? { r: 0, f: -1 } : { r, f: 0 };
+  foundRatings++; clearTimeout(foundTimer);
+  foundTimer = setTimeout(() => { saveCull(); state.items.forEach(x => x.el && paintThumb(x)); refreshCullUi(); toast(`Picked up ${foundRatings} rating${foundRatings === 1 ? '' : 's'} from Lightroom or your camera`); foundRatings = 0; }, 600);
+  return true;
+}
+async function readSidecarRatings(fresh) {
+  for (const it of fresh) {
+    const sc = it._side;
+    if (!sc || !untouched(it)) continue;
+    try {
+      const t = await sc.text();
+      const m = t.match(/xmp:Rating\s*=\s*"(-?\d)"/) || t.match(/<xmp:Rating>\s*(-?\d)\s*<\/xmp:Rating>/);
+      if (m) applyFoundRating(it, m[1]);
+    } catch {}
+  }
 }
 function setLoadedButtons(v) {
   $('clearAll').disabled = $('statsBtn').disabled = $('csvBtn').disabled = $('csvDlBtn').disabled = $('keepBtn').disabled = !v;
 }
 async function walkHandle(dir, out, zone = null, home = null, root = dir) {
   for await (const entry of dir.values()) {
-    if (entry.kind === 'file') { if (SUPPORTED.has(extOf(entry.name)) && !entry.name.startsWith('._')) out.push({ file: await entry.getFile(), handle: entry, dir, zone, home, root }); }
+    if (entry.kind === 'file') {
+      if (SUPPORTED.has(extOf(entry.name)) && !entry.name.startsWith('._')) out.push({ file: await entry.getFile(), handle: entry, dir, zone, home, root });
+      else if (extOf(entry.name) === 'xmp' && !entry.name.startsWith('._')) out.push({ file: await entry.getFile(), dir, xmp: true });
+    }
     else if (entry.kind === 'directory') {
       const z = entry.name === '_picks' ? 'picks' : entry.name === '_rejects' ? 'rejects' : null;
       if (z) { if (!zone) await walkHandle(entry, out, z, dir, root); }
@@ -1387,6 +1427,7 @@ function getMeta(it) {
       } catch {}
     }
     if (!Object.keys(m).length) it.metaErr = 'Could not read metadata from this file';
+    if (m.Rating !== undefined && m.Rating !== null && m.Rating !== '' && !it._side) applyFoundRating(it, m.Rating);
     try { it.orient = (await exifr.orientation(it.file)) || 1; } catch { it.orient = 1; }
     it.meta = m;
     return m;
@@ -4755,8 +4796,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.6 beta';
+const VERSION = '0.9.7 beta';
 const RELEASES = [
+  { v: '0.9.7 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Ratings from Lightroom come along: when you open a folder, FledgeView reads star ratings and rejects from .xmp sidecars, and ratings stored inside photos (like Lightroom JPEG exports). Ratings you set in FledgeView always take priority.',
+    ]],
+  ] },
   { v: '0.9.6 beta', date: 'November 2026', groups: [
     ['Improved', [
       'The Edit tab beside the panels is now green, so Quick finish is easy to spot. It turns amber while the drawer is open. The toolbar Edit button is back to its regular color.',
