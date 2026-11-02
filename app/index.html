@@ -385,6 +385,12 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;white-space:no
 .side-head{display:flex;align-items:center;gap:8px;padding:8px 10px 6px}
 .side-sort{display:flex;align-items:center;gap:8px;padding:0 10px 8px}
 .side-sort select{flex:1;font:inherit;font-size:14px;color:inherit;background:var(--page);border:1px solid var(--panel-line);border-radius:6px;padding:4px 6px}
+.side-filter{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:0 10px 8px}
+.side-filter select{flex:1 1 120px;min-width:0;font:inherit;font-size:14px;color:inherit;background:var(--page);border:1px solid var(--panel-line);border-radius:6px;padding:4px 6px}
+.side-filter select.on{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber)}
+.side-filter #fLens{flex-basis:100%}
+.side-filter .tl{flex:none}
+.side-filter .fclear{flex:none;font-size:12px;padding:2px 8px}
 #sortDlg{width:min(600px,94vw)}
 .sortopts label{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;padding:9px 0;border-bottom:1px solid var(--panel-line);cursor:pointer}
 .sortopts input{margin-top:4px;accent-color:var(--amber)}
@@ -612,6 +618,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
       <button class="btn collapse" id="panelHide" aria-label="Hide sidebar" title="Hide sidebar">‹</button>
     </div>
     <div class="side-sort"><label class="tl" for="sortSel">Sort</label><select id="sortSel"><option value="name">File name</option><option value="time">Capture time</option><option value="burst">Sharpest first in each burst</option><option value="sharp">Sharpest first (whole folder)</option><option value="rating">Rating (best first)</option></select></div>
+    <div class="side-filter" id="sideFilter" hidden><label class="tl" for="fLens">Filter</label><button class="btn fclear" id="fClear" hidden title="Show photos from every lens, camera, and file type">Clear</button><select id="fLens" title="Show only photos taken with one lens"></select><select id="fCam" hidden title="Show only photos from one camera"></select><select id="fType" hidden title="Show only one kind of file"></select></div>
     <nav class="strip" id="strip" aria-label="Loaded photos"></nav>
     <section class="info" id="infoSec">
       <button class="info-toggle" id="infoToggle" aria-expanded="false" aria-controls="infoBody">Photo info <span class="chev">▸</span></button>
@@ -994,6 +1001,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <ul>
           <li><kbd>1</kbd>–<kbd>5</kbd> rates, <kbd>P</kbd> picks, <kbd>X</kbd> rejects, and <kbd>U</kbd> clears the flag. Ratings show as feathers; change them to stars, dots, or diamonds in <strong>View ▾ → Features</strong>. Ratings are saved in this browser.</li>
           <li><strong>Show</strong> in the Rate panel filters to one exact rating or to your picks. <strong>Cull ▾ → Show</strong> adds rejects, unflagged photos, and “3 and up” style filters.</li>
+          <li><strong>Filter</strong>, under Sort in the sidebar, shows only one lens, camera, or file type. Teleconverter combinations are listed separately, and filters combine with ratings and picks. <strong>Clear</strong> shows everything again.</li>
           <li><strong>Bursts:</strong> frames shot within half a second of each other are grouped, shown by a colored bar under the thumbnails. Each frame shows its sharpness as a percentage of the best one in its burst.</li>
           <li><strong>Auto-pick sharpest</strong> scores every burst and picks the frames nearly as sharp as the best one. It never rejects anything unless you turn that option on, and it leaves photos you’ve already rated alone.</li>
           <li><strong>Move picks and rejects</strong> moves picks into a <code>_picks</code> folder and rejects into <code>_rejects</code>, next to your originals. Sort again after changing your mind, and they move back. Nothing is ever deleted.</li>
@@ -1278,6 +1286,7 @@ function addFiles(list, focusNew = false) {
   toast(`Added ${fresh.length} photo${fresh.length === 1 ? '' : 's'}`);
   if (!focusNew && fresh.length >= 10 && S.sortAsk !== false) setTimeout(openSortDlg, 350);
   rebuildView(keep);
+  refreshFilterOptions();
   queueThumbs(fresh);
   queueMeta(fresh);
   if (sidecars.size) readSidecarRatings(fresh, list, sidecars);
@@ -1393,6 +1402,7 @@ $('clearAll').onclick = () => {
   state.items = []; state.view = []; state.idx = -1; state.token++; state.bursts = []; state.roots.clear();
   metaQ.length = 0; thumbQueue.length = 0; lru.length = 0;
   $('strip').innerHTML = ''; $('gridCount').textContent = ''; if (state.sel) { state.sel.clear(); refreshSel(); }
+  state.lensF = state.camF = state.typeF = ''; refreshFilterOptions();
   panes.forEach(clearPane);
   $('osd').hidden = true; $('msg').hidden = true; $('empty').hidden = false; $('empty').textContent = 'No photo loaded. Use Open folder, or drop photos anywhere on this page.';
   $('screen').classList.add('noimg');
@@ -1430,6 +1440,7 @@ function getMeta(it) {
     if (m.Rating !== undefined && m.Rating !== null && m.Rating !== '' && !it._side) applyFoundRating(it, m.Rating);
     try { it.orient = (await exifr.orientation(it.file)) || 1; } catch { it.orient = 1; }
     it.meta = m;
+    scheduleFilterRefresh();
     return m;
   })();
   return it.metaP;
@@ -2055,7 +2066,7 @@ const PASS = {
 };
 function rebuildView(keep) {
   const fn = on('cull') ? PASS[state.filter] : PASS.all;
-  state.view = sortView(state.items.filter(it => fn(cullOf(it))));
+  state.view = sortView(state.items.filter(it => fn(cullOf(it)) && passMetaFilters(it)));
   buildStrip();
   if (!state.view.length) {
     state.idx = -1; state.token++;
@@ -4796,8 +4807,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.7 beta';
+const VERSION = '0.9.8 beta';
 const RELEASES = [
+  { v: '0.9.8 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Filter by lens, camera, and file type, under Sort in the sidebar. Teleconverter combinations are listed separately (for example, Sony 300mm F2.8 · 2x TC), and each menu appears only when a folder has more than one choice. Filters combine with ratings and picks.',
+    ]],
+  ] },
   { v: '0.9.7 beta', date: 'November 2026', groups: [
     ['New', [
       'Ratings from Lightroom come along: when you open a folder, FledgeView reads star ratings and rejects from .xmp sidecars, and ratings stored inside photos (like Lightroom JPEG exports). Ratings you set in FledgeView always take priority.',
@@ -4957,6 +4973,69 @@ function setSort(v) {
 }
 $('sortSel').value = S.sort || 'name';
 $('sortSel').onchange = e => setSort(e.target.value);
+/* ---------- filters by lens, camera, and file type ---------- */
+state.lensF = ''; state.camF = ''; state.typeF = '';
+function lensKeyOf(it) {
+  if (!it.meta) return null;
+  const [lens, tc] = lensFolders(it, 'short', true);
+  return tc ? `${lens} · ${tc.replace(/^With /, '')}` : lens;
+}
+function camKeyOf(it) {
+  if (!it.meta) return null;
+  const m = it.meta, model = String(m.Model || '').trim(), make = String(m.Make || '').trim();
+  if (!model) return 'Unknown camera';
+  /* Sony stores internal codes (ILCE-1M2); show the names people use (Sony A1 II) */
+  const sm = model.match(/^IL[CM]E-(\d+)([A-Z]*?)(?:M(\d))?$/);
+  if (sm) { const roman = ['', '', 'II', 'III', 'IV', 'V', 'VI'][+sm[3] || 0] || ''; return `Sony ${model.startsWith('ILME') ? 'FX' : 'A'}${sm[1]}${sm[2]}${roman ? ' ' + roman : ''}`; }
+  return make && !model.toLowerCase().startsWith(make.split(' ')[0].toLowerCase()) && !/^(ILCE|DSC|ILME|NIKON|Canon)/i.test(model) ? `${make.split(' ')[0]} ${model}` : model;
+}
+const typeKeyOf = it => RAW.has(it.ext) ? 'RAW' : (it.ext === 'jpg' || it.ext === 'jpeg') ? 'JPEG' : ['heic', 'heif', 'hif'].includes(it.ext) ? 'HEIF' : it.ext.toUpperCase();
+function passMetaFilters(it) {
+  if (state.typeF && typeKeyOf(it) !== state.typeF) return false;
+  if (state.lensF && lensKeyOf(it) !== state.lensF) return false;
+  if (state.camF && camKeyOf(it) !== state.camF) return false;
+  return true;
+}
+function fillFilter(sel, allLabel, counts, current) {
+  const entries = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], undefined, { numeric: true }));
+  sel.innerHTML = '';
+  const all = document.createElement('option'); all.value = ''; all.textContent = allLabel; sel.append(all);
+  for (const [k, n] of entries) { const o = document.createElement('option'); o.value = k; o.textContent = `${k} (${n.toLocaleString()})`; sel.append(o); }
+  sel.value = counts.has(current) ? current : '';
+  sel.classList.toggle('on', !!sel.value);
+  return entries.length;
+}
+function refreshFilterOptions() {
+  const lens = new Map(), cam = new Map(), type = new Map();
+  let pending = 0;
+  for (const it of state.items) {
+    const t = typeKeyOf(it); type.set(t, (type.get(t) || 0) + 1);
+    if (!it.meta) { pending++; continue; }
+    const l = lensKeyOf(it), c = camKeyOf(it);
+    lens.set(l, (lens.get(l) || 0) + 1); cam.set(c, (cam.get(c) || 0) + 1);
+  }
+  const nL = fillFilter($('fLens'), pending ? `All lenses (reading ${pending.toLocaleString()}…)` : 'All lenses', lens, state.lensF);
+  const nC = fillFilter($('fCam'), 'All cameras', cam, state.camF);
+  const nT = fillFilter($('fType'), 'All file types', type, state.typeF);
+  $('fCam').hidden = nC < 2 && !state.camF; $('fType').hidden = nT < 2 && !state.typeF;
+  $('fLens').hidden = nL < 2 && !state.lensF;
+  $('sideFilter').hidden = $('fLens').hidden && $('fCam').hidden && $('fType').hidden;
+  $('fClear').hidden = !(state.lensF || state.camF || state.typeF);
+}
+let filterTimer = 0;
+function scheduleFilterRefresh() {
+  clearTimeout(filterTimer);
+  filterTimer = setTimeout(() => { refreshFilterOptions(); if (state.lensF || state.camF) rebuildView(cur()); }, 400);
+}
+function setMetaFilter(which, v) {
+  state[which] = v;
+  if ((which === 'lensF' || which === 'camF') && v) state.items.forEach(it => { if (!it.meta) getMeta(it); });
+  rebuildView(cur()); refreshFilterOptions();
+}
+$('fLens').onchange = e => setMetaFilter('lensF', e.target.value);
+$('fCam').onchange = e => setMetaFilter('camF', e.target.value);
+$('fType').onchange = e => setMetaFilter('typeF', e.target.value);
+$('fClear').onclick = () => { state.lensF = state.camF = state.typeF = ''; rebuildView(cur()); refreshFilterOptions(); };
 function openSortDlg() {
   if (document.querySelector('dialog[open]')) return;
   const v = S.sort || 'name';
