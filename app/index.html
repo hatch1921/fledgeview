@@ -14,14 +14,14 @@
 <meta name="author" content="Frank Hatcher, HatchApps LLC">
 <meta name="copyright" content="© 2026 HatchApps LLC. All rights reserved.">
 <meta name="application-name" content="FledgeView">
-<link rel="stylesheet" href="../assets/fonts/fonts.css">
-<script src="../assets/exifr.umd.js"></script>
-<script src="../assets/jszip.min.js"></script>
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<script src="/assets/exifr.umd.js"></script>
+<script src="/assets/jszip.min.js"></script>
+<link rel="manifest" href="/app/manifest.webmanifest">
 <meta name="theme-color" content="#16171a">
 <meta name="description" content="FledgeView: free photo culling for burst shooters. Find the sharp frame, sort by lens, finish, and share, right in your browser. Nothing uploaded.">
-<link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32.png">
-<link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <style>
 :root{
   --page:#d5d6d2; --ink:#1d1f21; --ink-soft:#5a5f65; --panel:#f2f2ef; --panel-line:#cfd0cb; --row-hover:#e5e6e1; --focus:#2d6cad;
@@ -569,7 +569,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
     </div>
     <button class="btn" id="webBtn" data-f="web" title="Export resized copies for the web and social media">Export</button>
     <button class="btn" id="dofBtn" title="Depth of field calculator">DOF</button>
-    <button class="btn" id="editBtn" aria-pressed="false" title="Quick finish: simple edits applied when you export">Edit</button>
+    <button class="btn go" id="editBtn" aria-pressed="false" title="Quick finish: simple edits applied when you export">Edit</button>
     <div class="menu">
       <button class="btn mbtn" aria-haspopup="true" aria-expanded="false">View ▾</button>
       <div class="mpanel" hidden>
@@ -2068,7 +2068,7 @@ async function show(i) {
   layoutAll();
   if (state.framing) renderFrame();
   if (state.editing) editLoad();
-  else if (S.editOpen && !state.framing) setEditing(true, false);
+  else if (S.editOpen && !state.framing && !state.show.quad && !state.show.compare) setEditing(true, false);
   markActive();
   if (on('sharp') && it.sharp == null && ok) scoreOnly(it).then(() => { paintThumb(it); if (cur() === it) { refreshOsd(); refreshRows(); } });
 }
@@ -4755,8 +4755,19 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.3 beta';
+const VERSION = '0.9.5 beta';
 const RELEASES = [
+  { v: '0.9.5 beta', date: 'November 2026', groups: [
+    ['Fixed', [
+      '4-up and Compare could show a single photo instead of their grid if the edit drawer had been left open. The drawer now steps aside for them and comes back afterward.',
+    ]],
+  ] },
+  { v: '0.9.4 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'The Edit button is now green, like Open folder, so Quick finish is easier to find. It turns amber while the edit drawer is open.',
+      'FledgeView is now at fledgeview.com, where it works offline after your first visit and can be installed as an app in Chrome or Edge.',
+    ]],
+  ] },
   { v: '0.9.3 beta', date: 'November 2026', groups: [
     ['New', [
       'Select several photos: Ctrl-click (Cmd on a Mac) to add or remove a thumbnail, Shift-click for a range, and Ctrl+A for every photo shown. Esc or a plain click clears the selection.',
@@ -5188,7 +5199,7 @@ if (typeof exifr === 'undefined') msg('The EXIF library didn’t load. Check you
 })();
 </script>
 <script>
-if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname))) { window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {})); }
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname))) { window.addEventListener('load', () => navigator.serviceWorker.register('/app/sw.js', { scope: '/app/' }).catch(() => {})); }
 </script>
 </body>
 </html>
