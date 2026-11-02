@@ -69,11 +69,11 @@ button{font:inherit;color:inherit;cursor:pointer}
 .editview{position:absolute;inset:0;z-index:3;background:#000}
 .drawer{display:flex;align-items:stretch;align-self:center;gap:8px;margin-left:-8px}
 .drawer .editpanel{width:180px}
-.dtab{width:24px;min-height:120px;border:1px solid #3a3d42;border-radius:8px;background:#232428;color:var(--lcd-dim);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:6px 0}
-.dtab:hover{color:var(--lcd);border-color:var(--amber)}
+.dtab{width:24px;min-height:120px;border:1px solid #8fd77f;border-radius:8px;background:#b6efa8;color:#123d17;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:6px 0;font-weight:600}
+.dtab:hover{filter:brightness(1.06)}
 .dtab .dlabel{writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--cond);font-size:13px;letter-spacing:.5px}
 .dtab .dchev{font-size:14px;line-height:1}
-.drawer.open .dtab{color:var(--amber);border-color:var(--amber)}
+.drawer.open .dtab{color:#1b1b1b;background:var(--amber);border-color:var(--amber)}
 .drawer.open .dchev{transform:rotate(180deg)}
 .drawer.overlay.open{position:absolute;right:214px;top:50%;transform:translateY(-50%);z-index:6;margin:0;background:var(--body);padding:8px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 .editview canvas{width:100%;height:100%;display:block}
@@ -569,7 +569,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
     </div>
     <button class="btn" id="webBtn" data-f="web" title="Export resized copies for the web and social media">Export</button>
     <button class="btn" id="dofBtn" title="Depth of field calculator">DOF</button>
-    <button class="btn go" id="editBtn" aria-pressed="false" title="Quick finish: simple edits applied when you export">Edit</button>
+    <button class="btn" id="editBtn" aria-pressed="false" title="Quick finish: simple edits applied when you export">Edit</button>
     <div class="menu">
       <button class="btn mbtn" aria-haspopup="true" aria-expanded="false">View ▾</button>
       <div class="mpanel" hidden>
@@ -4755,8 +4755,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.5 beta';
+const VERSION = '0.9.6 beta';
 const RELEASES = [
+  { v: '0.9.6 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'The Edit tab beside the panels is now green, so Quick finish is easy to spot. It turns amber while the drawer is open. The toolbar Edit button is back to its regular color.',
+    ]],
+  ] },
   { v: '0.9.5 beta', date: 'November 2026', groups: [
     ['Fixed', [
       '4-up and Compare could show a single photo instead of their grid if the edit drawer had been left open. The drawer now steps aside for them and comes back afterward.',
