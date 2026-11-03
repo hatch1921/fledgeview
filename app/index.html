@@ -106,6 +106,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 .eclip.lo.lit{color:#5b8cff}.eclip.hi.lit{color:#ff5a4f}
 .ewarn{display:flex;align-items:center;gap:6px;font-family:var(--cond);font-size:12px;color:var(--lcd);cursor:pointer;margin:2px 0 0}
 .ewarn input{accent-color:var(--amber);margin:0}
+.ebw{display:flex;flex-direction:column;gap:4px;margin:2px 0 4px}
+.ebwopts{display:grid;grid-template-columns:auto 1fr;gap:4px 8px;align-items:center}
+.ebwopts .erow{margin:0}
+.ebwopts select{min-width:0;font:inherit;font-size:12px;color:var(--lcd);background:#1d1e21;border:1px solid rgba(255,255,255,.18);border-radius:5px;padding:2px 4px;color-scheme:dark}
 .eclipnote{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-family:var(--cond);font-size:10px;color:var(--lcd-dim);pointer-events:none}
 .th .ed{position:absolute;left:4px;bottom:7px;font-family:var(--cond);font-size:11px;color:#1b1b1b;background:var(--amber);padding:0 4px;border-radius:3px}
 .frameview canvas{width:100%;height:100%;display:block}
@@ -1139,6 +1143,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <p>Click the <strong>Edit</strong> tab at the right edge of the camera body (or <strong>Edit</strong> in the top toolbar) to slide out the Quick finish panel. Your other panels stay put, so you can rate and edit in one pass. Click the tab or <strong>Done</strong> to tuck it away; FledgeView remembers whether you left it open.</p>
         <ul>
           <li><strong>Light:</strong> exposure, contrast, highlights, shadows, whites, and blacks. <strong>Color:</strong> temperature (blue to amber) and tint (green to magenta), shown on colored scales, plus vibrance. <strong>Detail and effects:</strong> sharpen and vignette. Double-click a slider to reset it.</li>
+          <li><strong>Black &amp; white:</strong> tick it in the Color section, then choose a <strong>Filter</strong> to control how colors turn into grays (Orange darkens skies and is a good all-rounder; Red is dramatic; Green lightens foliage) and an optional warm or cool <strong>Tone</strong>. Temperature, tint, and vibrance step aside while it’s on; the Light sliders do the rest.</li>
           <li><strong>Sharpen here</strong> is for individual photos, like crisping feathers or fur. The <strong>Sharpen</strong> setting in Export is lighter output sharpening for resized copies. They work together.</li>
           <li><strong>Auto</strong> sets a starting point. It leaves well-exposed photos nearly alone and does more for dark, bright, or flat ones.</li>
           <li>Hold <strong>Before</strong> (or the <kbd>\</kbd> key) to see the original.</li>
@@ -4440,8 +4445,12 @@ function sharpenData(d, w, h, amt) {
   }
 }
 const EDIT_KEYS = EDIT_UI.filter(a => a.length > 1).map(a => a[0]);
-const blankEdit = () => Object.fromEntries(EDIT_KEYS.map(k => [k, 0]));
-function editOf(it) { const r = it && EDITS[it.key]; return r && EDIT_KEYS.some(k => r[k]) ? r : null; }
+const blankEdit = () => ({ ...Object.fromEntries(EDIT_KEYS.map(k => [k, 0])), bw: 0, bwf: 'orange', bwt: 'none' });
+const hasEdit = r => !!r && (EDIT_KEYS.some(k => r[k]) || !!r.bw);
+function editOf(it) { const r = it && EDITS[it.key]; return hasEdit(r) ? r : null; }
+/* black and white: weights mimic the colored filters film photographers used (normalized to 1) */
+const BW_FILTERS = { neutral: [0.2126, 0.7152, 0.0722], yellow: [0.36, 0.56, 0.08], orange: [0.5, 0.44, 0.06], red: [0.72, 0.3, -0.02], green: [0.16, 0.78, 0.06] };
+const BW_TONES = { none: [1, 1, 1], warm: [1.06, 1.0, 0.88], cool: [0.95, 0.99, 1.07] };
 const sm = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 const toLin = new Float32Array(256).map((_, i) => { const c = i / 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); });
 const toSrgb = l => { l = Math.max(0, Math.min(1, l)); return l <= 0.0031308 ? l * 12.92 : 1.055 * Math.pow(l, 1 / 2.4) - 0.055; };
@@ -4475,7 +4484,8 @@ function blurLum(cv) {
   return out;
 }
 function processEdits(src, dst, w, h, r, lum, geo) {
-  const [lr, lg, lb] = editLuts(r), hi = (r.hi || 0) / 100, sh = (r.sh || 0) / 100, vib = (r.vib || 0) / 100, vig = (r.vig || 0) / 100;
+  const bw = !!r.bw, bwW = BW_FILTERS[r.bwf] || BW_FILTERS.orange, bwT = BW_TONES[r.bwt] || BW_TONES.none;
+  const [lr, lg, lb] = editLuts(bw ? { ...r, temp: 0, tint: 0 } : r), hi = (r.hi || 0) / 100, sh = (r.sh || 0) / 100, vib = bw ? 0 : (r.vib || 0) / 100, vig = (r.vig || 0) / 100;
   const g = geo || { x0: 0, y0: 0, sx: 1, sy: 1, W: w, H: h };
   const cx = g.W / 2, cy = g.H / 2, nr = 1 / Math.hypot(cx, cy);
   for (let y = 0, i = 0, j = 0; y < h; y++) {
@@ -4491,6 +4501,7 @@ function processEdits(src, dst, w, h, r, lum, geo) {
         const k = 1 + vib * (vib > 0 ? 0.9 * (1 - Math.min(1, (mx - mn) * 1.6)) : 1);
         R = L + (R - L) * k; G = L + (G - L) * k; B = L + (B - L) * k;
       }
+      if (bw) { const Y = Math.max(0, bwW[0] * R + bwW[1] * G + bwW[2] * B); R = Y * bwT[0]; G = Y * bwT[1]; B = Y * bwT[2]; }
       if (vig) { const dx = (g.x0 + x * g.sx - cx) * nr, f = 1 + vig * 0.75 * sm(0.25, 1, dx * dx + dy * dy); R *= f; G *= f; B *= f; }
       dst[i] = R * 255; dst[i + 1] = G * 255; dst[i + 2] = B * 255; dst[i + 3] = src[i + 3];
     }
@@ -4622,8 +4633,22 @@ function renderEditSoon() { if (!editRaf) editRaf = requestAnimationFrame(() => 
 function buildEditSliders() {
   const box = $('eSliders'); box.innerHTML = '';
   for (const [k, label, mn = -100, mx = 100] of EDIT_UI) {
-    if (!label) { const s = document.createElement('div'); s.className = 'esec'; s.textContent = k; box.append(s); continue; }
-    const row = document.createElement('div'); row.className = 'erow';
+    if (!label) {
+      const s = document.createElement('div'); s.className = 'esec'; s.textContent = k; box.append(s);
+      if (k === 'Color') {
+        const w = document.createElement('div'); w.className = 'ebw';
+        w.innerHTML = '<label class="ewarn" title="Convert this photo to black and white"><input type="checkbox" id="eBw"> Black &amp; white</label>'
+          + '<div class="ebwopts" id="eBwOpts" hidden><label class="erow" for="eBwF">Filter</label><select id="eBwF" title="How colors turn into grays, like film filters. Yellow: slightly darker skies. Orange: darker skies, a good all-rounder. Red: dramatic skies. Green: lighter foliage."><option value="neutral">Neutral</option><option value="yellow">Yellow</option><option value="orange">Orange</option><option value="red">Red</option><option value="green">Green</option></select>'
+          + '<label class="erow" for="eBwT">Tone</label><select id="eBwT" title="A subtle tint over the grays: warm is sepia-like, cool is selenium-like"><option value="none">None</option><option value="warm">Warm</option><option value="cool">Cool</option></select></div>';
+        box.append(w);
+        const setBw = (key, val) => { const it = cur(); if (!it) return; const r = EDITS[it.key] || blankEdit(); r[key] = val; if (hasEdit(r)) EDITS[it.key] = { ...blankEdit(), ...r }; else delete EDITS[it.key]; saveEdits(); paintThumb(it); editLoad(); };
+        $('eBw').onchange = e => setBw('bw', e.target.checked ? 1 : 0);
+        $('eBwF').onchange = e => setBw('bwf', e.target.value);
+        $('eBwT').onchange = e => setBw('bwt', e.target.value);
+      }
+      continue;
+    }
+    const row = document.createElement('div'); row.className = 'erow'; row.dataset.k = k;
     const l = document.createElement('label'); l.textContent = label; l.htmlFor = 'e_' + k;
     const v = document.createElement('b'); v.id = 'ev_' + k; v.title = 'Double-click to reset'; v.textContent = '0';
     row.append(l, v);
@@ -4638,18 +4663,22 @@ function buildEditSliders() {
 function setEdit(k, val) {
   const it = cur(); if (!it) return;
   const r = EDITS[it.key] || blankEdit(); r[k] = Math.round(val);
-  if (EDIT_KEYS.some(q => r[q])) EDITS[it.key] = r; else delete EDITS[it.key];
+  if (hasEdit(r)) EDITS[it.key] = r; else delete EDITS[it.key];
   $('ev_' + k).textContent = Math.round(val) > 0 ? '+' + Math.round(val) : String(Math.round(val));
   saveEdits(); paintThumb(it); renderEditSoon();
 }
 function editLoad() {
   const r = (cur() && EDITS[cur().key]) || blankEdit();
   for (const k of EDIT_KEYS) { const v = r[k] || 0; $('e_' + k).value = v; $('ev_' + k).textContent = v > 0 ? '+' + v : String(v); }
+  const bw = !!r.bw;
+  $('eBw').checked = bw; $('eBwOpts').hidden = !bw; $('eBwF').value = r.bwf || 'orange'; $('eBwT').value = r.bwt || 'none';
+  /* temperature, tint and vibrance don't apply to black and white; the filter takes their place */
+  for (const k of ['temp', 'tint', 'vib']) { $('e_' + k).hidden = bw; const row = document.querySelector(`#eSliders .erow[data-k="${k}"]`); if (row) row.hidden = bw; }
   $('ePaste').disabled = $('ePasteAll').disabled = !editClip;
   refreshSel();
   renderEditSoon();
 }
-function setRecipe(it, r) { if (r && EDIT_KEYS.some(k => r[k])) EDITS[it.key] = { ...blankEdit(), ...r }; else delete EDITS[it.key]; saveEdits(); paintThumb(it); }
+function setRecipe(it, r) { if (hasEdit(r)) EDITS[it.key] = { ...blankEdit(), ...r }; else delete EDITS[it.key]; saveEdits(); paintThumb(it); }
 function editBefore(v) { if (editBeforeOn === v) return; editBeforeOn = v; renderEditSoon(); }
 function autoEdit() {
   if (!editBase) return null;
@@ -4722,7 +4751,7 @@ $('ePasteSel').onclick = () => {
 };
 $('editBtn').onclick = () => setEditing(!state.editing);
 $('eDone').onclick = () => setEditing(false);
-$('eAuto').onclick = () => { const it = cur(), r = autoEdit(); if (!it || !r) return; setRecipe(it, r); editLoad(); };
+$('eAuto').onclick = () => { const it = cur(), r = autoEdit(); if (!it || !r) return; const prev = EDITS[it.key]; if (prev && prev.bw) { r.bw = 1; r.bwf = prev.bwf; r.bwt = prev.bwt; r.vib = 0; } setRecipe(it, r); editLoad(); };
 $('eReset').onclick = () => { const it = cur(); if (!it) return; setRecipe(it, null); editLoad(); };
 $('eCopy').onclick = () => { const r = editOf(cur()); if (!r) return toast('This photo has no edits to copy'); editClip = { ...r }; editLoad(); toast('Edits copied'); };
 $('ePaste').onclick = () => { const it = cur(); if (!it || !editClip) return; setRecipe(it, editClip); editLoad(); };
@@ -5433,8 +5462,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.20 beta';
+const VERSION = '0.9.21 beta';
 const RELEASES = [
+  { v: '0.9.21 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Black & white in Quick finish: tick it in the Color section, then pick a Filter (Neutral, Yellow, Orange, Red, or Green, like the colored filters used with black-and-white film) and an optional warm or cool Tone. The Light sliders keep working, and it applies to exports, galleries, and Frame mode like any other edit.',
+    ]],
+  ] },
   { v: '0.9.20 beta', date: 'November 2026', groups: [
     ['New', [
       'Backup during Import: tick Backup and choose a second folder, ideally on another drive. Every photo and sidecar is copied to both places in the same folders, and each copy is checked. Your backup choice is remembered.',
