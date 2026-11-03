@@ -332,7 +332,7 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;white-space:no
 .screen.compare .cap,.screen.quad .cap{display:block}
 .screen.compare .osd,.screen.quad .osd{display:none}
 .screen.quad .panes{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
-.screen.quad .pane.active::after{content:"";position:absolute;inset:0;border:3px solid var(--amber);pointer-events:none;z-index:5}
+.screen.quad .pane.active::after,.screen.compare .pane.active::after{content:"";position:absolute;inset:0;border:3px solid var(--amber);pointer-events:none;z-index:5}
 .screen.quad .pane{cursor:pointer}
 .th.inq{border-color:rgba(233,165,59,.5)}
 .empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#6f7479;font-family:var(--cond);font-size:18px}
@@ -1027,8 +1027,8 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
           <li><strong>Blinkies</strong> (<kbd>B</kbd>): blown highlights flash red.</li>
           <li><strong>Peaking</strong> (<kbd>E</kbd>): paints the sharpest edges yellow. The slider under the screen sets how much is highlighted.</li>
           <li><strong>Focus pt</strong> (<kbd>A</kbd>): a green box shows where the camera focused. Sony files only, and only straight-from-camera files; edited exports usually lose this information.</li>
-          <li><strong>Compare</strong> (<kbd>C</kbd>): the current photo and the next one side by side, with zoom linked.</li>
-          <li><strong>4-up</strong> (<kbd>Q</kbd>): four photos at once. Click one to select it. <kbd>P</kbd> picks it and loads the next four, leaving the other three untouched. <kbd>←</kbd> <kbd>→</kbd> move four at a time.</li>
+          <li><strong>Compare</strong> (<kbd>C</kbd>): the current photo and the next one side by side, with zoom linked. Click either photo to select it; ratings, <kbd>P</kbd>, and <kbd>X</kbd> apply to the selected one.</li>
+          <li><strong>4-up</strong> (<kbd>Q</kbd>): four photos at once. Click one to select it, then rate, pick, or reject it. With <strong>Advance: Manual</strong>, you stay on the same four, so you can pick one and reject the rest. With <strong>Auto</strong>, <kbd>P</kbd> picks the selected photo and loads the next four. <kbd>←</kbd> <kbd>→</kbd> move four at a time.</li>
           <li><strong>Frame</strong> (<kbd>M</kbd>): see your photo framed on a wall.</li>
           <li><strong>DOF</strong> (top toolbar): the depth of field calculator. See “DOF calculator.”</li>
         </ul>
@@ -2119,7 +2119,7 @@ function paintOverlays(p) {
   if (!p.blink.hidden) { p.blink.width = work.w; p.blink.height = work.h; p.blink.getContext('2d').putImageData(work.blink, 0, 0); }
   p.peak.hidden = !(p.ok && work && on('peak') && state.show.peak);
   if (!p.peak.hidden) { p.peak.width = work.w; p.peak.height = work.h; p.peak.getContext('2d').putImageData(peakImage(work, S.peakPct), 0, 0); }
-  p.afPt = p.ok && on('af') && state.show.af ? afFor(it) : null;
+  p.afPt = p.ok && it && on('af') && state.show.af ? afFor(it) : null;
   p.af.hidden = !p.afPt;
 }
 function updateCaptions() {
@@ -2159,9 +2159,9 @@ function rebuildView(keep) {
 async function show(i) {
   const n = state.view.length; if (!n) return;
   i = Math.max(0, Math.min(n - 1, i));
-  state.idx = i; const tok = ++state.token; const it = state.view[i];
+  state.idx = i; state.cmpSide = 0; const tok = ++state.token; const it = state.view[i];
   if (state.show.quad && (i < state.quadBase || i > state.quadBase + 3)) state.quadBase = i;
-  updateStrip(); updateReadout(); refreshCullUi(); $('bigWarn').hidden = true;
+  updateStrip(); updateReadout(); refreshCullUi(); markActive(); $('bigWarn').hidden = true;
   $('empty').hidden = true;
   const m = await getMeta(it);
   if (tok !== state.token) return;
@@ -2211,10 +2211,10 @@ function updateBigWarn(it) {
 }
 function msg(t) { $('msgText').textContent = t; $('msg').hidden = false; }
 function updateReadout() {
-  const it = cur();
+  const it = rateTarget(), pos = it ? state.view.indexOf(it) : -1;
   const r = $('readout'); r.innerHTML = '';
   const b = document.createElement('b');
-  b.textContent = it ? `${state.idx + 1} / ${state.view.length}` : '–';
+  b.textContent = it ? `${pos + 1} / ${state.view.length}` : '–';
   const nm = document.createElement('span'); nm.className = 'rname'; nm.textContent = it ? it.name : 'No photo';
   r.append(b, nm);
 }
@@ -2545,11 +2545,11 @@ function thumbFrom(it) {
 const rateBox = $('rate');
 for (let n = 1; n <= 5; n++) {
   const b = document.createElement('button'); b.innerHTML = rateIcon(); b.setAttribute('aria-label', `Rate ${n} of 5`);
-  b.onclick = () => { const it = cur(); if (it) setCull(it, { r: cullOf(it).r === n ? 0 : n }); };
+  b.onclick = () => { const it = rateTarget(); if (it) setCull(it, { r: cullOf(it).r === n ? 0 : n }, !state.show.quad); };
   rateBox.append(b);
 }
 function refreshCullUi() {
-  const it = cur(), c = it ? cullOf(it) : { r: 0, f: 0 };
+  const it = rateTarget(), c = it ? cullOf(it) : { r: 0, f: 0 };
   [...rateBox.children].forEach((b, i) => b.classList.toggle('on', i < c.r));
   $('fPick').setAttribute('aria-pressed', c.f === 1);
   $('fRej').setAttribute('aria-pressed', c.f === -1);
@@ -2558,10 +2558,10 @@ function setCull(it, patch, advance = true) {
   const c = { ...cullOf(it), ...patch };
   if (!c.r && !c.f) delete CULL[it.key]; else CULL[it.key] = c;
   saveCull(); paintThumb(it); refreshCullUi(); refreshOsd(); refreshRows();
-  if (advance && S.advance && state.idx < state.view.length - 1) setTimeout(() => show(state.idx + 1), 120);
+  if (advance && S.advance) { const at = state.view.indexOf(it); if (at >= 0 && at < state.view.length - 1) setTimeout(() => show(at + 1), 120); }
 }
-$('fPick').onclick = () => { const it = cur(); if (!it) return; if (state.show.quad && cullOf(it).f !== 1) return quadPick(); setCull(it, { f: cullOf(it).f === 1 ? 0 : 1 }); };
-$('fRej').onclick = () => { const it = cur(); if (it) setCull(it, { f: cullOf(it).f === -1 ? 0 : -1 }); };
+$('fPick').onclick = () => { const it = rateTarget(); if (!it) return; if (state.show.quad && S.advance && cullOf(it).f !== 1) return quadPick(); setCull(it, { f: cullOf(it).f === 1 ? 0 : 1 }, !state.show.quad); };
+$('fRej').onclick = () => { const it = rateTarget(); if (it) setCull(it, { f: cullOf(it).f === -1 ? 0 : -1 }, !state.show.quad); };
 $('filterSel').onchange = e => setFilter(e.target.value);
 function setFilter(v) {
   state.filter = v; $('filterSel').value = v;
@@ -2937,7 +2937,7 @@ $('peakPct').oninput = e => {
 function setCompare(v) {
   if (v && state.editing) setEditing(false, false);
   if (v && state.show.quad) setQuad(false, true);
-  state.show.compare = v; setTog('tCompare', v);
+  state.show.compare = v; setTog('tCompare', v); state.cmpSide = 0;
   $('pane1').hidden = !v; $('screen').classList.toggle('compare', v);
   if (!v) clearPane(panes[1]);
   if (cur()) show(state.idx);
@@ -2953,13 +2953,19 @@ function setQuad(v, quiet) {
   markActive();
   if (!quiet && cur()) show(state.idx); else updateStrip();
 }
-function markActive() { panes.forEach((p, k) => p.el.classList.toggle('active', !!state.show.quad && state.idx - state.quadBase === k)); }
+function markActive() { panes.forEach((p, k) => p.el.classList.toggle('active', state.show.quad ? state.idx - state.quadBase === k : !!state.show.compare && state.cmpSide === k)); }
+/* the photo that ratings, Pick and Reject apply to: in Compare, whichever side you clicked */
+function rateTarget() { if (state.show.compare && state.cmpSide === 1) { const it = state.view[state.idx + 1]; if (it) return it; } return cur(); }
+function selectCmp(k) {
+  if (k === 1 && !state.view[state.idx + 1]) return;
+  state.cmpSide = k; markActive(); updateReadout(); refreshCullUi();
+}
 function selectPane(k) {
   const it = state.view[state.quadBase + k]; if (!it) return;
   state.idx = state.quadBase + k;
   markActive(); updateStrip(); updateReadout(); refreshCullUi(); refreshRows(); refreshOsd(); updateCaptions();
 }
-panes.forEach((p, k) => p.el.addEventListener('click', () => { if (state.show.quad && !pan) selectPane(k); }));
+panes.forEach((p, k) => p.el.addEventListener('click', () => { if (pan) return; if (state.show.quad) selectPane(k); else if (state.show.compare && k < 2) selectCmp(k); }));
 function quadPick() {
   const it = cur(); if (!it) return;
   setCull(it, { f: 1 }, false);
@@ -5032,10 +5038,11 @@ document.addEventListener('keydown', e => {
   else if ((k === 'a' || k === 'A') && on('af')) $('tAf').click();
   else if ((k === 'c' || k === 'C') && on('bursts')) $('tCompare').click();
   else if (on('cull') && it) {
-    if (/^[0-5]$/.test(k)) { const n = +k; setCull(it, { r: n && cullOf(it).r === n ? 0 : n }); }
-    else if (k === 'p' || k === 'P') state.show.quad ? quadPick() : setCull(it, { f: 1 });
-    else if (k === 'x' || k === 'X') setCull(it, { f: -1 });
-    else if (k === 'u' || k === 'U') setCull(it, { f: 0 }, false);
+    const t = rateTarget(), adv = !state.show.quad;
+    if (/^[0-5]$/.test(k)) { const n = +k; setCull(t, { r: n && cullOf(t).r === n ? 0 : n }, adv); }
+    else if (k === 'p' || k === 'P') state.show.quad && S.advance ? quadPick() : setCull(t, { f: 1 }, adv);
+    else if (k === 'x' || k === 'X') setCull(t, { f: -1 }, adv);
+    else if (k === 'u' || k === 'U') setCull(t, { f: 0 }, false);
   }
 });
 
@@ -5102,8 +5109,15 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.13 beta';
+const VERSION = '0.9.14 beta';
 const RELEASES = [
+  { v: '0.9.14 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'Compare: click either photo to select it, and ratings, Pick, and Reject apply to that one.',
+      '4-up and Compare follow the Advance setting. With Manual, you stay put, so you can pick one photo and reject the others. With Auto, 4-up still picks and loads the next four, and Compare moves on.',
+      'The Rate panel shows the selected photo’s rating, file name, and position.',
+    ]],
+  ] },
   { v: '0.9.13 beta', date: 'November 2026', groups: [
     ['New', [
       'Import folder choices: Date / Lens, Year / Date / Lens, Year / Month / Day, Lens / Date, Shoot name / Lens, or a Custom pattern to match the system you already use. Click-to-insert words ({date}, {lens}, {camera}, {shoot}, and more) and a live example from the card show exactly where photos will go. Your choice is remembered.',
