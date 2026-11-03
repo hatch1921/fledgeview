@@ -137,12 +137,12 @@ button{font:inherit;color:inherit;cursor:pointer}
 .btn.out{background:#b5d4f4;color:#0c447c;border-color:#85b7eb;font-weight:600}
 .btn.out:hover:not(:disabled){background:#c6def7}
 @media (max-width:1500px){
-  .bar{column-gap:10px}
-  .actions{gap:6px}
-  .actions .tgap{width:2px}
-  .bar .btn{padding:6px 9px}
-  .seg button{padding:6px 8px}
-  .btn .ic{margin-right:5px}
+  .bar{column-gap:8px}
+  .actions{gap:5px}
+  .actions .tgap{width:0}
+  .bar .btn{padding:6px 8px}
+  .seg button{padding:6px 7px}
+  .btn .ic{margin-right:4px}
 }
 .btn{background:var(--panel);border:1px solid var(--panel-line);border-radius:6px;padding:6px 12px}
 .btn:hover:not(:disabled){background:var(--row-hover)}
@@ -678,7 +678,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
     <button class="btn" id="editBtn" aria-pressed="false" title="Quick finish: simple edits applied when you export"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h8M16 6h4M4 12h2M10 12h10M4 18h11M19 18h1"/><circle cx="14" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg>Edit</button>
     <span class="tgap" aria-hidden="true"></span>
     <button class="btn out" id="webBtn" data-f="web" title="Export resized copies for the web and social media"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>Export</button>
-    <button class="btn" id="dofBtn" title="Depth of field calculator">DOF</button>
+    <button class="btn" id="dofBtn" title="Lens tools: depth of field and field of view calculators"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3l3.5 6.5M21 12h-7.5M16.5 19.8L12.5 13M7.5 19.8l3.8-6.6M3 12h7.5M7.5 4.2l4 6.8"/></svg>Lens tools</button>
     <span class="tgap" aria-hidden="true"></span>
     <div class="menu">
       <button class="btn mbtn" aria-haspopup="true" aria-expanded="false">View ▾</button>
@@ -1101,7 +1101,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
           <li><strong>Compare</strong> (<kbd>C</kbd>): the current photo and the next one side by side, with zoom linked. Click either photo to select it; ratings, <kbd>P</kbd>, and <kbd>X</kbd> apply to the selected one.</li>
           <li><strong>4-up</strong> (<kbd>Q</kbd>): four photos at once. Click one to select it, then rate, pick, or reject it. With <strong>Advance: Manual</strong>, you stay on the same four, so you can pick one and reject the rest. With <strong>Auto</strong>, <kbd>P</kbd> picks the selected photo and loads the next four. <kbd>←</kbd> <kbd>→</kbd> move four at a time.</li>
           <li><strong>Frame</strong> (<kbd>M</kbd>): see your photo framed on a wall.</li>
-          <li><strong>DOF</strong> (top toolbar): the depth of field calculator. See “DOF calculator.”</li>
+          <li><strong>Lens tools</strong> (top toolbar): the depth of field and field of view calculators. See “Lens tools.”</li>
         </ul>
       </section>
       <section data-g="Culling">
@@ -1176,10 +1176,10 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         </ul>
         <div class="tip">ZIPs over about 20 MB are large for email; a cloud link (OneDrive, Google Drive, Dropbox) works better.</div>
       </section>
-      <section data-g="DOF calculator">
-        <h3>DOF calculator and field of view</h3>
+      <section data-g="Lens tools">
+        <h3>Lens tools: depth of field and field of view</h3>
         <ul>
-          <li>Click <strong>DOF</strong> in the top toolbar to open the depth of field calculator: sensor, focal length, teleconverter, aperture, and distance, with a side view of the sharp zone and an exposure section.</li>
+          <li>Click <strong>Lens tools</strong> in the top toolbar, then the <strong>Depth of field</strong> tab, to open the depth of field calculator: sensor, focal length, teleconverter, aperture, and distance, with a side view of the sharp zone and an exposure section.</li>
           <li><strong>Use this photo</strong> fills it in from the photo you’re viewing: focal length, teleconverter, aperture, sensor format, ISO, and shutter speed, plus focus distance when the camera recorded it.</li>
           <li>If no focus distance was recorded (common with edited exports), estimate your distance to the subject.</li>
           <li><strong>Field of view</strong> (the second tab) compares focal lengths in two ranges, <strong>Wide</strong> (9 to 100 mm) and <strong>Telephoto</strong> (100 to 1600 mm, including teleconverter combinations): frames drawn to true angular coverage, angles seen from above, and a table of horizontal, vertical, and diagonal angles. Click focal lengths to compare, drag the slider to try any other, and pick your sensor. <strong>Use this photo</strong> draws the frames on the photo you’re viewing, with the megapixels you’d keep by cropping to each. On a telephoto shot it also shows what a 1.4× and 2× teleconverter would have framed, to compare a TC with cropping.</li>
@@ -5393,8 +5393,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.18 beta';
+const VERSION = '0.9.19 beta';
 const RELEASES = [
+  { v: '0.9.19 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'The DOF button is now Lens tools, with an aperture icon, since it opens both the depth of field and field of view calculators.',
+    ]],
+  ] },
   { v: '0.9.18 beta', date: 'November 2026', groups: [
     ['Fixed', [
       'In the Clean look, the sidebar menus (Sort, lens, camera, file type) were hard to read when opened on a computer set to light mode. They now open as dark lists with light text.',
