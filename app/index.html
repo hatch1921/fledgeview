@@ -309,6 +309,14 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;white-space:no
 @media (max-width:860px){.galgrid{grid-template-columns:1fr}.galprev{height:45vh}}
 .orgplan{max-height:40vh;overflow:auto;border:1px solid var(--panel-line);border-radius:8px}
 #impDlg{width:min(720px,94vw)}
+#mvDlg{width:min(560px,94vw)}
+.mvopts{display:flex;flex-direction:column;gap:6px;margin:12px 0}
+.mvopt{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--panel-line);border-radius:8px;cursor:pointer}
+.mvopt:has(input:checked){border-color:var(--amber)}
+.mvopt input{margin-top:3px;accent-color:var(--amber)}
+.mvopt span{display:flex;flex-direction:column}
+.mvopt small{color:var(--ink-soft);font-size:12.5px}
+.mvlr{font-size:13px}
 .improw{display:flex;align-items:center;gap:10px;margin:6px 0}
 .implab{width:96px;flex:none;font-weight:600}
 .implab.impbk{display:flex;align-items:center;gap:6px;cursor:pointer}
@@ -678,7 +686,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <button class="mi" id="scoreBurst" data-f="sharp">Score burst</button>
         <button class="mi" id="autoBtn" data-f="sharp">Auto-pick sharpest…</button>
         <button class="mi" id="writeXmp" data-f="cull">Write ratings</button>
-        <button class="mi" id="moveRej" data-f="cull">Move picks and rejects</button>
+        <button class="mi" id="moveRej" data-f="cull">Move picks and rejects…</button>
         <button class="mi" id="orgBtn" data-f="cull">Organize into lens folders…</button>
         <button class="mi" id="copyList" data-f="cull">Copy list</button>
       </div>
@@ -1132,7 +1140,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
           <li><strong>Filter</strong>, under Sort in the sidebar, shows only one lens, camera, or file type. Teleconverter combinations are listed separately, and filters combine with ratings and picks. <strong>Clear</strong> shows everything again.</li>
           <li><strong>Bursts:</strong> frames shot within half a second of each other are grouped, shown by a colored bar under the thumbnails. Each frame is labeled compared with the sharpest one in its burst: <strong>Best</strong>, <strong>Sharp</strong> (within 90% of the best, which the eye can’t tell apart), a percentage for slightly softer frames, or <strong>Soft</strong> (below 70%). Hover over a label for the exact figure. On Sony files straight from the camera, sharpness is measured around the focus point (usually the eye), so a soft frame can’t win on a busy background; other files are measured across the whole frame.</li>
           <li><strong>Auto-pick sharpest</strong> scores every burst and picks the frames nearly as sharp as the best one. It never rejects anything unless you turn that option on, and it leaves photos you’ve already rated alone.</li>
-          <li><strong>Move picks and rejects</strong> moves picks into a <code>_picks</code> folder and rejects into <code>_rejects</code>, next to your originals. Sort again after changing your mind, and they move back. Nothing is ever deleted.</li>
+          <li><strong>Move picks and rejects…</strong> moves picks into a <code>_picks</code> folder and rejects into <code>_rejects</code>, next to your originals. Choose <strong>Picks and rejects</strong>, <strong>Rejects only</strong> (keepers stay where they are), or <strong>Picks only</strong>. Run it again after changing your mind, and photos move back. Nothing is ever deleted: once you’re sure, delete <code>_rejects</code> yourself in File Explorer or Finder, which sends it to the Recycle Bin or Trash.</li>
           <li><strong>Import</strong> (the first button in the toolbar) copies a card into your main photo folder, organized the way you choose: <code>date / lens</code> by default, or year, month, and day, lens first, a shoot name, or your own <strong>Custom</strong> pattern using words like <code>{year}</code>, <code>{date}</code>, <code>{lens}</code>, <code>{camera}</code>, and <code>{shoot}</code>. A live example shows where photos will go. Teleconverter shots can get their own subfolder, and sidecars travel with their photos. Choose the card and your main folder, check the plan, then click Import. Tick <strong>Backup</strong> and choose a second folder (ideally on another drive) to write a verified second copy at the same time. Every copy is checked, photos already imported are skipped, and the card is never changed. Then cull the new folders and import them into Lightroom when you’re ready.</li>
           <li><strong>Organize into lens folders</strong> moves each photo into a folder named for its lens, with teleconverter shots in their own subfolder. It shows the plan first, sidecar files (.xmp, .dop, .pp3) move along, and <strong>Undo last organize</strong> puts everything back.</li>
           <li><strong>Write ratings</strong> saves your ratings into .xmp sidecar files for Lightroom.</li>
@@ -1269,6 +1277,18 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
   <p class="sub">In Chrome or Edge on fledgeview.com, or in the downloaded copy, FledgeView uses a newer picker that says Select folder instead.</p>
   <label class="chk"><input type="checkbox" id="upNever" checked> Don’t show this again</label>
   <div class="end"><button class="btn" data-close>Cancel</button><button class="btn primary" id="upGo">Choose a folder</button></div>
+</dialog>
+
+<dialog id="mvDlg">
+  <h2>Move picks and rejects</h2>
+  <p class="sub">Moves photos into <code>_picks</code> and <code>_rejects</code> folders next to your originals. Sidecar files move with them. Nothing is deleted: change a flag and run this again, and photos move back.</p>
+  <div class="mvopts" role="radiogroup" aria-label="What to move">
+    <label class="mvopt"><input type="radio" name="mvWhat" value="both"><span><b>Picks and rejects</b><small id="mvN_both"></small></span></label>
+    <label class="mvopt"><input type="radio" name="mvWhat" value="rejects"><span><b>Rejects only</b><small id="mvN_rejects"></small></span></label>
+    <label class="mvopt"><input type="radio" name="mvWhat" value="picks"><span><b>Picks only</b><small id="mvN_picks"></small></span></label>
+  </div>
+  <div class="tip mvlr"><strong>Using Lightroom?</strong> Photos already in your catalog will show as missing after a move until you relink them (Library → Find Missing Photos). And when you import a folder with “Include subfolders” on, Lightroom brings in <code>_rejects</code> too: untick it in the import panel, or delete <code>_rejects</code> in File Explorer or Finder once you’re sure.</div>
+  <div class="end"><button class="btn" data-close>Cancel</button><button class="btn primary" id="mvGo">Move</button></div>
 </dialog>
 
 <dialog id="impDlg">
@@ -2865,20 +2885,52 @@ function confirmMoveWarning() {
 }
 $('mwCopy').onclick = () => copyText(RELINK_TEXT, 'Relink steps copied');
 $('mwReset').onclick = () => { S.moveWarnAck = false; saveS(); $('mwResetNote').textContent = 'You’ll see the warning the next time you move photos.'; };
-$('moveRej').onclick = async () => {
-  const movable = state.items.filter(i => i.dir && i.handle);
-  if (!movable.length) return toast(whyNoWrite());
-  const plan = movable.map(it => { const c = cullOf(it); return { it, target: c.f === 1 ? 'picks' : c.f === -1 ? 'rejects' : null }; })
-    .filter(p => p.target !== (p.it.zone || null));
-  if (!plan.length) {
-    const flagged = movable.filter(it => cullOf(it).f).length;
-    return toast(flagged ? 'Your picks and rejects are already in their _picks and _rejects folders.' : 'There are no picks or rejects to move yet. To put photos into folders by lens, use Cull ▾ → Organize into lens folders.');
-  }
+/* which photos move where: 'both' follows every flag; 'rejects' or 'picks' leaves the other kind where it is */
+function movePlan(movable, mode) {
+  return movable.map(it => {
+    const f = cullOf(it).f, z = it.zone || null;
+    let target;
+    if (mode === 'rejects') target = f === -1 ? 'rejects' : z === 'rejects' ? null : z;
+    else if (mode === 'picks') target = f === 1 ? 'picks' : z === 'picks' ? null : z;
+    else target = f === 1 ? 'picks' : f === -1 ? 'rejects' : null;
+    return { it, target };
+  }).filter(p => p.target !== (p.it.zone || null));
+}
+function movePlanText(plan) {
   const np = plan.filter(p => p.target === 'picks').length, nr = plan.filter(p => p.target === 'rejects').length, nb = plan.length - np - nr;
   const parts = [];
-  if (np) parts.push(`${np} to _picks`); if (nr) parts.push(`${nr} to _rejects`); if (nb) parts.push(`${nb} back to the main folder`);
+  if (np) parts.push(`${np.toLocaleString()} to _picks`); if (nr) parts.push(`${nr.toLocaleString()} to _rejects`); if (nb) parts.push(`${nb.toLocaleString()} back to the main folder`);
+  return parts.length ? parts.join(', ') : 'Nothing to move';
+}
+function chooseMove(movable) {
+  return new Promise(res => {
+    const d = $('mvDlg'), radios = [...d.querySelectorAll('input[name=mvWhat]')];
+    const pick = ['both', 'rejects', 'picks'].includes(S.moveWhat) ? S.moveWhat : 'both';
+    radios.forEach(x => { x.checked = x.value === pick; });
+    for (const m of ['both', 'rejects', 'picks']) $('mvN_' + m).textContent = movePlanText(movePlan(movable, m));
+    const sync = () => { const m = radios.find(x => x.checked).value; $('mvGo').disabled = !movePlan(movable, m).length; };
+    radios.forEach(x => { x.onchange = sync; }); sync();
+    let done = false;
+    const finish = v => { if (done) return; done = true; d.removeEventListener('close', onClose); if (d.open) d.close(); res(v); };
+    const onClose = () => finish(null);
+    d.addEventListener('close', onClose);
+    $('mvGo').onclick = () => { const m = radios.find(x => x.checked).value; S.moveWhat = m; saveS(); finish(m); };
+    d.showModal();
+  });
+}
+$('moveRej').onclick = async () => {
+  closeMenus();
+  const movable = state.items.filter(i => i.dir && i.handle);
+  if (!movable.length) return toast(whyNoWrite());
+  if (!movePlan(movable, 'both').length && !movePlan(movable, 'rejects').length && !movePlan(movable, 'picks').length) {
+    const flagged = movable.filter(it => cullOf(it).f).length;
+    return toast(flagged ? 'Your picks and rejects are already in their _picks and _rejects folders.' : 'There are no picks or rejects to move yet. To put photos into folders by lens, use Cull \u25be \u2192 Organize into lens folders.');
+  }
+  const mode = await chooseMove(movable);
+  if (!mode) return;
+  const plan = movePlan(movable, mode);
+  if (!plan.length) return;
   if (!await confirmMoveWarning()) return;
-  if (!confirm(`Move ${parts.join(', ')}? Sidecar files move with their photos. Nothing is deleted.\n\nUsing Lightroom Classic? If these photos are already in your catalog, Lightroom will show them as missing until you relink them with Library → Find Missing Photos.`)) return;
   if (!await ensureWrite()) return toast('Write permission wasn’t granted, so nothing was moved');
   let ok = 0, fail = 0, skip = 0, firstErr = '';
   for (const { it, target } of plan) {
@@ -5516,8 +5568,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.23 beta';
+const VERSION = '0.9.24 beta';
 const RELEASES = [
+  { v: '0.9.24 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'Move picks and rejects now asks what to move: Picks and rejects, Rejects only (keepers stay where they are), or Picks only, with how many photos each would move. Your choice is remembered, and a note explains how Lightroom treats the _rejects folder.',
+    ]],
+  ] },
   { v: '0.9.23 beta', date: 'November 2026', groups: [
     ['Improved', [
       'Sharpness labels on thumbnails now use bands: Best, Sharp (within 90% of the best, as sharp as the eye can tell), a percentage for slightly softer frames, and Soft below 70%. The exact percentage is in the tip and on screen.',
