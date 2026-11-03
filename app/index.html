@@ -1117,7 +1117,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
           <li><kbd>1</kbd>–<kbd>5</kbd> rates, <kbd>P</kbd> picks, <kbd>X</kbd> rejects, and <kbd>U</kbd> clears the flag. Ratings show as feathers; change them to stars, dots, or diamonds in <strong>View ▾ → Features</strong>. Ratings are saved in this browser.</li>
           <li><strong>Show</strong> in the Rate panel filters to one exact rating or to your picks. <strong>Cull ▾ → Show</strong> adds rejects, unflagged photos, and “3 and up” style filters.</li>
           <li><strong>Filter</strong>, under Sort in the sidebar, shows only one lens, camera, or file type. Teleconverter combinations are listed separately, and filters combine with ratings and picks. <strong>Clear</strong> shows everything again.</li>
-          <li><strong>Bursts:</strong> frames shot within half a second of each other are grouped, shown by a colored bar under the thumbnails. Each frame shows its sharpness as a percentage of the best one in its burst.</li>
+          <li><strong>Bursts:</strong> frames shot within half a second of each other are grouped, shown by a colored bar under the thumbnails. Each frame shows its sharpness as a percentage of the best one in its burst. On Sony files straight from the camera, sharpness is measured around the focus point (usually the eye), so a soft frame can’t win on a busy background; other files are measured across the whole frame.</li>
           <li><strong>Auto-pick sharpest</strong> scores every burst and picks the frames nearly as sharp as the best one. It never rejects anything unless you turn that option on, and it leaves photos you’ve already rated alone.</li>
           <li><strong>Move picks and rejects</strong> moves picks into a <code>_picks</code> folder and rejects into <code>_rejects</code>, next to your originals. Sort again after changing your mind, and they move back. Nothing is ever deleted.</li>
           <li><strong>Import</strong> (the first button in the toolbar) copies a card into your main photo folder, organized the way you choose: <code>date / lens</code> by default, or year, month, and day, lens first, a shoot name, or your own <strong>Custom</strong> pattern using words like <code>{year}</code>, <code>{date}</code>, <code>{lens}</code>, <code>{camera}</code>, and <code>{shoot}</code>. A live example shows where photos will go. Teleconverter shots can get their own subfolder, and sidecars travel with their photos. Choose the card and your main folder, check the plan, then click Import. Tick <strong>Backup</strong> and choose a second folder (ideally on another drive) to write a verified second copy at the same time. Every copy is checked, photos already imported are skipped, and the card is never changed. Then cull the new folders and import them into Lightroom when you’re ready.</li>
@@ -1417,9 +1417,9 @@ let seenTimer;
 const saveSeen = () => { clearTimeout(seenTimer); seenTimer = setTimeout(() => { try { let a = [...SEEN]; if (a.length > 50000) { a = a.slice(-50000); SEEN = new Set(a); } localStorage.setItem('chimp-seen', JSON.stringify(a)); } catch {} }, 500); };
 const fmtPct = rate => { const p = rate * 100; return p === 0 ? '0%' : p < 10 ? p.toFixed(1) + '%' : Math.round(p) + '%'; };
 let SHARP = {};
-try { SHARP = JSON.parse(localStorage.getItem('chimp-sharp') || '{}') || {}; } catch {}
+try { SHARP = JSON.parse(localStorage.getItem('chimp-sharp2') || '{}') || {}; localStorage.removeItem('chimp-sharp'); } catch {}
 let sharpTimer;
-const saveSharp = () => { clearTimeout(sharpTimer); sharpTimer = setTimeout(() => { try { const k = Object.keys(SHARP); if (k.length > 50000) k.slice(0, k.length - 50000).forEach(x => delete SHARP[x]); localStorage.setItem('chimp-sharp', JSON.stringify(SHARP)); } catch {} }, 800); };
+const saveSharp = () => { clearTimeout(sharpTimer); sharpTimer = setTimeout(() => { try { const k = Object.keys(SHARP); if (k.length > 50000) k.slice(0, k.length - 50000).forEach(x => delete SHARP[x]); localStorage.setItem('chimp-sharp2', JSON.stringify(SHARP)); } catch {} }, 800); };
 let CULL = {};
 try { CULL = JSON.parse(localStorage.getItem('chimp-cull') || '{}') || {}; } catch {}
 let cullTimer;
@@ -3316,8 +3316,11 @@ $('fSave').onclick = async () => {
   const res = await saveFile(name, blob);
   toast(res === 'saved' ? `Saved ${name}` : res === 'declined' ? 'Download cancelled' : 'Saving isn’t available in this view');
 };
-/* consistent sharpness scoring: always measured at 1600 px on the long edge */
-function sharpnessOf(src, sw, sh) {
+/* consistent sharpness scoring, always measured at 1600 px on the long edge.
+   With a focus point (Sony, straight from the camera), detail is measured in a square around it, which is what a photographer
+   means by sharp: an out-of-focus frame can't win on a busy silhouette or grainy feathers elsewhere. Without one, the three
+   busiest tiles of a 12 x 8 grid are used. Scores compare frames within a burst, not across cameras. */
+function sharpnessOf(src, sw, sh, focus) {
   const sc = Math.min(1, 1600 / Math.max(sw, sh));
   const w = Math.max(3, Math.round(sw * sc)), h = Math.max(3, Math.round(sh * sc));
   const t = document.createElement('canvas'); t.width = w; t.height = h;
@@ -3326,6 +3329,16 @@ function sharpnessOf(src, sw, sh) {
   x.drawImage(src, 0, 0, w, h);
   const d = x.getImageData(0, 0, w, h).data, N = w * h, lum = new Float32Array(N);
   for (let p = 0, i = 0; p < N; p++, i += 4) lum[p] = 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+  if (focus && focus.x >= 0 && focus.x <= 1 && focus.y >= 0 && focus.y <= 1) {
+    const half = Math.max(24, Math.round(0.06 * Math.max(w, h))), fx = Math.round(focus.x * w), fy = Math.round(focus.y * h);
+    const x0 = Math.max(1, fx - half), x1 = Math.min(w - 2, fx + half), y0 = Math.max(1, fy - half), y1 = Math.min(h - 2, fy + half);
+    let s1 = 0, s2 = 0, n = 0;
+    for (let y = y0; y <= y1; y++) for (let xx = x0; xx <= x1; xx++) {
+      const p = y * w + xx, lap = 4 * lum[p] - lum[p - 1] - lum[p + 1] - lum[p - w] - lum[p + w];
+      s1 += lap; s2 += lap * lap; n++;
+    }
+    if (n > 200) { const mu = s1 / n; return Math.round(s2 / n - mu * mu); }
+  }
   const TX = 12, TY = 8, T = TX * TY, sum = new Float64Array(T), sq = new Float64Array(T), cnt = new Uint32Array(T);
   for (let y = 1; y < h - 1; y++) {
     const ty = Math.min(TY - 1, (y * TY / h) | 0) * TX;
@@ -3365,9 +3378,12 @@ async function smallPreviewImg(it) {
 async function scoreOnly(it) {
   if (it.sharp != null) return it.sharp;
   if (SHARP[it.key] != null) return (it.sharp = SHARP[it.key]);
+  if (!it.meta) { try { await getMeta(it); } catch {} }
+  let focus = null;
+  try { if (await sonyFocus(it)) focus = DIRECT.has(it.ext) ? afFor(it) : it.af; } catch {}
   const img = await smallPreviewImg(it);
   if (!img) return null;
-  it.sharp = sharpnessOf(img, img.naturalWidth, img.naturalHeight);
+  it.sharp = sharpnessOf(img, img.naturalWidth, img.naturalHeight, focus);
   if (it.sharp != null) { SHARP[it.key] = it.sharp; saveSharp(); }
   return it.sharp;
 }
@@ -5462,8 +5478,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.21 beta';
+const VERSION = '0.9.22 beta';
 const RELEASES = [
+  { v: '0.9.22 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'Sharpness now looks where the camera focused. On Sony files straight from the camera, frames are scored by the detail around the focus point (usually the eye), so a soft frame can no longer outrank a sharp one because of a busy silhouette or grain elsewhere. Thanks to Peter for the example. Other files use the whole-frame method as before. Saved scores are recalculated the next time you sort by sharpness.',
+    ]],
+  ] },
   { v: '0.9.21 beta', date: 'November 2026', groups: [
     ['New', [
       'Black & white in Quick finish: tick it in the Color section, then pick a Filter (Neutral, Yellow, Orange, Red, or Green, like the colored filters used with black-and-white film) and an optional warm or cool Tone. The Light sliders keep working, and it applies to exports, galleries, and Frame mode like any other edit.',
