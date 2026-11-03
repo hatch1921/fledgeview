@@ -1938,6 +1938,20 @@ function touch(it) {
     const old = lru.splice(idx, 1)[0]; old.cache = null;
   }
 }
+/* once a photo is on screen, quietly prepare the photos on either side so the next arrow press shows them at once;
+   stops if you move on, and stays inside the recent-photos memory limit */
+function preloadNeighbors(tok) {
+  setTimeout(async () => {
+    if (tok !== state.token || document.hidden || state.show.quad) return;
+    for (const d of [1, -1]) {
+      const nb = state.view[state.idx + d];
+      if (!nb || nb.cache) continue;
+      try { await ensureCanvas(nb); } catch {}
+      if (tok !== state.token) return;
+    }
+    const c = cur(); if (c) touch(c);
+  }, 120);
+}
 async function ensureCanvas(it) {
   if (it.cache) { touch(it); return it.cache; }
   await getMeta(it);
@@ -2423,7 +2437,8 @@ async function show(i) {
   layoutAll();
   if (state.framing) renderFrame();
   if (state.editing) editLoad();
-  else if (S.editOpen && !state.framing && !state.show.quad && !state.show.compare) setEditing(true, false);
+  else if (S.editOpen && !state.pview && !state.framing && !state.show.quad && !state.show.compare) setEditing(true, false);
+  preloadNeighbors(tok);
   markActive();
   if (on('sharp') && it.sharp == null && ok) scoreOnly(it).then(() => { paintThumb(it); if (cur() === it) { refreshOsd(); refreshRows(); } });
 }
@@ -5633,7 +5648,7 @@ document.addEventListener('fullscreenchange', () => {
   if (state.pview) requestAnimationFrame(() => { layoutAll(); if (state.editing) renderEditSoon(); });
 });
 /* ---------- Photo view: just the photo, filling the screen; Esc returns to the tool on the same photo ---------- */
-const pv = { fs: false, wasEditing: false, idle: 0, hint: 0 };
+const pv = { fs: false, wasEditing: false, idle: 0, hint: 0, z: null };
 state.pview = false;
 /* edited photos are shown with their edits, through the same rendering as the edit panel */
 function pvSyncEdit() { if (!state.pview) return; const want = !!editOf(cur()); if (want !== !!state.editing) setEditing(want, false); }
@@ -5646,6 +5661,8 @@ async function setPhotoView(v) {
     if (state.framing) setFraming(false);
     closeMenus();
     pv.wasEditing = !!state.editing;
+    /* Photo view always opens fitted to the screen; the tool's own zoom comes back on return */
+    pv.z = { ...Z }; Z.k = 1; Z.cx = Z.cy = 0.5;
     state.pview = true; document.body.classList.add('pview'); $('pvUi').hidden = false;
     pvSyncEdit();
     requestAnimationFrame(() => { layoutAll(); if (state.editing) renderEditSoon(); });
@@ -5654,6 +5671,7 @@ async function setPhotoView(v) {
   } else {
     state.pview = false; document.body.classList.remove('pview', 'pvidle', 'pvinfo'); $('pvUi').hidden = true; $('pvFlash').hidden = true;
     if (!!state.editing !== pv.wasEditing) setEditing(pv.wasEditing, false);
+    if (pv.z) { Object.assign(Z, pv.z); pv.z = null; }
     if (pv.fs && document.fullscreenElement) { pv.fs = false; try { await document.exitFullscreen(); } catch {} }
     pv.fs = false;
     const t = cur(); if (t && t.el) t.el.scrollIntoView({ block: 'nearest' });
@@ -5702,8 +5720,16 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.28 beta';
+const VERSION = '0.9.29 beta';
 const RELEASES = [
+  { v: '0.9.29 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'Moving to the next or previous photo is faster: once a photo is on screen, the photos on either side are prepared in the background, so the arrow keys and arrow buttons show them almost at once.',
+    ]],
+    ['Fixed', [
+      'Photo view now always opens fitted to the screen. If you had zoomed in the tool, the first arrow click used to resize the photo instead of moving on. Your tool zoom comes back when you return.',
+    ]],
+  ] },
   { v: '0.9.28 beta', date: 'November 2026', groups: [
     ['New', [
       'Photo view (top right, or press V): just the photo, filling the screen. Move with the arrow keys or the arrows at the edges, rate with 1\u20135, P, and X, zoom with Z or a double-click, and press I for the photo info. Esc returns to FledgeView on the photo you were viewing. Edited photos are shown with their edits.',
