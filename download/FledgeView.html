@@ -326,6 +326,8 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;white-space:no
 #impDlg{width:min(720px,94vw)}
 .improw{display:flex;align-items:center;gap:10px;margin:6px 0}
 .implab{width:96px;flex:none;font-weight:600}
+.implab.impbk{display:flex;align-items:center;gap:6px;cursor:pointer}
+.implab.impbk input{accent-color:var(--amber);margin:0}
 .impval{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted,#888)}
 .impval.set{color:inherit}
 .impprog{margin-top:12px}
@@ -718,6 +720,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <button class="mi" id="helpBtn">Keyboard shortcuts</button>
         <button class="mi" id="monBtn">Monitor check</button>
         <button class="mi" id="tipsToggle" role="menuitemcheckbox">Show tips</button>
+        <button class="mi" id="feedbackBtn">Send feedback</button>
         <button class="mi" id="newsBtn">What’s new</button>
         <button class="mi" id="aboutBtn">About FledgeView</button>
         <button class="mi" id="tipBtn">Support FledgeView ♥</button>
@@ -1133,7 +1136,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
           <li><strong>Bursts:</strong> frames shot within half a second of each other are grouped, shown by a colored bar under the thumbnails. Each frame shows its sharpness as a percentage of the best one in its burst.</li>
           <li><strong>Auto-pick sharpest</strong> scores every burst and picks the frames nearly as sharp as the best one. It never rejects anything unless you turn that option on, and it leaves photos you’ve already rated alone.</li>
           <li><strong>Move picks and rejects</strong> moves picks into a <code>_picks</code> folder and rejects into <code>_rejects</code>, next to your originals. Sort again after changing your mind, and they move back. Nothing is ever deleted.</li>
-          <li><strong>Import</strong> (the first button in the toolbar) copies a card into your main photo folder, organized the way you choose: <code>date / lens</code> by default, or year, month, and day, lens first, a shoot name, or your own <strong>Custom</strong> pattern using words like <code>{year}</code>, <code>{date}</code>, <code>{lens}</code>, <code>{camera}</code>, and <code>{shoot}</code>. A live example shows where photos will go. Teleconverter shots can get their own subfolder, and sidecars travel with their photos. Choose the card and your main folder, check the plan, then click Import. Every copy is checked, photos already imported are skipped, and the card is never changed. Then cull the new folders and import them into Lightroom when you’re ready.</li>
+          <li><strong>Import</strong> (the first button in the toolbar) copies a card into your main photo folder, organized the way you choose: <code>date / lens</code> by default, or year, month, and day, lens first, a shoot name, or your own <strong>Custom</strong> pattern using words like <code>{year}</code>, <code>{date}</code>, <code>{lens}</code>, <code>{camera}</code>, and <code>{shoot}</code>. A live example shows where photos will go. Teleconverter shots can get their own subfolder, and sidecars travel with their photos. Choose the card and your main folder, check the plan, then click Import. Tick <strong>Backup</strong> and choose a second folder (ideally on another drive) to write a verified second copy at the same time. Every copy is checked, photos already imported are skipped, and the card is never changed. Then cull the new folders and import them into Lightroom when you’re ready.</li>
           <li><strong>Organize into lens folders</strong> moves each photo into a folder named for its lens, with teleconverter shots in their own subfolder. It shows the plan first, sidecar files (.xmp, .dop, .pp3) move along, and <strong>Undo last organize</strong> puts everything back.</li>
           <li><strong>Write ratings</strong> saves your ratings into .xmp sidecar files for Lightroom.</li>
         </ul>
@@ -1232,6 +1235,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
           <li><strong>View ▾ → Appearance</strong> switches between <strong>Camera</strong> (the camera-back look) and <strong>Clean</strong> (flat and Mac-inspired, using your system’s font). Everything works the same in both.</li>
           <li><strong>View ▾ → Features</strong> hides tools you don’t use, changes the rating icons and burst timing, and can bring back the move warning.</li>
           <li><strong>Tips:</strong> hover over any button or slider for a short description and its shortcut. Turn them off in <strong>Help ▾ → Show tips</strong>.</li>
+          <li><strong>Help ▾ → Send feedback</strong> opens an email with your version, browser, and screen size filled in, so problems are easy to track down.</li>
           <li><strong>Help ▾ → Monitor check</strong> tests whether your screen shows shadow and highlight detail properly.</li>
           <li><strong>FledgeView is free.</strong> If it saves you time, <strong>Help ▾ → Support FledgeView</strong> leads to a tip page on Ko-fi.</li>
         </ul>
@@ -1274,6 +1278,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
   <p class="sub">Copies photos from a memory card (or any folder) into your main photo folder, sorted into folders the way you choose: by date, lens, shoot, or your own pattern. Sidecar files come along. Nothing on the card is changed or deleted.</p>
   <div class="improw" style="margin-top:12px"><span class="implab">Card</span><span class="impval" id="impSrcName">Not chosen</span><button class="btn" id="impSrcBtn">Choose card…</button></div>
   <div class="improw"><span class="implab">Main folder</span><span class="impval" id="impDstName">Not chosen</span><button class="btn" id="impDstBtn">Choose folder…</button></div>
+  <div class="improw"><label class="implab impbk" title="Also copy every photo to a second place, ideally another drive, and check each copy"><input type="checkbox" id="impBkOn"> Backup</label><span class="impval" id="impBkName">Off</span><button class="btn" id="impBkBtn">Choose backup…</button></div>
   <div class="wrow" style="margin-top:10px"><label for="impPreset">Folders</label><select id="impPreset"><option value="{date}/{lens}">Date / Lens (2026-11-02 / Sony 600mm F6.3)</option><option value="{year}/{date}/{lens}">Year / Date / Lens (2026 / 2026-11-02 / Sony 600mm F6.3)</option><option value="{year}/{month}/{day}">Year / Month / Day (2026 / 11 / 02)</option><option value="{lens}/{date}">Lens / Date (Sony 600mm F6.3 / 2026-11-02)</option><option value="{shoot}/{lens}">Shoot name / Lens (Bosque Dec 2026 / Sony 600mm F6.3)</option><option value="custom">Custom…</option></select></div>
   <div id="impCustomBox" hidden>
     <div class="wrow"><label for="impCustom">Pattern</label><input id="impCustom" type="text" spellcheck="false" autocomplete="off" placeholder="{year}/{date} {shoot}/{lens}"></div>
@@ -4801,10 +4806,12 @@ function showTip(el, text) {
   if (m) { body = text.slice(0, m.index).replace(/\.$/, '') + '.'; key = m[1]; body = body.replace(/\.\.$/, '.'); }
   tipBox.textContent = body;
   if (key) { const k = document.createElement('kbd'); k.textContent = key; tipBox.append(k); }
-  (el.closest('dialog[open]') || document.body).append(tipBox);
+  const host = el.closest('dialog[open]');
+  host ? host.append(tipBox) : document.body.append(tipBox);
   const r = el.getBoundingClientRect(), bw = tipBox.offsetWidth, bh = tipBox.offsetHeight;
-  let top = r.bottom + 8; if (top + bh > window.innerHeight - 6) top = Math.max(6, r.top - bh - 8);
-  const left = Math.min(window.innerWidth - bw - 6, Math.max(6, r.left + r.width / 2 - bw / 2));
+  const bx = host ? host.getBoundingClientRect() : { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight };
+  let top = r.bottom + 8; if (top + bh > bx.bottom - 6) top = Math.max(bx.top + 6, r.top - bh - 8);
+  const left = Math.min(bx.right - bw - 6, Math.max(bx.left + 6, r.left + r.width / 2 - bw / 2));
   tipBox.style.top = top + 'px'; tipBox.style.left = left + 'px'; tipBox.classList.add('on');
 }
 document.addEventListener('mouseover', e => {
@@ -4955,8 +4962,9 @@ function renderImpPlan() {
       l.append(a, c); box.append(l);
     }
   }
-  $('impNote').textContent = `${imp.photos.length.toLocaleString()} photos, ${fmtBytes(bytes)}${sideN ? `, plus ${sideN} sidecar file${sideN === 1 ? '' : 's'}` : ''}. Photos already in your main folder are skipped.`;
-  $('impGo').disabled = !imp.dst;
+  const bkOn = $('impBkOn').checked;
+  $('impNote').textContent = `${imp.photos.length.toLocaleString()} photos, ${fmtBytes(bytes)}${sideN ? `, plus ${sideN} sidecar file${sideN === 1 ? '' : 's'}` : ''}. Photos already in your main folder are skipped.` + (bkOn ? (imp.bk ? ` A second copy goes to ${imp.bk.name}, in the same folders.` : ' Choose a backup folder, or turn Backup off.') : '');
+  $('impGo').disabled = !imp.dst || (bkOn && !imp.bk);
 }
 function impSetName(id, h) { $(id).textContent = h ? h.name : 'Not chosen'; $(id).classList.toggle('set', !!h); }
 function impAvailable() { return !!window.showDirectoryPicker && !framed; }
@@ -4964,6 +4972,8 @@ $('impBtn').onclick = async () => {
   closeMenus();
   if (!impAvailable()) { toast('Import from card needs Chrome or Edge, on fledgeview.com or the downloaded copy.'); return; }
   if (!imp.dst) { const h = await idbKV.get('importDest'); if (h) imp.dst = h; }
+  if (!imp.bk) { const h = await idbKV.get('importBackup'); if (h) imp.bk = h; }
+  $('impBkOn').checked = !!S.impBk && !!imp.bk; impBkSync();
   impSetName('impDstName', imp.dst); impSetName('impSrcName', imp.src);
   impRestore();
   $('impProg').hidden = true; $('impStop').hidden = true;
@@ -4975,6 +4985,23 @@ $('impSrcBtn').onclick = async () => {
   impSetName('impSrcName', imp.src); $('impGo').disabled = true; imp.photos = [];
   $('impPlan').innerHTML = '';
   await impReadCard();
+};
+function impBkSync() {
+  const on = $('impBkOn').checked;
+  $('impBkName').textContent = on ? (imp.bk ? imp.bk.name : 'Not chosen') : (imp.bk ? `Off (last used: ${imp.bk.name})` : 'Off');
+  $('impBkName').classList.toggle('set', on && !!imp.bk);
+}
+async function impPickBackup() {
+  let h;
+  try { h = await window.showDirectoryPicker({ mode: 'readwrite', id: 'fvbackup' }); } catch (e) { if (e.name !== 'AbortError') toast('Couldn\u2019t open that folder: ' + (e.message || e.name)); return false; }
+  if (imp.src && (await imp.src.isSameEntry(h) || await imp.src.resolve(h))) { toast('Choose a backup that isn\u2019t on the card itself.'); return false; }
+  if (imp.dst && (await imp.dst.isSameEntry(h) || await imp.dst.resolve(h) || await h.resolve(imp.dst))) { toast('Choose a backup outside your main folder, ideally on another drive.'); return false; }
+  imp.bk = h; idbKV.set('importBackup', h); return true;
+}
+$('impBkBtn').onclick = async () => { if (await impPickBackup()) { $('impBkOn').checked = true; S.impBk = true; saveS(); } impBkSync(); renderImpPlan(); };
+$('impBkOn').onchange = async () => {
+  if ($('impBkOn').checked && !imp.bk && !(await impPickBackup())) $('impBkOn').checked = false;
+  S.impBk = $('impBkOn').checked; saveS(); impBkSync(); renderImpPlan();
 };
 $('impDstBtn').onclick = async () => {
   try { imp.dst = await window.showDirectoryPicker({ mode: 'readwrite', id: 'fvdest' }); } catch (e) { if (e.name !== 'AbortError') toast('Couldn’t open that folder: ' + (e.message || e.name)); return; }
@@ -4998,47 +5025,60 @@ async function impCopy(file, dir, name) {
 }
 $('impGo').onclick = async () => {
   if (imp.busy || !imp.src || !imp.dst || !imp.photos.length) return;
-  if ((await imp.dst.queryPermission({ mode: 'readwrite' })) !== 'granted' && (await imp.dst.requestPermission({ mode: 'readwrite' })) !== 'granted') { toast('FledgeView needs permission to save into your main folder.'); return; }
+  const bk = $('impBkOn').checked ? imp.bk : null;
+  if ($('impBkOn').checked && !bk) { toast('Choose a backup folder, or turn Backup off.'); return; }
+  const grant = async h => (await h.queryPermission({ mode: 'readwrite' })) === 'granted' || (await h.requestPermission({ mode: 'readwrite' })) === 'granted';
+  if (!(await grant(imp.dst))) { toast('FledgeView needs permission to save into your main folder.'); return; }
+  if (bk && !(await grant(bk))) { toast('FledgeView needs permission to save into your backup folder.'); return; }
   imp.busy = true; imp.stop = false;
-  $('impGo').disabled = $('impClose').disabled = $('impSrcBtn').disabled = $('impDstBtn').disabled = true;
+  $('impGo').disabled = $('impClose').disabled = $('impSrcBtn').disabled = $('impDstBtn').disabled = $('impBkBtn').disabled = $('impBkOn').disabled = true;
   $('impStop').hidden = false; $('impStop').disabled = false; $('impProg').hidden = false;
-  const dirCache = new Map();
-  const dirFor = async parts => {
-    let d = imp.dst, key = '';
-    for (const part of parts) { key += '/' + part; if (!dirCache.has(key)) dirCache.set(key, await d.getDirectoryHandle(part, { create: true })); d = dirCache.get(key); }
+  const caches = new Map();
+  const dirFor = async (root, parts) => {
+    if (!caches.has(root)) caches.set(root, new Map());
+    const c = caches.get(root); let d = root, key = '';
+    for (const part of parts) { key += '/' + part; if (!c.has(key)) c.set(key, await d.getDirectoryHandle(part, { create: true })); d = c.get(key); }
     return d;
   };
-  const total = imp.photos.reduce((s, p) => s + (p.file ? p.file.size : 0), 0);
-  let doneBytes = 0, copied = 0, skipped = 0; const problems = [], opened = [];
+  const one = imp.photos.reduce((sum, p) => sum + (p.file ? p.file.size : 0), 0), total = one * (bk ? 2 : 1);
+  let doneBytes = 0, copied = 0, skipped = 0, bCopied = 0, bSkipped = 0; const problems = [], opened = [];
   const t0 = performance.now();
   for (let i = 0; i < imp.photos.length; i++) {
     if (imp.stop) break;
     const p = imp.photos[i];
+    const step = async (root, label, onCopied, onSkip) => {
+      const parts = impPath(p), dir = await dirFor(root, parts.map(safeName));
+      const res = await impCopy(p.file, dir, p.name);
+      if (res === 'exists') onSkip();
+      else if (res === 'conflict') problems.push(`${label}${p.name}: a different file with this name is already in ${parts.join(' / ')}`);
+      else onCopied(res, dir);
+      for (const sc of p.sides) { try { await impCopy(await sc.handle.getFile(), dir, sc.name); } catch (e) { problems.push(`${label}${sc.name}: ${e.message || e.name}`); } }
+    };
     try {
       if (!p.file) throw new Error('could not be read');
-      const parts = impPath(p), dir = await dirFor(parts.map(safeName));
-      const r = await impCopy(p.file, dir, p.name);
-      if (r === 'exists') skipped++;
-      else if (r === 'conflict') problems.push(`${p.name}: a different file with this name is already in ${parts.join(' / ')}`);
-      else { copied++; opened.push({ file: r.file, handle: r.fh, dir, root: imp.dst }); }
-      for (const s of p.sides) { try { await impCopy(await s.handle.getFile(), dir, s.name); } catch (e) { problems.push(`${s.name}: ${e.message || e.name}`); } }
+      await step(imp.dst, '', (res, dir) => { copied++; opened.push({ file: res.file, handle: res.fh, dir, root: imp.dst }); }, () => skipped++);
     } catch (e) { problems.push(`${p.name}: ${e.message || e.name}`); }
     doneBytes += p.file ? p.file.size : 0;
+    if (bk && p.file) {
+      try { await step(bk, 'Backup: ', () => bCopied++, () => bSkipped++); } catch (e) { problems.push(`Backup: ${p.name}: ${e.message || e.name}`); }
+      doneBytes += p.file.size;
+    }
     const secs = (performance.now() - t0) / 1000, rate = doneBytes / Math.max(0.5, secs), left = (total - doneBytes) / Math.max(1, rate);
     $('impBar').style.width = (total ? doneBytes / total * 100 : 100).toFixed(1) + '%';
-    $('impProgTxt').textContent = `Copying ${(i + 1).toLocaleString()} of ${imp.photos.length.toLocaleString()} · ${fmtBytes(doneBytes)} of ${fmtBytes(total)}${i + 1 < imp.photos.length && secs > 2 ? ` · about ${fmtTime(left)} left` : ''}`;
+    $('impProgTxt').textContent = `Copying ${(i + 1).toLocaleString()} of ${imp.photos.length.toLocaleString()}${bk ? ' (main and backup)' : ''} \u00b7 ${fmtBytes(doneBytes)} of ${fmtBytes(total)}${i + 1 < imp.photos.length && secs > 2 ? ` \u00b7 about ${fmtTime(left)} left` : ''}`;
   }
   imp.busy = false;
-  $('impClose').disabled = $('impSrcBtn').disabled = $('impDstBtn').disabled = false; $('impStop').hidden = true; $('impGo').disabled = false;
+  $('impClose').disabled = $('impSrcBtn').disabled = $('impDstBtn').disabled = $('impBkBtn').disabled = $('impBkOn').disabled = false; $('impStop').hidden = true; $('impGo').disabled = false;
   const stopped = imp.stop ? ' Stopped before the end; run Import again to copy the rest.' : '';
-  $('impProgTxt').textContent = `Done. Copied ${copied.toLocaleString()} photo${copied === 1 ? '' : 's'}${skipped ? `, skipped ${skipped.toLocaleString()} already in your main folder` : ''}${problems.length ? `, ${problems.length} problem${problems.length === 1 ? '' : 's'}` : ''}.${stopped}`;
-  $('impNote').textContent = problems.length ? 'Problems: ' + problems.slice(0, 5).join('; ') + (problems.length > 5 ? `; and ${problems.length - 5} more.` : '') : 'Every copy was checked against the original. The card was not changed.';
+  const bkText = bk ? ` Backup: ${bCopied.toLocaleString()} copied${bSkipped ? `, ${bSkipped.toLocaleString()} already there` : ''}.` : '';
+  $('impProgTxt').textContent = `Done. Copied ${copied.toLocaleString()} photo${copied === 1 ? '' : 's'}${skipped ? `, skipped ${skipped.toLocaleString()} already in your main folder` : ''}${problems.length ? `, ${problems.length} problem${problems.length === 1 ? '' : 's'}` : ''}.${bkText}${stopped}`;
+  $('impNote').textContent = problems.length ? 'Problems: ' + problems.slice(0, 5).join('; ') + (problems.length > 5 ? `; and ${problems.length - 5} more.` : '') : `Every copy was checked against the original${bk ? ', in both places' : ''}. The card was not changed.`;
   if (copied && $('impOpen').checked && !problems.length && !imp.stop) {
     $('impDlg').close();
     if (state.items.length) $('clearAll').click();
     state.roots.add(imp.dst);
     addFiles(opened);
-    setTimeout(() => toast(`Imported ${copied.toLocaleString()} photo${copied === 1 ? '' : 's'} into ${imp.dst.name}. The card was not changed.`), 60);
+    setTimeout(() => toast(`Imported ${copied.toLocaleString()} photo${copied === 1 ? '' : 's'} into ${imp.dst.name}${bk ? ` with a backup in ${bk.name}` : ''}. The card was not changed.`), 60);
   }
 };
 
@@ -5413,8 +5453,14 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.19 beta';
+const VERSION = '0.9.20 beta';
 const RELEASES = [
+  { v: '0.9.20 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Backup during Import: tick Backup and choose a second folder, ideally on another drive. Every photo and sidecar is copied to both places in the same folders, and each copy is checked. Your backup choice is remembered.',
+      'Help ▾ → Send feedback opens an email with your FledgeView version, browser, and screen size filled in.',
+    ]],
+  ] },
   { v: '0.9.19 beta', date: 'November 2026', groups: [
     ['Improved', [
       'The DOF button is now Lens tools, with an aperture icon, since it opens both the depth of field and field of view calculators.',
@@ -5570,6 +5616,20 @@ function renderNews() {
 }
 function openNews() { renderNews(); $('newsDlg').showModal(); S.seenVersion = VERSION; saveS(); $('helpMenuBtn').classList.remove('hasnew'); $('newsBtn').classList.remove('hasnew'); }
 $('newsBtn').onclick = openNews;
+/* feedback: an email with the details needed to reproduce a problem; the address is assembled on click so it isn't sitting in the page for spam bots */
+function browserName() {
+  const ua = navigator.userAgent;
+  const pick = [[/Edg\/(\d+)/, 'Edge'], [/OPR\/(\d+)/, 'Opera'], [/Firefox\/(\d+)/, 'Firefox'], [/Chrome\/(\d+)/, 'Chrome'], [/Version\/(\d+).*Safari/, 'Safari']].find(([re]) => re.test(ua));
+  return pick ? `${pick[1]} ${ua.match(pick[0])[1]}` : 'Unknown browser';
+}
+function osName() { const ua = navigator.userAgent; return /Windows/.test(ua) ? 'Windows' : /Mac OS X/.test(ua) ? (navigator.maxTouchPoints > 1 ? 'iPad' : 'Mac') : /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iOS' : /Linux/.test(ua) ? 'Linux' : 'Unknown system'; }
+$('feedbackBtn').onclick = () => {
+  closeMenus();
+  const to = ['hatch1921', 'gmail.com'].join('@');
+  const where = location.protocol === 'file:' ? 'downloaded copy' : location.hostname;
+  const body = ['What happened, or what would you like FledgeView to do?', '', '', '', '---', `FledgeView ${VERSION} (${where})`, `${browserName()} on ${osName()}`, `Window ${window.innerWidth} \u00d7 ${window.innerHeight}, screen ${screen.width} \u00d7 ${screen.height}`, `Look: ${S.look === 'clean' ? 'Clean' : 'Camera'} \u00b7 Photos loaded: ${state.items.length}`].join('\n');
+  location.href = `mailto:${to}?subject=${encodeURIComponent('FledgeView Feedback')}&body=${encodeURIComponent(body)}`;
+};
 $('aboutVer').textContent = 'Version ' + VERSION;
 $('aboutNews').onclick = e => { e.preventDefault(); $('aboutDlg').close(); openNews(); };
 if (!S.seenVersion) { S.seenVersion = S.guide === undefined ? VERSION : ''; saveS(); } // first-time users get the guide instead of the update dot
