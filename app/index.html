@@ -98,6 +98,16 @@ html[data-look="clean"] .knob.eopen[aria-expanded="true"]{background:var(--acc)!
 .knob.ebtn.wide{width:100%;margin-top:4px}
 .knob.edone{background:var(--amber);color:#1b1b1b}
 .knob.eexp{background:#b5d4f4;color:#0c447c;font-weight:600}
+.ecrop{display:flex;flex-direction:column;gap:6px;margin:2px 0 4px}
+#eCropBtn[aria-pressed="true"]{background:var(--amber);color:#1b1b1b}
+#eCropBtn.has:not([aria-pressed="true"])::after{content:" \2713";color:var(--amber)}
+.ecropopts{display:grid;grid-template-columns:auto 1fr;gap:6px 8px;align-items:center}
+.ecropopts .erow{margin:0}
+.ecropopts select{min-width:0;font:inherit;font-size:12px;color:var(--lcd);background:#1d1e21;border:1px solid rgba(255,255,255,.18);border-radius:5px;padding:2px 4px;color-scheme:dark}
+#eCropReset{grid-column:1 / -1}
+.ecropinfo{grid-column:1 / -1;font-size:11.5px;line-height:1.35;color:var(--lcd-dim)}
+.editview.cropping canvas{cursor:crosshair}
+.editview.cropping{user-select:none;-webkit-user-select:none;touch-action:none}
 html[data-look="clean"] .knob.eexp{background:var(--acc)!important;color:#fff!important}
 #editBtn[aria-pressed="true"]{background:var(--amber);border-color:var(--amber);color:#1b1b1b}
 .enote{font-size:11px;color:var(--lcd-dim);margin:6px 0 0;line-height:1.35}
@@ -1187,6 +1197,8 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <p>Click <strong>Quick finish</strong> in the Edit and share section of the control panel (or <strong>Edit</strong> in the top toolbar) to open the Quick finish panel to the right. Your other panels stay put, so you can rate and edit in one pass. Click <strong>Quick finish</strong> again or <strong>Done</strong> to close it; FledgeView remembers whether you left it open.</p>
         <ul>
           <li><strong>Light:</strong> exposure, contrast, highlights, shadows, whites, and blacks. <strong>Color:</strong> temperature (blue to amber) and tint (green to magenta), shown on colored scales, plus vibrance. <strong>Detail and effects:</strong> sharpen and vignette. Double-click a slider to reset it.</li>
+          <li><strong>Crop and straighten:</strong> click <strong>Crop</strong>, then drag the corners or the whole box; choose an <strong>Aspect</strong> or Free. <strong>Straighten</strong> levels a tilted horizon, showing a grid while you drag. Click <strong>Done cropping</strong> (or press Enter) to finish. While you crop, the box shows the size you’re cropping to: pixels, megapixels, and print size in inches at 300 ppi. The crop is kept with your other edits, and Export\u2019s social shapes crop from the cropped photo.</li>
+          <li><strong>Saturation</strong> boosts or calms every color evenly, while <strong>Vibrance</strong> favors muted colors. <strong>Clarity</strong> adds contrast to mid-size detail, such as feathers and fur, without sharpening smooth backgrounds.</li>
           <li><strong>Black &amp; white:</strong> tick it in the Color section, then choose a <strong>Filter</strong> to control how colors turn into grays (Orange darkens skies and is a good all-rounder; Red is dramatic; Green lightens foliage) and an optional warm or cool <strong>Tone</strong>. Temperature, tint, and vibrance step aside while it’s on; the Light sliders do the rest.</li>
           <li><strong>Sharpen here</strong> is for individual photos, like crisping feathers or fur. The <strong>Sharpen</strong> setting in Export is lighter output sharpening for resized copies. They work together.</li>
           <li><strong>Auto</strong> sets a starting point. It leaves well-exposed photos nearly alone and does more for dark, bright, or flat ones.</li>
@@ -2378,6 +2390,7 @@ function rebuildView(keep) {
 
 async function show(i) {
   const n = state.view.length; if (!n) return;
+  if (cropMode) setCropMode(false);
   i = Math.max(0, Math.min(n - 1, i));
   state.idx = i; state.cmpSide = 0; const tok = ++state.token; const it = state.view[i];
   if (state.show.quad && (i < state.quadBase || i > state.quadBase + 3)) state.quadBase = i;
@@ -3382,8 +3395,8 @@ function renderFrame() {
   if (cv.height !== ch) cv.height = ch;
   const ctx = cv.getContext('2d');
   if (!it || !img) { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, cw, ch); $('frameInfo').textContent = ''; return; }
-  const L = frameLayout(img.width, img.height);
-  drawFramed(ctx, cw, ch, editedSrc(it, img, 2400), L, fcrop());
+  const fsrc = editedSrc(it, img, 2400), L = frameLayout(fsrc.width, fsrc.height);
+  drawFramed(ctx, cw, ch, fsrc, L, fcrop());
   { const fl0 = drawFramed.last; if (fl0) drawGuides(ctx, fl0.ox, fl0.oy, fl0.opw, fl0.oph); }
   const zz = (fcrop() || {}).z || 1;
   const fl = fullPixelsLong(it), lin = Math.max(L.ow, L.oh), ppi = fl ? Math.round(fl / zz / lin) : 0;
@@ -3461,7 +3474,8 @@ $('fSave').onclick = async () => {
   const it = cur(), img = panes[0].img;
   if (!it || !img) return toast('Open a photo first');
   const W = 2400, H = 1600, c = document.createElement('canvas'); c.width = W; c.height = H;
-  drawFramed(c.getContext('2d'), W, H, editedSrc(it, img, 4000), frameLayout(img.width, img.height), fcrop());
+  const fsrc = editedSrc(it, img, 4000);
+  drawFramed(c.getContext('2d'), W, H, fsrc, frameLayout(fsrc.width, fsrc.height), fcrop());
   const blob = await new Promise(res => c.toBlob(res, 'image/jpeg', 0.9));
   const name = `${baseOf(it.name)}_framed_${S.frame.size}.jpg`;
   const res = await saveFile(name, blob);
@@ -3947,10 +3961,10 @@ async function renderWeb(it, o, opts = {}) {
     if (!p) throw new Error('No viewable image');
     src = { it, p }; lastWebSrc = src;
   }
-  const p = src.p;
-  const rot = p.extracted ? rotFor(it.orient) : 0, swap = rot === 90 || rot === 270;
-  const nw = p.img.naturalWidth, nh = p.img.naturalHeight;
-  const sw = swap ? nh : nw, sh = swap ? nw : nh;
+  let p = src.p;
+  let rot = p.extracted ? rotFor(it.orient) : 0, swap = rot === 90 || rot === 270;
+  let nw = p.img.naturalWidth || p.img.width, nh = p.img.naturalHeight || p.img.height;
+  let sw = swap ? nh : nw, sh = swap ? nw : nh;
   const draw = (img, w, h, r) => {
     const c = document.createElement('canvas'); c.width = w; c.height = h;
     const x = c.getContext('2d'); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
@@ -3958,6 +3972,12 @@ async function renderWeb(it, o, opts = {}) {
     else x.drawImage(img, 0, 0, w, h);
     return c;
   };
+  const geo = !opts.noEdits && !o.framed ? geomOf(editOf(it)) : null;
+  if (geo) {
+    const gk = stable(geo);
+    if (!src.geoC || src.geoC.key !== gk) { const k0 = Math.min(1, 6000 / Math.max(sw, sh)); src.geoC = { key: gk, c: geomCanvas(draw(p.img, Math.max(1, Math.round(sw * k0)), Math.max(1, Math.round(sh * k0)), rot), geo) }; }
+    src = { it, p: { img: src.geoC.c, extracted: false } }; p = src.p; rot = 0; swap = false; nw = sw = p.img.width; nh = sh = p.img.height;
+  }
   const shape = SHAPES[o.shape];
   let c, tw, th, crop = null;
   if (o.framed) {
@@ -4601,7 +4621,7 @@ let EDITS = {};
 try { EDITS = JSON.parse(localStorage.getItem('chimp-edits') || '{}') || {}; } catch {}
 let editTimer;
 const saveEdits = () => { clearTimeout(editTimer); editTimer = setTimeout(() => safeStore('chimp-edits', JSON.stringify(EDITS), true), 300); };
-const EDIT_UI = [['Light'], ['exp', 'Exposure'], ['con', 'Contrast'], ['hi', 'Highlights'], ['sh', 'Shadows'], ['wh', 'Whites'], ['bl', 'Blacks'], ['Color'], ['temp', 'Temperature'], ['tint', 'Tint'], ['vib', 'Vibrance'], ['Detail and effects'], ['shp', 'Sharpen', 0, 100], ['vig', 'Vignette', -100, 0]];
+const EDIT_UI = [['Crop and straighten'], ['rot', 'Straighten', -450, 450], ['Light'], ['exp', 'Exposure'], ['con', 'Contrast'], ['hi', 'Highlights'], ['sh', 'Shadows'], ['wh', 'Whites'], ['bl', 'Blacks'], ['Color'], ['temp', 'Temperature'], ['tint', 'Tint'], ['vib', 'Vibrance'], ['sat', 'Saturation'], ['Detail and effects'], ['cla', 'Clarity'], ['shp', 'Sharpen', 0, 100], ['vig', 'Vignette', -100, 0]];
 const EDIT_SCALE = { temp: 'linear-gradient(90deg,#3d7fe0,#9fb8d9 45%,#d9d4c4 50%,#e8c37a 55%,#f0a43a)', tint: 'linear-gradient(90deg,#3fae5a,#a9cfa6 45%,#d6d2cc 50%,#d7a8cc 55%,#c45ab3)' };
 /* unsharp mask with a small threshold, so smooth areas like sky and out-of-focus backgrounds stay clean */
 function sharpenData(d, w, h, amt) {
@@ -4616,8 +4636,10 @@ function sharpenData(d, w, h, amt) {
   }
 }
 const EDIT_KEYS = EDIT_UI.filter(a => a.length > 1).map(a => a[0]);
-const blankEdit = () => ({ ...Object.fromEntries(EDIT_KEYS.map(k => [k, 0])), bw: 0, bwf: 'orange', bwt: 'none' });
-const hasEdit = r => !!r && (EDIT_KEYS.some(k => r[k]) || !!r.bw);
+const blankEdit = () => ({ ...Object.fromEntries(EDIT_KEYS.map(k => [k, 0])), bw: 0, bwf: 'orange', bwt: 'none', crop: null, cropAr: 'orig' });
+const hasEdit = r => !!r && (EDIT_KEYS.some(k => r[k]) || !!r.bw || !!r.crop);
+/* slider readouts: Straighten is stored in tenths of a degree */
+const editVal = (k, v) => k === 'rot' ? (v > 0 ? '+' : '') + (v / 10).toFixed(1) + '\u00b0' : v > 0 ? '+' + v : String(v);
 function editOf(it) { const r = it && EDITS[it.key]; return hasEdit(r) ? r : null; }
 /* black and white: weights mimic the colored filters film photographers used (normalized to 1) */
 const BW_FILTERS = { neutral: [0.2126, 0.7152, 0.0722], yellow: [0.36, 0.56, 0.08], orange: [0.5, 0.44, 0.06], red: [0.72, 0.3, -0.02], green: [0.16, 0.78, 0.06] };
@@ -4654,9 +4676,35 @@ function blurLum(cv) {
   for (let i = 0, j = 0; j < out.length; i += 4, j++) out[j] = bd[i];
   return out;
 }
-function processEdits(src, dst, w, h, r, lum, geo) {
+/* a medium blur of brightness for Clarity; its radius scales with the photo, so the look matches on screen and in exports */
+function blurMid(cv) {
+  const w = cv.width, h = cv.height, s = Math.min(1, 480 / Math.max(w, h));
+  const a = document.createElement('canvas'); a.width = Math.max(2, Math.round(w * s)); a.height = Math.max(2, Math.round(h * s));
+  const ax = a.getContext('2d'); ax.imageSmoothingQuality = 'high'; ax.drawImage(cv, 0, 0, a.width, a.height);
+  const b = document.createElement('canvas'); b.width = w; b.height = h;
+  const bx = b.getContext('2d'); bx.imageSmoothingEnabled = true; bx.imageSmoothingQuality = 'high'; bx.drawImage(a, 0, 0, w, h);
+  const bd = bx.getImageData(0, 0, w, h).data, out = new Uint8Array(w * h);
+  for (let i = 0, j = 0; j < out.length; i += 4, j++) out[j] = 0.2126 * bd[i] + 0.7152 * bd[i + 1] + 0.0722 * bd[i + 2];
+  return out;
+}
+const lumCanvas = (arr, w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'), d = x.createImageData(w, h); for (let i = 0, j = 0; j < arr.length; i += 4, j++) { d.data[i] = d.data[i + 1] = d.data[i + 2] = arr[j]; d.data[i + 3] = 255; } x.putImageData(d, 0, 0); return c; };
+const lumFrom = (cv, sx, sy, sw, sh, dw, dh) => { const l = document.createElement('canvas'); l.width = dw; l.height = dh; const lx = l.getContext('2d'); lx.imageSmoothingEnabled = true; lx.drawImage(cv, sx, sy, sw, sh, 0, 0, dw, dh); const ld = lx.getImageData(0, 0, dw, dh).data, out = new Uint8Array(dw * dh); for (let i = 0, j = 0; j < out.length; i += 4, j++) out[j] = ld[i]; return out; };
+/* crop and straighten: Straighten turns the photo about its center and scales it just enough to leave no empty corners;
+   the crop is a box in that straightened frame, stored as fractions of its width and height */
+function geomOf(r) { if (!r) return null; const rot = (r.rot || 0) / 10, c = r.crop || null; return rot || c ? { rot, crop: c } : null; }
+function geomCanvas(src, g, maxDim = 0) {
+  const W = src.naturalWidth || src.width, H = src.naturalHeight || src.height, t = g.rot * Math.PI / 180, ca = Math.abs(Math.cos(t)), sa = Math.abs(Math.sin(t));
+  const sc = Math.max((W * ca + H * sa) / W, (W * sa + H * ca) / H), c = g.crop || { x: 0, y: 0, w: 1, h: 1 };
+  const ow = c.w * W, oh = c.h * H, k = maxDim ? Math.min(1, maxDim / Math.max(ow, oh)) : 1;
+  const out = document.createElement('canvas'); out.width = Math.max(1, Math.round(ow * k)); out.height = Math.max(1, Math.round(oh * k));
+  const x = out.getContext('2d'); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
+  x.scale(k, k); x.translate(-c.x * W, -c.y * H); x.translate(W / 2, H / 2); x.rotate(t); x.scale(sc, sc); x.drawImage(src, -W / 2, -H / 2, W, H);
+  return out;
+}
+function processEdits(src, dst, w, h, r, lum, geo, mid) {
   const bw = !!r.bw, bwW = BW_FILTERS[r.bwf] || BW_FILTERS.orange, bwT = BW_TONES[r.bwt] || BW_TONES.none;
   const [lr, lg, lb] = editLuts(bw ? { ...r, temp: 0, tint: 0 } : r), hi = (r.hi || 0) / 100, sh = (r.sh || 0) / 100, vib = bw ? 0 : (r.vib || 0) / 100, vig = (r.vig || 0) / 100;
+  const sat = bw ? 0 : (r.sat || 0) / 100, cla = mid ? (r.cla || 0) / 100 : 0;
   const g = geo || { x0: 0, y0: 0, sx: 1, sy: 1, W: w, H: h };
   const cx = g.W / 2, cy = g.H / 2, nr = 1 / Math.hypot(cx, cy);
   for (let y = 0, i = 0, j = 0; y < h; y++) {
@@ -4667,11 +4715,18 @@ function processEdits(src, dst, w, h, r, lum, geo) {
         const m = lum[j] / 255, gain = 1 + sh * 0.9 * (1 - sm(0, 0.55, m)) + hi * 0.55 * sm(0.45, 1, m);
         R *= gain; G *= gain; B *= gain;
       }
+      if (cla) {
+        /* local contrast in the midtones: the difference from a soft blur, weighted away from deep shadows and bright highlights;
+           differences under about 1% are ignored, so smooth backgrounds and gentle light falloff stay as they are */
+        const m = (0.2126 * src[i] + 0.7152 * src[i + 1] + 0.0722 * src[i + 2]) / 255, d0 = m - mid[j] / 255, d = d0 > 0 ? Math.max(0, d0 - 0.012) : Math.min(0, d0 + 0.012), add = cla * 2.2 * d * (4 * m * (1 - m));
+        R += add; G += add; B += add;
+      }
       if (vib) {
         const L = 0.2126 * R + 0.7152 * G + 0.0722 * B, mx = Math.max(R, G, B), mn = Math.min(R, G, B);
         const k = 1 + vib * (vib > 0 ? 0.9 * (1 - Math.min(1, (mx - mn) * 1.6)) : 1);
         R = L + (R - L) * k; G = L + (G - L) * k; B = L + (B - L) * k;
       }
+      if (sat) { const L = 0.2126 * R + 0.7152 * G + 0.0722 * B, k = 1 + sat; R = L + (R - L) * k; G = L + (G - L) * k; B = L + (B - L) * k; }
       if (bw) { const Y = Math.max(0, bwW[0] * R + bwW[1] * G + bwW[2] * B); R = Y * bwT[0]; G = Y * bwT[1]; B = Y * bwT[2]; }
       if (vig) { const dx = (g.x0 + x * g.sx - cx) * nr, f = 1 + vig * 0.75 * sm(0.25, 1, dx * dx + dy * dy); R *= f; G *= f; B *= f; }
       dst[i] = R * 255; dst[i + 1] = G * 255; dst[i + 2] = B * 255; dst[i + 3] = src[i + 3];
@@ -4680,7 +4735,7 @@ function processEdits(src, dst, w, h, r, lum, geo) {
 }
 function applyEdits(cv, r) {
   const x = cv.getContext('2d'), id = x.getImageData(0, 0, cv.width, cv.height);
-  processEdits(id.data, id.data, cv.width, cv.height, r, blurLum(cv));
+  processEdits(id.data, id.data, cv.width, cv.height, r, blurLum(cv), undefined, r.cla ? blurMid(cv) : undefined);
   sharpenData(id.data, cv.width, cv.height, (r.shp || 0) / 100 * 1.6);
   x.putImageData(id, 0, 0);
 }
@@ -4691,10 +4746,12 @@ function releaseCaches() {
   if (typeof lastWebSrc !== 'undefined') lastWebSrc = null;
   if (typeof fov !== 'undefined') fov.photo = null;
 }
-function editedSrc(it, img, maxDim = 4000) {
+function editedSrc(it, img, maxDim = 4000, noGeo = false) {
   const r = editOf(it); if (!r || !img) return img;
+  const g = noGeo ? null : geomOf(r);
+  if (g) img = geomCanvas(img, g, maxDim);
   const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
-  const key = it.key + '|' + stable(r) + '|' + maxDim + '|' + iw + 'x' + ih;
+  const key = it.key + '|' + stable(r) + '|' + maxDim + '|' + iw + 'x' + ih + (noGeo ? '|ng' : '');
   if (editedCache.has(key)) return editedCache.get(key);
   const s = Math.min(1, maxDim / Math.max(iw, ih)), c = document.createElement('canvas');
   c.width = Math.max(1, Math.round(iw * s)); c.height = Math.max(1, Math.round(ih * s));
@@ -4703,7 +4760,8 @@ function editedSrc(it, img, maxDim = 4000) {
   if (editedCache.size > 3) editedCache.delete(editedCache.keys().next().value);
   editedCache.set(key, c); return c;
 }
-let editBase = null, editBeforeOn = false, editRaf = 0, editClip = null;
+let editBase = null, editBeforeOn = false, editRaf = 0, editClip = null, editGeo = null;
+let cropMode = false, cropRect = null, cropAr = 'orig', ecDrag = null, straightening = 0;
 function editPrep() {
   const it = cur(), img = panes[0].img, cv = $('editCanvas');
   const dpr = DPR(), cw = Math.round(scr.clientWidth * dpr), ch = Math.round(scr.clientHeight * dpr);
@@ -4711,14 +4769,16 @@ function editPrep() {
   if (cv.width !== cw) cv.width = cw;
   if (cv.height !== ch) cv.height = ch;
   if (!it || !img) { const x = cv.getContext('2d'); x.fillStyle = '#000'; x.fillRect(0, 0, cw, ch); editBase = null; return false; }
-  const iw0 = img.naturalWidth || img.width, ih0 = img.naturalHeight || img.height, s = Math.min(cw / iw0, ch / ih0);
-  const iw = Math.max(1, Math.round(iw0 * s)), ih = Math.max(1, Math.round(ih0 * s)), key = it.key + '|' + iw + 'x' + ih;
+  const g0 = geomOf(editOf(it)), gShow = cropMode ? (g0 && g0.rot ? { rot: g0.rot, crop: null } : null) : g0;
+  let srcImg = img;
+  if (gShow) { const gk = it.key + '|' + stable(gShow); if (!editGeo || editGeo.key !== gk) editGeo = { key: gk, c: geomCanvas(img, gShow, 3200) }; srcImg = editGeo.c; }
+  const iw0 = srcImg.naturalWidth || srcImg.width, ih0 = srcImg.naturalHeight || srcImg.height, pad = cropMode ? 0.92 : 1, s = Math.min(cw / iw0, ch / ih0) * pad;
+  const iw = Math.max(1, Math.round(iw0 * s)), ih = Math.max(1, Math.round(ih0 * s)), key = it.key + '|' + iw + 'x' + ih + '|' + (gShow ? stable(gShow) : '') + (cropMode ? '|crop' : '');
   if (!editBase || editBase.key !== key) {
     const c = document.createElement('canvas'); c.width = iw; c.height = ih;
-    const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(img, 0, 0, iw, ih);
-    const lumArr = blurLum(c), lc = document.createElement('canvas'); lc.width = iw; lc.height = ih;
-    { const lx = lc.getContext('2d'), li = lx.createImageData(iw, ih); for (let i = 0, j = 0; j < lumArr.length; i += 4, j++) { li.data[i] = li.data[i + 1] = li.data[i + 2] = lumArr[j]; li.data[i + 3] = 255; } lx.putImageData(li, 0, 0); }
-    editBase = { key, iw, ih, ox: (cw - iw) >> 1, oy: (ch - ih) >> 1, data: x.getImageData(0, 0, iw, ih), lum: lumArr, lumCv: lc };
+    const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(srcImg, 0, 0, iw, ih);
+    const lumArr = blurLum(c), midArr = blurMid(c);
+    editBase = { key, iw, ih, ox: (cw - iw) >> 1, oy: (ch - ih) >> 1, data: x.getImageData(0, 0, iw, ih), lum: lumArr, lumCv: lumCanvas(lumArr, iw, ih), mid: midArr, midCv: lumCanvas(midArr, iw, ih), geo: !!gShow, srcW: img.naturalWidth || img.width, srcH: img.naturalHeight || img.height };
   }
   return true;
 }
@@ -4731,12 +4791,12 @@ function renderEdit() {
   let fit = b.data;
   if (edited) {
     const fk = stable(r);
-    if (b.fitKey !== fk) { b.fitOut = x.createImageData(b.iw, b.ih); processEdits(b.data.data, b.fitOut.data, b.iw, b.ih, r, b.lum); sharpenData(b.fitOut.data, b.iw, b.ih, (r.shp || 0) / 100 * 1.6); b.fitKey = fk; }
+    if (b.fitKey !== fk) { b.fitOut = x.createImageData(b.iw, b.ih); processEdits(b.data.data, b.fitOut.data, b.iw, b.ih, r, b.lum, undefined, b.mid); sharpenData(b.fitOut.data, b.iw, b.ih, (r.shp || 0) / 100 * 1.6); b.fitKey = fk; }
     fit = b.fitOut;
   }
   const clip = drawEditHist(fit.data);
   let disp = fit, dx0 = b.ox, dy0 = b.oy;
-  if (Z.k > 1.001 && p.ok && p.img) {
+  if (Z.k > 1.001 && p.ok && p.img && !cropMode) {
     /* zoomed: render exactly what the viewer would show, from the full-resolution image, with the edits applied */
     const dpr = DPR(), pr = p.el.getBoundingClientRect(), sr = scr.getBoundingClientRect();
     const ix = pr.left - sr.left + p.x, iy = pr.top - sr.top + p.y, iw = p.img.width * p.s, ih = p.img.height * p.s;
@@ -4748,11 +4808,10 @@ function renderEdit() {
     const tx = t.getContext('2d'); tx.imageSmoothingQuality = 'high'; tx.drawImage(p.img, sx, sy, sw, sh, 0, 0, dw, dh);
     const zd = tx.getImageData(0, 0, dw, dh);
     if (edited) {
-      const f = b.iw / p.img.width, l = document.createElement('canvas'); l.width = dw; l.height = dh;
-      const lx = l.getContext('2d'); lx.imageSmoothingEnabled = true; lx.drawImage(b.lumCv, sx * f, sy * f, sw * f, sh * f, 0, 0, dw, dh);
-      const ld = lx.getImageData(0, 0, dw, dh).data, lum = new Uint8Array(dw * dh);
-      for (let i = 0, j = 0; j < lum.length; i += 4, j++) lum[j] = ld[i];
-      processEdits(zd.data, zd.data, dw, dh, r, lum, { x0: sx, y0: sy, sx: sw / dw, sy: sh / dh, W: p.img.width, H: p.img.height });
+      /* zoomed views show the full-resolution photo before cropping, so its brightness maps come from the view itself when the photo is cropped or straightened */
+      const f = b.iw / p.img.width, lum = b.geo ? blurLum(t) : lumFrom(b.lumCv, sx * f, sy * f, sw * f, sh * f, dw, dh);
+      const mid = !r.cla ? undefined : b.geo ? blurMid(t) : lumFrom(b.midCv, sx * f, sy * f, sw * f, sh * f, dw, dh);
+      processEdits(zd.data, zd.data, dw, dh, r, lum, { x0: sx, y0: sy, sx: sw / dw, sy: sh / dh, W: p.img.width, H: p.img.height }, mid);
       sharpenData(zd.data, dw, dh, (r.shp || 0) / 100 * 1.6);
     }
     disp = zd; dx0 = Math.round(vx0 * dpr); dy0 = Math.round(vy0 * dpr);
@@ -4768,6 +4827,8 @@ function renderEdit() {
     disp = m;
   }
   x.putImageData(disp, dx0, dy0);
+  if (cropMode) drawCropBox(x, b);
+  else if (straightening) drawStraightenGrid(x, b);
   $('editBadge').hidden = !editBeforeOn;
   const paused = [state.show.peak && 'Peaking', state.show.blink && 'Blinkies'].filter(Boolean);
   $('editNote').hidden = !paused.length;
@@ -4806,12 +4867,108 @@ $('eClipHi').onclick = () => setClipWarn(S.clipWarn !== true);
 $('eClipLo').onclick = () => setClipWarn(S.clipWarn !== true);
 function toggleClipAll() { setClipWarn(S.clipWarn !== true); toast(S.clipWarn ? 'Clipping warnings on' : 'Clipping warnings off'); }
 syncClipButtons();
+const CROP_AR = { '1:1': 1, '4:5': 4 / 5, '5:4': 5 / 4, '3:2': 3 / 2, '2:3': 2 / 3, '16:9': 16 / 9 };
+/* the crop box's width-to-height ratio in its own fractional units (1 for Original), or null for Free */
+function cropRatio() { const b = editBase; if (cropAr === 'free' || !b) return null; if (cropAr === 'orig') return 1; return CROP_AR[cropAr] * b.ih / b.iw; }
+function fitCropAr() {
+  const nr = cropRatio(); if (!nr || !cropRect) return;
+  const c = cropRect, cx = c.x + c.w / 2, cy = c.y + c.h / 2;
+  let w = Math.sqrt(c.w * c.h * nr), h = w / nr;
+  if (w > 1) { w = 1; h = w / nr; } if (h > 1) { h = 1; w = h * nr; }
+  cropRect = { w, h, x: Math.min(1 - w, Math.max(0, cx - w / 2)), y: Math.min(1 - h, Math.max(0, cy - h / 2)) };
+}
+function setCropMode(v) {
+  const it = cur(); if (v && !it) return;
+  if (v) { const rr = EDITS[it.key] || blankEdit(); cropRect = rr.crop ? { ...rr.crop } : { x: 0, y: 0, w: 1, h: 1 }; cropAr = rr.cropAr || 'orig'; }
+  else if (cropMode && it && cropRect) {
+    const rr = EDITS[it.key] || blankEdit(), c = cropRect, full = c.x < 0.002 && c.y < 0.002 && c.w > 0.996 && c.h > 0.996;
+    rr.crop = full ? null : { x: +c.x.toFixed(5), y: +c.y.toFixed(5), w: +c.w.toFixed(5), h: +c.h.toFixed(5) }; rr.cropAr = cropAr;
+    if (hasEdit(rr)) EDITS[it.key] = { ...blankEdit(), ...rr }; else delete EDITS[it.key];
+    saveEdits(); paintThumb(it);
+  }
+  cropMode = v; editBase = null; ecDrag = null;
+  $('eCropBtn').setAttribute('aria-pressed', String(v)); $('eCropBtn').textContent = v ? 'Done cropping' : 'Crop';
+  $('eCropOpts').hidden = !v; $('eCropAr').value = cropAr;
+  $('editView').classList.toggle('cropping', v);
+  const rr = it && EDITS[it.key]; $('eCropBtn').classList.toggle('has', !!(rr && rr.crop));
+  renderEditSoon();
+}
+function drawCropBox(x, b) {
+  const d = DPR(), c = cropRect || { x: 0, y: 0, w: 1, h: 1 };
+  const X = b.ox + c.x * b.iw, Y = b.oy + c.y * b.ih, W = c.w * b.iw, H = c.h * b.ih, cw = x.canvas.width, ch = x.canvas.height;
+  x.fillStyle = 'rgba(0,0,0,.62)';
+  x.fillRect(0, 0, cw, Y); x.fillRect(0, Y + H, cw, ch - Y - H); x.fillRect(0, Y, X, H); x.fillRect(X + W, Y, cw - X - W, H);
+  x.strokeStyle = 'rgba(255,255,255,.35)'; x.lineWidth = d;
+  x.beginPath(); for (const f of [1 / 3, 2 / 3]) { x.moveTo(X + W * f, Y); x.lineTo(X + W * f, Y + H); x.moveTo(X, Y + H * f); x.lineTo(X + W, Y + H * f); } x.stroke();
+  x.strokeStyle = '#fff'; x.lineWidth = 2 * d; x.strokeRect(X, Y, W, H);
+  /* the size the crop will be, from the full-resolution photo: pixels, megapixels, and print size at 300 ppi */
+  const pw = Math.round(c.w * b.srcW), ph = Math.round(c.h * b.srcH), mp = pw * ph / 1e6, inch = v => (v / 300).toFixed(1);
+  const label = `${pw.toLocaleString()} \u00d7 ${ph.toLocaleString()} px  \u00b7  ${mp < 10 ? mp.toFixed(1) : Math.round(mp)} MP  \u00b7  ${inch(pw)} \u00d7 ${inch(ph)} in at 300 ppi`;
+  $('eCropInfo').textContent = `${pw.toLocaleString()} \u00d7 ${ph.toLocaleString()} px \u00b7 ${mp < 10 ? mp.toFixed(1) : Math.round(mp)} MP \u00b7 ${inch(pw)} \u00d7 ${inch(ph)} in at 300 ppi`;
+  x.font = `600 ${Math.round(13 * d)}px system-ui, sans-serif`; x.textBaseline = 'middle';
+  const tw = x.measureText(label).width + 20 * d, th = 26 * d, inside = H > th * 2.6 && W > tw + 12 * d;
+  const lx = Math.min(cw - tw - 6 * d, Math.max(6 * d, X + (W - tw) / 2)), ly = inside ? Y + H - th - 10 * d : Math.min(ch - th - 6 * d, Y + H + 8 * d);
+  x.fillStyle = 'rgba(0,0,0,.72)'; x.beginPath(); x.roundRect(lx, ly, tw, th, 6 * d); x.fill();
+  x.fillStyle = '#fff'; x.fillText(label, lx + 10 * d, ly + th / 2);
+  const L = 22 * d; x.lineWidth = 4 * d; x.beginPath();
+  for (const [px, py, sx, sy] of [[X, Y, 1, 1], [X + W, Y, -1, 1], [X, Y + H, 1, -1], [X + W, Y + H, -1, -1]]) { x.moveTo(px + sx * L, py); x.lineTo(px, py); x.lineTo(px, py + sy * L); }
+  x.stroke();
+}
+function drawStraightenGrid(x, b) {
+  const d = DPR(), n = 10; x.strokeStyle = 'rgba(255,255,255,.28)'; x.lineWidth = d; x.beginPath();
+  for (let i = 1; i < n; i++) { const gx = b.ox + b.iw * i / n, gy = b.oy + b.ih * i / n; x.moveTo(gx, b.oy); x.lineTo(gx, b.oy + b.ih); x.moveTo(b.ox, gy); x.lineTo(b.ox + b.iw, gy); }
+  x.stroke();
+}
+function cropPoint(e) { const cv = $('editCanvas'), rr = cv.getBoundingClientRect(), k = cv.width / rr.width, b = editBase; return { px: (e.clientX - rr.left) * k, py: (e.clientY - rr.top) * k, nx: ((e.clientX - rr.left) * k - b.ox) / b.iw, ny: ((e.clientY - rr.top) * k - b.oy) / b.ih }; }
+$('editView').addEventListener('pointerdown', e => {
+  if (!cropMode || !editBase || e.button !== 0) return;
+  e.preventDefault(); e.stopPropagation();
+  const b = editBase, q = cropPoint(e), c = cropRect, hit = 24 * DPR();
+  const corners = [[c.x, c.y], [c.x + c.w, c.y], [c.x, c.y + c.h], [c.x + c.w, c.y + c.h]];
+  const ci = corners.findIndex(([cx, cy]) => Math.hypot(b.ox + cx * b.iw - q.px, b.oy + cy * b.ih - q.py) < hit);
+  if (ci >= 0) ecDrag = { mode: 'corner', ax: corners[3 - ci][0], ay: corners[3 - ci][1] };
+  else if (q.nx > c.x && q.nx < c.x + c.w && q.ny > c.y && q.ny < c.y + c.h) ecDrag = { mode: 'move', sx: q.nx, sy: q.ny, rect: { ...c } };
+  else return;
+  $('editView').setPointerCapture(e.pointerId);
+}, true);
+$('editView').addEventListener('pointermove', e => {
+  if (!ecDrag) return;
+  e.stopPropagation();
+  const q = cropPoint(e), MIN = 0.04;
+  if (ecDrag.mode === 'move') {
+    const r0 = ecDrag.rect;
+    cropRect = { ...r0, x: Math.min(1 - r0.w, Math.max(0, r0.x + q.nx - ecDrag.sx)), y: Math.min(1 - r0.h, Math.max(0, r0.y + q.ny - ecDrag.sy)) };
+  } else {
+    const { ax, ay } = ecDrag, nx = Math.min(1, Math.max(0, q.nx)), ny = Math.min(1, Math.max(0, q.ny));
+    const dx = nx >= ax ? 1 : -1, dy = ny >= ay ? 1 : -1, availW = dx > 0 ? 1 - ax : ax, availH = dy > 0 ? 1 - ay : ay;
+    let w = Math.max(MIN, Math.abs(nx - ax)), h = Math.max(MIN, Math.abs(ny - ay));
+    const nr = cropRatio();
+    if (nr) { w = Math.max(w, h * nr); h = w / nr; if (w > availW) { w = availW; h = w / nr; } if (h > availH) { h = availH; w = h * nr; } }
+    else { w = Math.min(w, availW); h = Math.min(h, availH); }
+    cropRect = { w, h, x: dx > 0 ? ax : ax - w, y: dy > 0 ? ay : ay - h };
+  }
+  renderEditSoon();
+}, true);
+$('editView').addEventListener('pointerup', () => { ecDrag = null; }, true);
+/* dragging the crop box must not start a text selection across the page */
+$('editView').addEventListener('mousedown', e => { if (cropMode) e.preventDefault(); }, true);
+document.addEventListener('keydown', e => { if (cropMode && (e.key === 'Enter' || e.key === 'Escape') && !e.target.closest('input,select,textarea')) { e.preventDefault(); e.stopImmediatePropagation(); setCropMode(false); } }, true);
 function renderEditSoon() { if (!editRaf) editRaf = requestAnimationFrame(() => { editRaf = 0; renderEdit(); }); }
 function buildEditSliders() {
   const box = $('eSliders'); box.innerHTML = '';
   for (const [k, label, mn = -100, mx = 100] of EDIT_UI) {
     if (!label) {
       const s = document.createElement('div'); s.className = 'esec'; s.textContent = k; box.append(s);
+      if (k === 'Crop and straighten') {
+        const w = document.createElement('div'); w.className = 'ecrop';
+        w.innerHTML = '<button class="knob ebtn wide" id="eCropBtn" aria-pressed="false" title="Drag the corners or the whole box to crop. Click again, or press Enter, when you\u2019re done.">Crop</button>'
+          + '<div class="ecropopts" id="eCropOpts" hidden><label class="erow" for="eCropAr">Aspect</label><select id="eCropAr" title="Keep the crop to a shape, or Free for any shape"><option value="orig">Original</option><option value="free">Free</option><option value="1:1">1:1</option><option value="4:5">4:5</option><option value="5:4">5:4</option><option value="3:2">3:2</option><option value="2:3">2:3</option><option value="16:9">16:9</option></select>'
+          + '<button class="knob ebtn" id="eCropReset">Reset crop</button><div class="ecropinfo" id="eCropInfo" aria-live="polite"></div></div>';
+        box.append(w);
+        $('eCropBtn').onclick = () => setCropMode(!cropMode);
+        $('eCropAr').onchange = e => { cropAr = e.target.value; fitCropAr(); renderEditSoon(); };
+        $('eCropReset').onclick = () => { cropRect = { x: 0, y: 0, w: 1, h: 1 }; fitCropAr(); renderEditSoon(); };
+      }
       if (k === 'Color') {
         const w = document.createElement('div'); w.className = 'ebw';
         w.innerHTML = '<label class="ewarn" title="Convert this photo to black and white"><input type="checkbox" id="eBw"> Black &amp; white</label>'
@@ -4841,16 +4998,18 @@ function setEdit(k, val) {
   const it = cur(); if (!it) return;
   const r = EDITS[it.key] || blankEdit(); r[k] = Math.round(val);
   if (hasEdit(r)) EDITS[it.key] = r; else delete EDITS[it.key];
-  $('ev_' + k).textContent = Math.round(val) > 0 ? '+' + Math.round(val) : String(Math.round(val));
+  $('ev_' + k).textContent = editVal(k, Math.round(val));
+  if (k === 'rot') { clearTimeout(straightening); straightening = setTimeout(() => { straightening = 0; renderEditSoon(); }, 900); }
   saveEdits(); paintThumb(it); renderEditSoon();
 }
 function editLoad() {
   const r = (cur() && EDITS[cur().key]) || blankEdit();
-  for (const k of EDIT_KEYS) { const v = r[k] || 0; $('e_' + k).value = v; $('ev_' + k).textContent = v > 0 ? '+' + v : String(v); }
+  for (const k of EDIT_KEYS) { const v = r[k] || 0; $('e_' + k).value = v; $('ev_' + k).textContent = editVal(k, v); }
+  $('eCropBtn').classList.toggle('has', !!r.crop);
   const bw = !!r.bw;
   $('eBw').checked = bw; $('eBwOpts').hidden = !bw; $('eBwF').value = r.bwf || 'orange'; $('eBwT').value = r.bwt || 'none';
   /* temperature, tint and vibrance don't apply to black and white; the filter takes their place */
-  for (const k of ['temp', 'tint', 'vib']) { $('e_' + k).hidden = bw; const row = document.querySelector(`#eSliders .erow[data-k="${k}"]`); if (row) row.hidden = bw; }
+  for (const k of ['temp', 'tint', 'vib', 'sat']) { $('e_' + k).hidden = bw; const row = document.querySelector(`#eSliders .erow[data-k="${k}"]`); if (row) row.hidden = bw; }
   $('ePaste').disabled = $('ePasteAll').disabled = !editClip;
   refreshSel();
   renderEditSoon();
@@ -4877,6 +5036,7 @@ function autoEdit() {
   return r;
 }
 function setEditing(v, remember = true) {
+  if (!v && cropMode) setCropMode(false);
   if (v && !cur()) { if (remember) toast('Open a photo first'); return; }
   state.editing = v; setTog('editBtn', v);
   if (remember) { S.editOpen = v; saveS(); }
@@ -4929,8 +5089,8 @@ $('ePasteSel').onclick = () => {
 $('editBtn').onclick = () => setEditing(!state.editing);
 $('eDone').onclick = () => setEditing(false);
 $('eExport').onclick = () => { webSrcOnce = state.sel && state.sel.size > 1 ? 'sel' : 'current'; $('webBtn').click(); };
-$('eAuto').onclick = () => { const it = cur(), r = autoEdit(); if (!it || !r) return; const prev = EDITS[it.key]; if (prev && prev.bw) { r.bw = 1; r.bwf = prev.bwf; r.bwt = prev.bwt; r.vib = 0; } setRecipe(it, r); editLoad(); };
-$('eReset').onclick = () => { const it = cur(); if (!it) return; setRecipe(it, null); editLoad(); };
+$('eAuto').onclick = () => { const it = cur(), r = autoEdit(); if (!it || !r) return; const prev = EDITS[it.key]; if (prev && prev.bw) { r.bw = 1; r.bwf = prev.bwf; r.bwt = prev.bwt; r.vib = 0; } if (prev) { r.rot = prev.rot || 0; r.crop = prev.crop || null; r.cropAr = prev.cropAr || 'orig'; } setRecipe(it, r); editLoad(); };
+$('eReset').onclick = () => { const it = cur(); if (!it) return; if (cropMode) { cropRect = { x: 0, y: 0, w: 1, h: 1 }; cropAr = 'orig'; $('eCropAr').value = 'orig'; } setRecipe(it, null); editLoad(); };
 $('eCopy').onclick = () => { const r = editOf(cur()); if (!r) return toast('This photo has no edits to copy'); editClip = { ...r }; editLoad(); toast('Edits copied'); };
 $('ePaste').onclick = () => { const it = cur(); if (!it || !editClip) return; setRecipe(it, editClip); editLoad(); };
 $('ePasteAll').onclick = () => {
@@ -5700,8 +5860,20 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.29 beta';
+const VERSION = '0.9.31 beta';
 const RELEASES = [
+  { v: '0.9.31 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'While you crop, the box shows the size you\u2019re cropping to, updating as you drag: pixels, megapixels, and print size in inches at 300 ppi. The same line appears in the drawer under Aspect.',
+    ]],
+  ] },
+  { v: '0.9.30 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Crop and straighten in Quick finish: click Crop, drag the corners or the whole box, and pick an aspect (Original, Free, 1:1, 4:5, 5:4, 3:2, 2:3, 16:9). Straighten levels the horizon, with a grid while you drag. Crops apply to exports, galleries, Frame mode, and Photo view, and Export\u2019s social shapes crop from your cropped photo.',
+      'Saturation, beside Vibrance: boosts or calms every color evenly.',
+      'Clarity, in Detail and effects: brings out texture in feathers, fur, and bark, while leaving smooth backgrounds alone.',
+    ]],
+  ] },
   { v: '0.9.29 beta', date: 'November 2026', groups: [
     ['Improved', [
       'Moving to the next or previous photo is faster: once a photo is on screen, the photos on either side are prepared in the background, so the arrow keys and arrow buttons show them almost at once.',
