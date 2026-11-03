@@ -68,17 +68,16 @@ button{font:inherit;color:inherit;cursor:pointer}
 .frameview{position:absolute;inset:0;z-index:3}
 .editview{position:absolute;inset:0;z-index:3;background:#000}
 .drawer{display:flex;align-items:flex-start;align-self:start;gap:8px;margin-left:-8px}
-.drawer .dtab{align-self:center}
+.drawer:not(.open){display:none}
 .drawer .editpanel{width:180px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
 .efoot{position:sticky;bottom:-12px;align-self:stretch;margin:6px -8px -12px;padding:8px 8px 12px;background:linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.2)),var(--body);border-radius:0 0 14px 14px;box-shadow:0 -8px 12px -8px rgba(0,0,0,.6);display:flex;flex-direction:column;align-items:stretch;gap:6px;z-index:2}
 .efoot .knob.ebtn{width:100%;margin:0}
 html[data-look="clean"] .efoot{background:#232325;border-radius:0}
-.dtab{width:24px;min-height:120px;border:1px solid #afa9ec;border-radius:8px;background:#cecbf6;color:#3c3489;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:6px 0;font-weight:600}
-.dtab:hover{filter:brightness(1.06)}
-.dtab .dlabel{writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--cond);font-size:13px;letter-spacing:.5px}
-.dtab .dchev{font-size:14px;line-height:1}
-.drawer.open .dtab{color:#1b1b1b;background:var(--amber);border-color:var(--amber)}
-.drawer.open .dchev{transform:rotate(180deg)}
+.knob.eopen{display:flex;justify-content:center;align-items:center;gap:8px}
+.knob.eopen .dchev{font-size:15px;line-height:1;transition:transform .15s}
+.knob.eopen[aria-expanded="true"]{background:var(--amber);color:#1b1b1b}
+.knob.eopen[aria-expanded="true"] .dchev{transform:rotate(180deg)}
+html[data-look="clean"] .knob.eopen[aria-expanded="true"]{background:var(--acc)!important;color:#fff!important}
 .drawer.overlay.open{position:absolute;right:214px;top:12px;transform:none;z-index:6;margin:0;background:var(--body);padding:8px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 .editview canvas{width:100%;height:100%;display:block}
 .editnote{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.65);color:#e8e6e1;font-size:13px;padding:3px 9px;border-radius:4px;pointer-events:none}
@@ -224,8 +223,7 @@ html[data-look="clean"] .side select option{background:#2c2c2e;color:#ececf0}
 html[data-look="clean"] .side select option:disabled{color:#8e8e93}
 html[data-look="clean"] #oRate,html[data-look="clean"] .rfb.on,html[data-look="clean"] .rate button.on,html[data-look="clean"] .th .stars{color:#ffd60a!important}
 html[data-look="clean"] .bigwarn,html[data-look="clean"] .beyond,html[data-look="clean"] .knob.warn,html[data-look="clean"] .knob.warn:hover:not(:disabled){background:#ff9f0a!important;color:#1c1c1e!important}
-html[data-look="clean"] .osd-top .mode,html[data-look="clean"] .drawer.open .dtab,html[data-look="clean"] .knob.edone,html[data-look="clean"] #editBtn[aria-pressed="true"],html[data-look="clean"] .th .ed,html[data-look="clean"] .cbtns .ck[aria-pressed="true"],html[data-look="clean"] .th .sp.best,html[data-look="clean"] #newsBtn.hasnew::after{color:#fff!important}
-html[data-look="clean"] .drawer.open .dtab{background:var(--acc)!important;border-color:var(--acc)!important}
+html[data-look="clean"] .osd-top .mode,html[data-look="clean"] .knob.edone,html[data-look="clean"] #editBtn[aria-pressed="true"],html[data-look="clean"] .th .ed,html[data-look="clean"] .cbtns .ck[aria-pressed="true"],html[data-look="clean"] .th .sp.best,html[data-look="clean"] #newsBtn.hasnew::after{color:#fff!important}
 html[data-look="clean"] #editBtn[aria-pressed="true"]{background:var(--acc)!important;border-color:var(--acc)!important}
 html[data-look="clean"] .logo,html[data-look="clean"] .bar h1{font-family:var(--cond)}
 html[data-look="clean"] dialog{border-radius:14px}
@@ -443,7 +441,8 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;white-space:no
 .screen.noimg #hist{display:none}
 
 .controls{display:flex;flex-direction:column;align-items:center;gap:12px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
-@media (max-height:1000px){.controls{gap:8px}.csec{padding:8px 6px!important;gap:7px!important}.wheel{width:112px!important;height:112px!important}.wheel .w-center{width:50px!important;height:50px!important}.controls .hint:not(.tiplink){display:none}}
+@media (max-height:1100px){.controls .hint:not(.tiplink){display:none}}
+@media (max-height:1000px){.controls{gap:8px}.csec{padding:8px 6px!important;gap:7px!important}.wheel{width:112px!important;height:112px!important}.wheel .w-center{width:50px!important;height:50px!important}.controls .hint:not(.tiplink){display:none}.knob.sharebtn{padding-top:4px;padding-bottom:4px}}
 @media (max-height:820px){.controls .tiplink{display:none}}
 .csec{display:flex;flex-direction:column;align-items:center;gap:10px;width:162px;padding:12px 8px;border-radius:14px;background:rgba(0,0,0,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.04),inset 0 -1px 0 rgba(0,0,0,.3)}
 .slabel{font-family:var(--cond);font-size:13px;color:#8a8f94;margin-bottom:-4px}
@@ -859,8 +858,9 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <div class="flags"><button class="knob rfp" id="rfPicks" aria-pressed="false">Picks</button><button class="knob rfp" id="rfClear">All</button></div>
       </div>
       </div>
-      <div class="csec" aria-label="Share">
-        <div class="slabel">Share</div>
+      <div class="csec" aria-label="Edit and share">
+        <div class="slabel">Edit and share</div>
+        <button class="knob sharebtn eopen" id="editTab" aria-expanded="false" aria-controls="editPanel" title="Quick finish: simple edits in a panel to the right (open or close)"><span>Quick finish</span><span class="dchev" aria-hidden="true">›</span></button>
         <button class="knob sharebtn" id="shareGal" title="Make a gallery page to email or post">Web gallery</button>
         <button class="knob sharebtn" id="shareSocial" title="Resize and crop copies for Instagram, Facebook, and the web">Social media</button>
       </div>
@@ -868,7 +868,6 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
       <a class="hint tiplink" href="https://ko-fi.com/J5Q729VR3X" target="_blank" rel="noopener" title="FledgeView is free. Tips on Ko-fi keep it going.">♥ Support FledgeView</a>
     </div>
     <aside class="drawer" id="editDrawer" aria-label="Quick finish">
-      <button class="dtab" id="editTab" aria-expanded="false" aria-controls="editPanel" title="Quick finish: simple edits (open or close)"><span class="dchev" aria-hidden="true">‹</span><span class="dlabel">Edit</span></button>
       <div class="csec editpanel" id="editPanel" hidden aria-label="Quick finish">
         <div class="ephead"><span>Quick finish</span><button class="knob ebtn" id="eAuto" title="Set a starting point from this photo’s histogram">Auto</button></div>
         <div class="ehist"><canvas id="eHist" width="360" height="120" aria-label="Histogram of the edited photo"></canvas><button class="eclip lo" id="eClipLo" aria-pressed="false" title="Crushed blacks indicator. Click to turn clipping warnings on or off (J)"></button><button class="eclip hi" id="eClipHi" aria-pressed="false" title="Blown highlights indicator. Click to turn clipping warnings on or off (J)"></button><span class="eclipnote" id="eClipNote"></span></div>
@@ -1163,7 +1162,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
       </section>
       <section data-g="Quick finish">
         <h3>Quick finish: simple edits</h3>
-        <p>Click the <strong>Edit</strong> tab at the right edge of the camera body (or <strong>Edit</strong> in the top toolbar) to slide out the Quick finish panel. Your other panels stay put, so you can rate and edit in one pass. Click the tab or <strong>Done</strong> to tuck it away; FledgeView remembers whether you left it open.</p>
+        <p>Click <strong>Quick finish</strong> in the Edit and share section of the control panel (or <strong>Edit</strong> in the top toolbar) to open the Quick finish panel to the right. Your other panels stay put, so you can rate and edit in one pass. Click <strong>Quick finish</strong> again or <strong>Done</strong> to close it; FledgeView remembers whether you left it open.</p>
         <ul>
           <li><strong>Light:</strong> exposure, contrast, highlights, shadows, whites, and blacks. <strong>Color:</strong> temperature (blue to amber) and tint (green to magenta), shown on colored scales, plus vibrance. <strong>Detail and effects:</strong> sharpen and vignette. Double-click a slider to reset it.</li>
           <li><strong>Black &amp; white:</strong> tick it in the Color section, then choose a <strong>Filter</strong> to control how colors turn into grays (Orange darkens skies and is a good all-rounder; Red is dramatic; Green lightens foliage) and an optional warm or cool <strong>Tone</strong>. Temperature, tint, and vibrance step aside while it’s on; the Light sliders do the rest.</li>
@@ -5536,7 +5535,7 @@ function fitLayout() {
   const top = $('stage').getBoundingClientRect().top + window.scrollY;
   const stacked = vw <= 980, narrow = vw <= 640;
   const camPad = narrow ? 14 : 22, bezel = 10, side = 16;
-  const base = vw - side * 2 - camPad * 2 - bezel * 2 - (narrow ? 0 : 182) - (stacked ? 0 : S.panel === false ? 50 : 356) - (narrow ? 0 : 44);
+  const base = vw - side * 2 - camPad * 2 - bezel * 2 - (narrow ? 0 : 182) - (stacked ? 0 : S.panel === false ? 50 : 356) - (narrow ? 0 : 8);
   const overlay = !!state.editing && (base - 196 < 640 || narrow);
   $('editDrawer').classList.toggle('overlay', overlay);
   const availW = base - (state.editing && !overlay ? 196 : 0);
@@ -5598,8 +5597,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.26 beta';
+const VERSION = '0.9.27 beta';
 const RELEASES = [
+  { v: '0.9.27 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'Quick finish now opens from a button in the control panel, at the top of the Edit and share section, instead of a tab on the edge of the camera body. The photo gets that space back when the panel is closed.',
+    ]],
+  ] },
   { v: '0.9.26 beta', date: 'November 2026', groups: [
     ['New', [
       'Export\u2026 in the edit drawer, just above Done: it opens Export with this photo chosen, or the selected photos if you\u2019ve selected several, edits included.',
