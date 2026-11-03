@@ -196,6 +196,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .gbar .g255{right:6px;color:#222}
 .gbar i{position:absolute;top:0;bottom:0;width:2px;background:var(--amber);box-shadow:0 0 0 1px rgba(0,0,0,.45)}
 #gval{min-width:150px;font-variant-numeric:tabular-nums}
+#gval:empty{min-width:0}
 .rgbbars{display:flex;flex-direction:column;gap:2px;width:128px;height:33px}
 .cb{position:relative;flex:1;border-radius:2px;border:1px solid rgba(255,255,255,.18)}
 .cb.r{background:linear-gradient(to right,#000,#ff0000)}
@@ -565,7 +566,18 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;white-space:no
 .th .bbar.b1{background:var(--teal)}
 .th .bn,.th .sp{position:absolute;bottom:7px;font-family:var(--cond);font-size:12px;color:#fff;background:rgba(0,0,0,.65);padding:0 4px;border-radius:3px}
 .th .bn{right:4px}.th .sp{left:4px}
+.th{container-type:inline-size}
+.th .bn .bs{display:none}
+@container (max-width:140px){.th .bn .bl{display:none}.th .bn .bs{display:inline}}
 .th .sp.best{background:var(--amber);color:#000}
+.th .sp.ok{background:rgba(31,122,58,.88);color:#fff}
+.th .sp.mid{background:rgba(176,112,0,.9);color:#fff}
+.th .sp.soft{background:rgba(178,34,34,.9);color:#fff}
+.upath{flex:1 1 0;display:flex;justify-content:flex-end;align-items:center;gap:6px;min-width:0;font-size:13px;color:var(--lcd-dim)}
+.upath .pi{flex:none}
+.upath .pt{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;direction:rtl;text-align:left}
+.under.framing .upath{display:none!important}
+.side-path bdi{direction:ltr;unicode-bidi:isolate}
 .th.on{border-color:var(--amber)}
 
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--page);padding:8px 14px;border-radius:6px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:min(560px,90vw);text-align:center;z-index:5}
@@ -899,6 +911,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
       </div>
       <span class="bigwarn" id="bigWarn" hidden></span>
       <span id="status" role="status" aria-live="polite"></span>
+      <div class="upath" id="sidePath" hidden></div>
     </div>
   </section>
 
@@ -1137,7 +1150,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
           <li><kbd>1</kbd>–<kbd>5</kbd> rates, <kbd>P</kbd> picks, <kbd>X</kbd> rejects, and <kbd>U</kbd> clears the flag. Ratings show as feathers; change them to stars, dots, or diamonds in <strong>View ▾ → Features</strong>. Ratings are saved in this browser.</li>
           <li><strong>Show</strong> in the Rate panel filters to one exact rating or to your picks. <strong>Cull ▾ → Show</strong> adds rejects, unflagged photos, and “3 and up” style filters.</li>
           <li><strong>Filter</strong>, under Sort in the sidebar, shows only one lens, camera, or file type. Teleconverter combinations are listed separately, and filters combine with ratings and picks. <strong>Clear</strong> shows everything again.</li>
-          <li><strong>Bursts:</strong> frames shot within half a second of each other are grouped, shown by a colored bar under the thumbnails. Each frame shows its sharpness as a percentage of the best one in its burst. On Sony files straight from the camera, sharpness is measured around the focus point (usually the eye), so a soft frame can’t win on a busy background; other files are measured across the whole frame.</li>
+          <li><strong>Bursts:</strong> frames shot within half a second of each other are grouped, shown by a colored bar under the thumbnails. Each frame is labeled compared with the sharpest one in its burst: <strong>Best</strong>, <strong>Sharp</strong> (within 90% of the best, which the eye can’t tell apart), a percentage for slightly softer frames, or <strong>Soft</strong> (below 70%). Hover over a label for the exact figure. On Sony files straight from the camera, sharpness is measured around the focus point (usually the eye), so a soft frame can’t win on a busy background; other files are measured across the whole frame.</li>
           <li><strong>Auto-pick sharpest</strong> scores every burst and picks the frames nearly as sharp as the best one. It never rejects anything unless you turn that option on, and it leaves photos you’ve already rated alone.</li>
           <li><strong>Move picks and rejects</strong> moves picks into a <code>_picks</code> folder and rejects into <code>_rejects</code>, next to your originals. Sort again after changing your mind, and they move back. Nothing is ever deleted.</li>
           <li><strong>Import</strong> (the first button in the toolbar) copies a card into your main photo folder, organized the way you choose: <code>date / lens</code> by default, or year, month, and day, lens first, a shoot name, or your own <strong>Custom</strong> pattern using words like <code>{year}</code>, <code>{date}</code>, <code>{lens}</code>, <code>{camera}</code>, and <code>{shoot}</code>. A live example shows where photos will go. Teleconverter shots can get their own subfolder, and sidecars travel with their photos. Choose the card and your main folder, check the plan, then click Import. Tick <strong>Backup</strong> and choose a second folder (ideally on another drive) to write a verified second copy at the same time. Every copy is checked, photos already imported are skipped, and the card is never changed. Then cull the new folders and import them into Lightroom when you’re ready.</li>
@@ -1599,7 +1612,7 @@ $('clearAll').onclick = () => {
   farObs.disconnect(); hiObs.disconnect();
   state.items = []; state.view = []; state.idx = -1; state.token++; state.bursts = []; state.roots.clear();
   metaQ.length = 0; thumbQueue.length = 0; lru.length = 0;
-  $('strip').innerHTML = ''; $('gridCount').textContent = ''; if (state.sel) { state.sel.clear(); refreshSel(); }
+  $('strip').innerHTML = ''; $('gridCount').textContent = ''; $('sidePath').hidden = true; if (state.sel) { state.sel.clear(); refreshSel(); }
   state.lensF = state.camF = state.typeF = ''; refreshFilterOptions();
   panes.forEach(clearPane);
   $('osd').hidden = true; $('msg').hidden = true; $('empty').hidden = false; $('empty').textContent = 'No photo loaded. Use Import to copy a memory card, or Open folder for photos already on your computer. You can also drop photos anywhere on this page.';
@@ -1926,6 +1939,31 @@ function peakImage(work, pct) {
   work.peak = { pct, img };
   return img;
 }
+/* sharpness relative to the best frame in a burst, in bands: small differences are within what the eye can't see */
+function sharpBand(p) { return p === 100 ? { cls: 'best', label: 'Best' } : p >= 90 ? { cls: 'ok', label: 'Sharp' } : p >= 70 ? { cls: 'mid', label: p + '%' } : { cls: 'soft', label: 'Soft' }; }
+/* where the current photo lives, relative to the folder that was opened (browsers don't reveal full disk paths) */
+async function photoFolder(it) {
+  if (it._folder !== undefined) return it._folder;
+  let parts = null;
+  const rp = it.file && it.file.webkitRelativePath;
+  if (rp) parts = rp.split('/').slice(0, -1);
+  else if (it.root && it.handle) { try { const a = await it.root.resolve(it.handle); if (a) parts = [it.root.name, ...a.slice(0, -1)]; } catch {} }
+  it._folder = parts && parts.length ? parts : null;
+  return it._folder;
+}
+async function updateSidePath() {
+  const el = $('sidePath'), it = cur();
+  if (!it) { el.hidden = true; return; }
+  const parts = await photoFolder(it);
+  if (it !== cur()) return;
+  el.hidden = false; el.innerHTML = '';
+  const ic = document.createElement('span'); ic.className = 'pi'; ic.textContent = parts ? '\u{1F4C1}' : '';
+  const pt = document.createElement('span'); pt.className = 'pt';
+  const b = document.createElement('bdi');
+  b.textContent = parts ? parts.join(' \u203a ') : 'Photos opened individually';
+  pt.append(b); el.append(ic, pt);
+  el.title = parts ? parts.join(' / ') + '\nBrowsers show folder names, not the full location on your computer.' : 'These photos were opened with Open file or dropped in, so there\u2019s no folder to show.';
+}
 function sharpPct(it) {
   if (!it.burst || it.sharp == null) return null;
   const best = Math.max(...it.burst.members.map(m => m.sharp ?? 0));
@@ -1935,7 +1973,7 @@ function sharpText(it) {
   if (!on('sharp') || it.sharp == null) return '';
   const p = sharpPct(it);
   if (p == null) return '';
-  return p === 100 ? 'Sharpest in burst' : `Sharpness ${p}% of best`;
+  return p === 100 ? 'Sharpest in burst' : p >= 90 ? `Sharp (${p}% of best)` : p < 70 ? `Soft (${p}% of best)` : `Sharpness ${p}% of best`;
 }
 function drawHist(it) {
   const h = $('hist'), hx = h.getContext('2d');
@@ -2283,7 +2321,7 @@ async function show(i) {
   i = Math.max(0, Math.min(n - 1, i));
   state.idx = i; state.cmpSide = 0; const tok = ++state.token; const it = state.view[i];
   if (state.show.quad && (i < state.quadBase || i > state.quadBase + 3)) state.quadBase = i;
-  updateStrip(); updateReadout(); refreshCullUi(); markActive(); $('bigWarn').hidden = true;
+  updateStrip(); updateReadout(); refreshCullUi(); markActive(); updateSidePath(); $('bigWarn').hidden = true;
   $('empty').hidden = true;
   const m = await getMeta(it);
   if (tok !== state.token) return;
@@ -2606,9 +2644,9 @@ function paintThumb(it) {
   b.classList.toggle('msel', !!(state.sel && state.sel.has(it.key)));
   if (on('bursts') && it.burst) {
     add('bbar b' + (it.burst.id % 2), '');
-    if (it.burst.pos === 1) add('bn', `Burst of ${it.burst.size}`);
+    if (it.burst.pos === 1) { const bn = add('bn', ''); bn.title = `Burst of ${it.burst.size}`; const l = document.createElement('span'); l.className = 'bl'; l.textContent = `Burst of ${it.burst.size}`; const sh = document.createElement('span'); sh.className = 'bs'; sh.textContent = `×${it.burst.size}`; bn.append(l, sh); }
   }
-  if (on('sharp')) { const p = sharpPct(it); if (p != null) add('sp' + (p === 100 ? ' best' : ''), p === 100 ? 'Best' : p + '%'); }
+  if (on('sharp')) { const p = sharpPct(it); if (p != null) { const band = sharpBand(p); add('sp ' + band.cls, band.label).title = p === 100 ? 'Sharpest frame in this burst' : `${p}% of the sharpest frame in this burst`; } }
 }
 function updateStrip() {
   const qb = state.show.quad ? state.quadBase : -10;
@@ -5498,8 +5536,14 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.22 beta';
+const VERSION = '0.9.23 beta';
 const RELEASES = [
+  { v: '0.9.23 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'Sharpness labels on thumbnails now use bands: Best, Sharp (within 90% of the best, as sharp as the eye can tell), a percentage for slightly softer frames, and Soft below 70%. The exact percentage is in the tip and on screen.',
+      'The current photo\u2019s folder shows under the photo, at the right of the brightness and color readout, for example Wildlife \u203a 2026-09-18 \u203a Sony 300mm F2.8 \u203a With 2x TC.',
+    ]],
+  ] },
   { v: '0.9.22 beta', date: 'November 2026', groups: [
     ['Improved', [
       'Sharpness now looks where the camera focused. On Sony files straight from the camera, frames are scored by the detail around the focus point (usually the eye), so a soft frame can no longer outrank a sharp one because of a busy silhouette or grain elsewhere. Thanks to Peter for the example. Other files use the whole-frame method as before. Saved scores are recalculated the next time you sort by sharpness.',
