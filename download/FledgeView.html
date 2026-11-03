@@ -175,8 +175,6 @@ button{font:inherit;color:inherit;cursor:pointer}
 .btn.primary:hover{opacity:.88;background:var(--ink)}
 .btn.go{background:#b6efa8;color:#123d17;border-color:#8fd77f;font-weight:600}
 .btn.go:hover{background:#a3e793}
-.tog[aria-pressed="true"]{background:var(--ink);color:var(--page);border-color:var(--ink)}
-.tog[aria-pressed="true"]:hover{background:var(--ink);opacity:.88}
 .seg{display:inline-flex;border:1px solid var(--panel-line);border-radius:6px;overflow:hidden}
 .seg button{background:var(--panel);border:0;padding:6px 11px}
 .seg button+button{border-left:1px solid var(--panel-line)}
@@ -184,7 +182,6 @@ button{font:inherit;color:inherit;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--page)}
 
 .tools{padding:2px 16px 6px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px}
-.tgroup{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .tl{color:var(--ink-soft);font-size:13px}
 .tools select{font:inherit;color:inherit;background:var(--panel);border:1px solid var(--panel-line);border-radius:6px;padding:5px 8px}
 .tools input[type=range]{width:110px;accent-color:var(--amber)}
@@ -329,6 +326,14 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;white-space:no
 @media (max-width:860px){.galgrid{grid-template-columns:1fr}.galprev{height:45vh}}
 .orgplan{max-height:40vh;overflow:auto;border:1px solid var(--panel-line);border-radius:8px}
 #impDlg{width:min(720px,94vw)}
+#mvDlg{width:min(560px,94vw)}
+.mvopts{display:flex;flex-direction:column;gap:6px;margin:12px 0}
+.mvopt{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--panel-line);border-radius:8px;cursor:pointer}
+.mvopt:has(input:checked){border-color:var(--amber)}
+.mvopt input{margin-top:3px;accent-color:var(--amber)}
+.mvopt span{display:flex;flex-direction:column}
+.mvopt small{color:var(--ink-soft);font-size:12.5px}
+.mvlr{font-size:13px}
 .improw{display:flex;align-items:center;gap:10px;margin:6px 0}
 .implab{width:96px;flex:none;font-weight:600}
 .implab.impbk{display:flex;align-items:center;gap:6px;cursor:pointer}
@@ -485,7 +490,6 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;white-space:no
 .ri{display:inline-block;width:1em;height:1em;vertical-align:-0.14em;fill:currentColor}
 .th .stars .ri{width:13px;height:13px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.8))}
 #oRate .ri{width:15px;height:15px}
-.rf{gap:6px}
 .rfb{background:none;border:0;color:#5d6166;font-size:21px;line-height:1;padding:2px 1px}
 .rfb.on{color:var(--amber)}
 .rfb:hover{color:#f3c27a}
@@ -577,7 +581,6 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;white-space:no
 .upath .pi{flex:none}
 .upath .pt{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;direction:rtl;text-align:left}
 .under.framing .upath{display:none!important}
-.side-path bdi{direction:ltr;unicode-bidi:isolate}
 .th.on{border-color:var(--amber)}
 
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--page);padding:8px 14px;border-radius:6px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:min(560px,90vw);text-align:center;z-index:5}
@@ -698,7 +701,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <button class="mi" id="scoreBurst" data-f="sharp">Score burst</button>
         <button class="mi" id="autoBtn" data-f="sharp">Auto-pick sharpest…</button>
         <button class="mi" id="writeXmp" data-f="cull">Write ratings</button>
-        <button class="mi" id="moveRej" data-f="cull">Move picks and rejects</button>
+        <button class="mi" id="moveRej" data-f="cull">Move picks and rejects…</button>
         <button class="mi" id="orgBtn" data-f="cull">Organize into lens folders…</button>
         <button class="mi" id="copyList" data-f="cull">Copy list</button>
       </div>
@@ -1152,7 +1155,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
           <li><strong>Filter</strong>, under Sort in the sidebar, shows only one lens, camera, or file type. Teleconverter combinations are listed separately, and filters combine with ratings and picks. <strong>Clear</strong> shows everything again.</li>
           <li><strong>Bursts:</strong> frames shot within half a second of each other are grouped, shown by a colored bar under the thumbnails. Each frame is labeled compared with the sharpest one in its burst: <strong>Best</strong>, <strong>Sharp</strong> (within 90% of the best, which the eye can’t tell apart), a percentage for slightly softer frames, or <strong>Soft</strong> (below 70%). Hover over a label for the exact figure. On Sony files straight from the camera, sharpness is measured around the focus point (usually the eye), so a soft frame can’t win on a busy background; other files are measured across the whole frame.</li>
           <li><strong>Auto-pick sharpest</strong> scores every burst and picks the frames nearly as sharp as the best one. It never rejects anything unless you turn that option on, and it leaves photos you’ve already rated alone.</li>
-          <li><strong>Move picks and rejects</strong> moves picks into a <code>_picks</code> folder and rejects into <code>_rejects</code>, next to your originals. Sort again after changing your mind, and they move back. Nothing is ever deleted.</li>
+          <li><strong>Move picks and rejects…</strong> moves picks into a <code>_picks</code> folder and rejects into <code>_rejects</code>, next to your originals. Choose <strong>Picks and rejects</strong>, <strong>Rejects only</strong> (keepers stay where they are), or <strong>Picks only</strong>. Run it again after changing your mind, and photos move back. Nothing is ever deleted: once you’re sure, delete <code>_rejects</code> yourself in File Explorer or Finder, which sends it to the Recycle Bin or Trash.</li>
           <li><strong>Import</strong> (the first button in the toolbar) copies a card into your main photo folder, organized the way you choose: <code>date / lens</code> by default, or year, month, and day, lens first, a shoot name, or your own <strong>Custom</strong> pattern using words like <code>{year}</code>, <code>{date}</code>, <code>{lens}</code>, <code>{camera}</code>, and <code>{shoot}</code>. A live example shows where photos will go. Teleconverter shots can get their own subfolder, and sidecars travel with their photos. Choose the card and your main folder, check the plan, then click Import. Tick <strong>Backup</strong> and choose a second folder (ideally on another drive) to write a verified second copy at the same time. Every copy is checked, photos already imported are skipped, and the card is never changed. Then cull the new folders and import them into Lightroom when you’re ready.</li>
           <li><strong>Organize into lens folders</strong> moves each photo into a folder named for its lens, with teleconverter shots in their own subfolder. It shows the plan first, sidecar files (.xmp, .dop, .pp3) move along, and <strong>Undo last organize</strong> puts everything back.</li>
           <li><strong>Write ratings</strong> saves your ratings into .xmp sidecar files for Lightroom.</li>
@@ -1289,6 +1292,18 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
   <p class="sub">In Chrome or Edge on fledgeview.com, or in the downloaded copy, FledgeView uses a newer picker that says Select folder instead.</p>
   <label class="chk"><input type="checkbox" id="upNever" checked> Don’t show this again</label>
   <div class="end"><button class="btn" data-close>Cancel</button><button class="btn primary" id="upGo">Choose a folder</button></div>
+</dialog>
+
+<dialog id="mvDlg">
+  <h2>Move picks and rejects</h2>
+  <p class="sub">Moves photos into <code>_picks</code> and <code>_rejects</code> folders next to your originals. Sidecar files move with them. Nothing is deleted: change a flag and run this again, and photos move back.</p>
+  <div class="mvopts" role="radiogroup" aria-label="What to move">
+    <label class="mvopt"><input type="radio" name="mvWhat" value="both"><span><b>Picks and rejects</b><small id="mvN_both"></small></span></label>
+    <label class="mvopt"><input type="radio" name="mvWhat" value="rejects"><span><b>Rejects only</b><small id="mvN_rejects"></small></span></label>
+    <label class="mvopt"><input type="radio" name="mvWhat" value="picks"><span><b>Picks only</b><small id="mvN_picks"></small></span></label>
+  </div>
+  <div class="tip mvlr"><strong>Using Lightroom?</strong> Photos already in your catalog will show as missing after a move until you relink them (Library → Find Missing Photos). And when you import a folder with “Include subfolders” on, Lightroom brings in <code>_rejects</code> too: untick it in the import panel, or delete <code>_rejects</code> in File Explorer or Finder once you’re sure.</div>
+  <div class="end"><button class="btn" data-close>Cancel</button><button class="btn primary" id="mvGo">Move</button></div>
 </dialog>
 
 <dialog id="impDlg">
@@ -1447,16 +1462,29 @@ const on = f => !!S.features[f];
 let SEEN = new Set();
 try { SEEN = new Set(JSON.parse(localStorage.getItem('chimp-seen') || '[]')); } catch {}
 let seenTimer;
-const saveSeen = () => { clearTimeout(seenTimer); seenTimer = setTimeout(() => { try { let a = [...SEEN]; if (a.length > 50000) { a = a.slice(-50000); SEEN = new Set(a); } localStorage.setItem('chimp-seen', JSON.stringify(a)); } catch {} }, 500); };
+const saveSeen = () => { clearTimeout(seenTimer); seenTimer = setTimeout(() => { try { let a = [...SEEN]; if (a.length > 20000) { a = a.slice(-20000); SEEN = new Set(a); } localStorage.setItem('chimp-seen', JSON.stringify(a)); } catch {} }, 500); };
 const fmtPct = rate => { const p = rate * 100; return p === 0 ? '0%' : p < 10 ? p.toFixed(1) + '%' : Math.round(p) + '%'; };
 let SHARP = {};
 try { SHARP = JSON.parse(localStorage.getItem('chimp-sharp2') || '{}') || {}; localStorage.removeItem('chimp-sharp'); } catch {}
 let sharpTimer;
-const saveSharp = () => { clearTimeout(sharpTimer); sharpTimer = setTimeout(() => { try { const k = Object.keys(SHARP); if (k.length > 50000) k.slice(0, k.length - 50000).forEach(x => delete SHARP[x]); localStorage.setItem('chimp-sharp2', JSON.stringify(SHARP)); } catch {} }, 800); };
+const saveSharp = () => { clearTimeout(sharpTimer); sharpTimer = setTimeout(() => { try { const k = Object.keys(SHARP); if (k.length > 20000) k.slice(0, k.length - 20000).forEach(x => delete SHARP[x]); localStorage.setItem('chimp-sharp2', JSON.stringify(SHARP)); } catch {} }, 800); };
 let CULL = {};
 try { CULL = JSON.parse(localStorage.getItem('chimp-cull') || '{}') || {}; } catch {}
 let cullTimer;
-const saveCull = () => { clearTimeout(cullTimer); cullTimer = setTimeout(() => { try { localStorage.setItem('chimp-cull', JSON.stringify(CULL)); } catch {} }, 300); };
+/* Ratings and edits are irreplaceable; the viewed list and sharpness scores can be rebuilt. If storage is full,
+   trim the rebuildable ones and try again, and say so if a rating or edit still can't be saved. */
+let storeWarned = false;
+function safeStore(key, str, critical) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try { localStorage.setItem(key, str); return true; } catch (e) {
+      if (attempt === 0) { try { const a = [...SEEN].slice(-5000); SEEN = new Set(a); localStorage.setItem('chimp-seen', JSON.stringify(a)); } catch {} }
+      else if (attempt === 1) { try { const k = Object.keys(SHARP); k.slice(0, Math.max(0, k.length - 5000)).forEach(x => delete SHARP[x]); localStorage.setItem('chimp-sharp2', JSON.stringify(SHARP)); } catch {} try { localStorage.removeItem('chimp-crops'); } catch {} }
+    }
+  }
+  if (critical && !storeWarned) { storeWarned = true; toast('This browser\u2019s storage for FledgeView is full, so new ratings or edits may not be saved. Use Cull \u25be \u2192 Write ratings to keep them in .xmp files.'); }
+  return false;
+}
+const saveCull = () => { clearTimeout(cullTimer); cullTimer = setTimeout(() => safeStore('chimp-cull', JSON.stringify(CULL), true), 300); };
 const cullOf = it => CULL[it.key] || { r: 0, f: 0 };
 
 const state = { items: [], view: [], idx: -1, disp: 0, token: 0, rows: [], allTags: false,
@@ -1611,7 +1639,9 @@ $('clearAll').onclick = () => {
   state.items.forEach(i => { if (i.thumb) URL.revokeObjectURL(i.thumb); if (i.thumbHi) URL.revokeObjectURL(i.thumbHi); if (i._galUrl) URL.revokeObjectURL(i._galUrl); });
   farObs.disconnect(); hiObs.disconnect();
   state.items = []; state.view = []; state.idx = -1; state.token++; state.bursts = []; state.roots.clear();
-  metaQ.length = 0; thumbQueue.length = 0; lru.length = 0;
+  state.items.forEach(i => { i.cache = null; i.metaP = null; });
+  metaQ.length = 0; thumbQueue.length = 0; hiQ.length = 0; lru.length = 0;
+  releaseCaches();
   $('strip').innerHTML = ''; $('gridCount').textContent = ''; $('sidePath').hidden = true; if (state.sel) { state.sel.clear(); refreshSel(); }
   state.lensF = state.camF = state.typeF = ''; refreshFilterOptions();
   panes.forEach(clearPane);
@@ -2538,7 +2568,7 @@ scr.addEventListener('pointermove', e => {
   const names = ['Red', 'Green', 'Blue'], clipped = [];
   ['mR', 'mG', 'mB'].forEach((id, i) => {
     const m = $(id); m.hidden = false; m.style.left = (d[i] / 2 - 1) + 'px';
-    const c = d[i] >= 250; m.classList.toggle('clip', c); if (c) clipped.push(names[i]);
+    const isClip = d[i] >= 250; m.classList.toggle('clip', isClip); if (isClip) clipped.push(names[i]);
   });
   $('swatch').hidden = false; $('swatch').style.background = `rgb(${d[0]},${d[1]},${d[2]})`;
   $('gval').textContent = `${v}   R ${d[0]}  G ${d[1]}  B ${d[2]}` + (clipped.length ? `   ${clipped.join(' and ')} near max` : '');
@@ -2885,20 +2915,52 @@ function confirmMoveWarning() {
 }
 $('mwCopy').onclick = () => copyText(RELINK_TEXT, 'Relink steps copied');
 $('mwReset').onclick = () => { S.moveWarnAck = false; saveS(); $('mwResetNote').textContent = 'You’ll see the warning the next time you move photos.'; };
-$('moveRej').onclick = async () => {
-  const movable = state.items.filter(i => i.dir && i.handle);
-  if (!movable.length) return toast(whyNoWrite());
-  const plan = movable.map(it => { const c = cullOf(it); return { it, target: c.f === 1 ? 'picks' : c.f === -1 ? 'rejects' : null }; })
-    .filter(p => p.target !== (p.it.zone || null));
-  if (!plan.length) {
-    const flagged = movable.filter(it => cullOf(it).f).length;
-    return toast(flagged ? 'Your picks and rejects are already in their _picks and _rejects folders.' : 'There are no picks or rejects to move yet. To put photos into folders by lens, use Cull ▾ → Organize into lens folders.');
-  }
+/* which photos move where: 'both' follows every flag; 'rejects' or 'picks' leaves the other kind where it is */
+function movePlan(movable, mode) {
+  return movable.map(it => {
+    const f = cullOf(it).f, z = it.zone || null;
+    let target;
+    if (mode === 'rejects') target = f === -1 ? 'rejects' : z === 'rejects' ? null : z;
+    else if (mode === 'picks') target = f === 1 ? 'picks' : z === 'picks' ? null : z;
+    else target = f === 1 ? 'picks' : f === -1 ? 'rejects' : null;
+    return { it, target };
+  }).filter(p => p.target !== (p.it.zone || null));
+}
+function movePlanText(plan) {
   const np = plan.filter(p => p.target === 'picks').length, nr = plan.filter(p => p.target === 'rejects').length, nb = plan.length - np - nr;
   const parts = [];
-  if (np) parts.push(`${np} to _picks`); if (nr) parts.push(`${nr} to _rejects`); if (nb) parts.push(`${nb} back to the main folder`);
+  if (np) parts.push(`${np.toLocaleString()} to _picks`); if (nr) parts.push(`${nr.toLocaleString()} to _rejects`); if (nb) parts.push(`${nb.toLocaleString()} back to the main folder`);
+  return parts.length ? parts.join(', ') : 'Nothing to move';
+}
+function chooseMove(movable) {
+  return new Promise(res => {
+    const d = $('mvDlg'), radios = [...d.querySelectorAll('input[name=mvWhat]')];
+    const pick = ['both', 'rejects', 'picks'].includes(S.moveWhat) ? S.moveWhat : 'both';
+    radios.forEach(x => { x.checked = x.value === pick; });
+    for (const m of ['both', 'rejects', 'picks']) $('mvN_' + m).textContent = movePlanText(movePlan(movable, m));
+    const sync = () => { const m = radios.find(x => x.checked).value; $('mvGo').disabled = !movePlan(movable, m).length; };
+    radios.forEach(x => { x.onchange = sync; }); sync();
+    let done = false;
+    const finish = v => { if (done) return; done = true; d.removeEventListener('close', onClose); if (d.open) d.close(); res(v); };
+    const onClose = () => finish(null);
+    d.addEventListener('close', onClose);
+    $('mvGo').onclick = () => { const m = radios.find(x => x.checked).value; S.moveWhat = m; saveS(); finish(m); };
+    d.showModal();
+  });
+}
+$('moveRej').onclick = async () => {
+  closeMenus();
+  const movable = state.items.filter(i => i.dir && i.handle);
+  if (!movable.length) return toast(whyNoWrite());
+  if (!movePlan(movable, 'both').length && !movePlan(movable, 'rejects').length && !movePlan(movable, 'picks').length) {
+    const flagged = movable.filter(it => cullOf(it).f).length;
+    return toast(flagged ? 'Your picks and rejects are already in their _picks and _rejects folders.' : 'There are no picks or rejects to move yet. To put photos into folders by lens, use Cull \u25be \u2192 Organize into lens folders.');
+  }
+  const mode = await chooseMove(movable);
+  if (!mode) return;
+  const plan = movePlan(movable, mode);
+  if (!plan.length) return;
   if (!await confirmMoveWarning()) return;
-  if (!confirm(`Move ${parts.join(', ')}? Sidecar files move with their photos. Nothing is deleted.\n\nUsing Lightroom Classic? If these photos are already in your catalog, Lightroom will show them as missing until you relink them with Library → Find Missing Photos.`)) return;
   if (!await ensureWrite()) return toast('Write permission wasn’t granted, so nothing was moved');
   let ok = 0, fail = 0, skip = 0, firstErr = '';
   for (const { it, target } of plan) {
@@ -2992,7 +3054,7 @@ async function renderOrgPlan() {
     const n = document.createElement('span'); n.className = 'n'; n.textContent = `${g.items.length.toLocaleString()} photo${g.items.length === 1 ? '' : 's'}`;
     d.append(pth, n); box.append(d);
   }
-  if (!rows.length) box.innerHTML = '<div class="orgrow"><span>' + (inPlace ? 'Everything in ' + rootName + ' is already organized by lens.' : 'Nothing to organize.') + '</span></div>';
+  if (!rows.length) { box.innerHTML = '<div class="orgrow"><span></span></div>'; box.querySelector('span').textContent = inPlace ? `Everything in ${rootName} is already organized by lens.` : 'Nothing to organize.'; }
   $('orgGo').disabled = !rows.length;
   const skipped = state.items.filter(it => it.zone).length;
   const noAccess = state.items.filter(it => !(it.dir && it.handle && it.root)).length;
@@ -3921,17 +3983,17 @@ async function renderWeb(it, o, opts = {}) {
   ox.drawImage(c, 0, 0);
   const [bg, fg, fg2] = BAR_COLORS[o.color] || BAR_COLORS.dark;
   ox.fillStyle = bg; ox.fillRect(0, th, tw, barH);
-  const pad = Math.round(fs * 1.1), gap = Math.round(fs * 2);
+  const padPx = Math.round(fs * 1.1), gap = Math.round(fs * 2);
   const font = n => `500 ${n}px Barlow, "Segoe UI", Arial, sans-serif`;
-  const fits = n => { ox.font = font(n); return ox.measureText(text).width + (right ? ox.measureText(right).width + gap : 0) <= tw - pad * 2; };
+  const fits = n => { ox.font = font(n); return ox.measureText(text).width + (right ? ox.measureText(right).width + gap : 0) <= tw - padPx * 2; };
   while (fs > 9 && !fits(fs)) fs--;
   ox.font = font(fs); ox.textBaseline = 'middle';
   const cy = th + barH / 2;
   let left = text;
-  const room = tw - pad * 2 - (right ? ox.measureText(right).width + gap : 0);
+  const room = tw - padPx * 2 - (right ? ox.measureText(right).width + gap : 0);
   while (left && ox.measureText(left).width > room) left = left.slice(0, -2).trimEnd() + '…';
-  ox.fillStyle = fg; ox.textAlign = 'left'; if (left) ox.fillText(left, pad, cy);
-  if (right) { ox.fillStyle = fg2; ox.textAlign = 'right'; ox.fillText(right, tw - pad, cy); }
+  ox.fillStyle = fg; ox.textAlign = 'left'; if (left) ox.fillText(left, padPx, cy);
+  if (right) { ox.fillStyle = fg2; ox.textAlign = 'right'; ox.fillText(right, tw - padPx, cy); }
   return { canvas: out, w: tw, h: th + barH, crop };
 }
 async function sourceExif(file) {
@@ -4503,7 +4565,7 @@ $('webGo').onclick = async () => {
 let EDITS = {};
 try { EDITS = JSON.parse(localStorage.getItem('chimp-edits') || '{}') || {}; } catch {}
 let editTimer;
-const saveEdits = () => { clearTimeout(editTimer); editTimer = setTimeout(() => { try { localStorage.setItem('chimp-edits', JSON.stringify(EDITS)); } catch {} }, 300); };
+const saveEdits = () => { clearTimeout(editTimer); editTimer = setTimeout(() => safeStore('chimp-edits', JSON.stringify(EDITS), true), 300); };
 const EDIT_UI = [['Light'], ['exp', 'Exposure'], ['con', 'Contrast'], ['hi', 'Highlights'], ['sh', 'Shadows'], ['wh', 'Whites'], ['bl', 'Blacks'], ['Color'], ['temp', 'Temperature'], ['tint', 'Tint'], ['vib', 'Vibrance'], ['Detail and effects'], ['shp', 'Sharpen', 0, 100], ['vig', 'Vignette', -100, 0]];
 const EDIT_SCALE = { temp: 'linear-gradient(90deg,#3d7fe0,#9fb8d9 45%,#d9d4c4 50%,#e8c37a 55%,#f0a43a)', tint: 'linear-gradient(90deg,#3fae5a,#a9cfa6 45%,#d6d2cc 50%,#d7a8cc 55%,#c45ab3)' };
 /* unsharp mask with a small threshold, so smooth areas like sky and out-of-focus backgrounds stay clean */
@@ -4588,6 +4650,12 @@ function applyEdits(cv, r) {
   x.putImageData(id, 0, 0);
 }
 const editedCache = new Map();
+/* caches that hold decoded images; emptied by Clear all so a session's memory doesn't linger */
+function releaseCaches() {
+  editedCache.clear(); editBase = null;
+  if (typeof lastWebSrc !== 'undefined') lastWebSrc = null;
+  if (typeof fov !== 'undefined') fov.photo = null;
+}
 function editedSrc(it, img, maxDim = 4000) {
   const r = editOf(it); if (!r || !img) return img;
   const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
@@ -4696,8 +4764,8 @@ function drawEditHist(d) {
   $('eClipNote').textContent = [sig(pL) ? `${fmt(pL)} crushed` : '', sig(pH) ? `${fmt(pH)} blown` : ''].filter(Boolean).join('  ·  ');
   return { hi: sig(pH) ? hi : 0, lo: sig(pL) ? lo : 0 };
 }
-function syncClipButtons() { const on = S.clipWarn === true; $('eClipHi').setAttribute('aria-pressed', String(on)); $('eClipLo').setAttribute('aria-pressed', String(on)); $('eWarn').checked = on; }
-function setClipWarn(on) { S.clipWarn = !!on; saveS(); syncClipButtons(); renderEditSoon(); }
+function syncClipButtons() { const isOn = S.clipWarn === true; $('eClipHi').setAttribute('aria-pressed', String(isOn)); $('eClipLo').setAttribute('aria-pressed', String(isOn)); $('eWarn').checked = isOn; }
+function setClipWarn(v) { S.clipWarn = !!v; saveS(); syncClipButtons(); renderEditSoon(); }
 $('eWarn').onchange = e => setClipWarn(e.target.checked);
 $('eClipHi').onclick = () => setClipWarn(S.clipWarn !== true);
 $('eClipLo').onclick = () => setClipWarn(S.clipWarn !== true);
@@ -4910,8 +4978,8 @@ document.addEventListener('mouseover', e => {
 document.addEventListener('mouseout', e => { if (tipFor && !(e.relatedTarget && tipFor.contains(e.relatedTarget))) hideTip(); });
 ['mousedown', 'keydown', 'wheel'].forEach(ev => document.addEventListener(ev, hideTip, true));
 window.addEventListener('scroll', hideTip, true);
-function syncTips() { const on = S.tips !== false; $('tipsToggle').setAttribute('aria-checked', String(on)); $('tipsChk').checked = on; if (!on) hideTip(); }
-function setTips(on) { S.tips = !!on; saveS(); syncTips(); toast(on ? 'Tips on' : 'Tips off'); }
+function syncTips() { const isOn = S.tips !== false; $('tipsToggle').setAttribute('aria-checked', String(isOn)); $('tipsChk').checked = isOn; if (!isOn) hideTip(); }
+function setTips(v) { S.tips = !!v; saveS(); syncTips(); toast(v ? 'Tips v' : 'Tips off'); }
 $('tipsToggle').onclick = () => setTips(S.tips === false);
 $('tipsChk').onchange = e => setTips(e.target.checked);
 syncTips();
@@ -5070,9 +5138,9 @@ $('impSrcBtn').onclick = async () => {
   await impReadCard();
 };
 function impBkSync() {
-  const on = $('impBkOn').checked;
-  $('impBkName').textContent = on ? (imp.bk ? imp.bk.name : 'Not chosen') : (imp.bk ? `Off (last used: ${imp.bk.name})` : 'Off');
-  $('impBkName').classList.toggle('set', on && !!imp.bk);
+  const isOn = $('impBkOn').checked;
+  $('impBkName').textContent = isOn ? (imp.bk ? imp.bk.name : 'Not chosen') : (imp.bk ? `Off (last used: ${imp.bk.name})` : 'Off');
+  $('impBkName').classList.toggle('set', isOn && !!imp.bk);
 }
 async function impPickBackup() {
   let h;
@@ -5190,8 +5258,8 @@ function fovChips() {
   const list = [...fovSel()].sort((a, b) => a - b), box = $('fovChips'); box.innerHTML = '';
   for (const f of FOV_RANGES[fov.range].stops) {
     const b = document.createElement('button'); b.type = 'button'; b.textContent = f + ' mm' + (FOV_TC[f] ? ` (${FOV_TC[f]})` : '');
-    const on = fovSel().has(f); b.setAttribute('aria-pressed', String(on));
-    if (on) { const c = FOV_COLORS[list.indexOf(f) % FOV_COLORS.length]; b.style.background = c; b.style.borderColor = c; }
+    const isOn = fovSel().has(f); b.setAttribute('aria-pressed', String(isOn));
+    if (isOn) { const c = FOV_COLORS[list.indexOf(f) % FOV_COLORS.length]; b.style.background = c; b.style.borderColor = c; }
     b.onclick = () => {
       const sel = fovSel();
       if (sel.has(f)) { if (sel.size > 1) sel.delete(f); }
@@ -5248,7 +5316,7 @@ function drawFov() {
   rc.style.height = rectH + 'px'; rc.width = Math.round(cw * dpr); rc.height = Math.round(rectH * dpr);
   fc.style.height = fanH + 'px'; fc.width = Math.round(cw * dpr); fc.height = Math.round(fanH * dpr);
   const x = rc.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, cw, rectH);
-  const aspect = s.w / s.h, pad = 14, ow = Math.min(cw - pad * 2, (rectH - pad * 2) * aspect), oh = ow / aspect, cx = cw / 2, cy = rectH / 2;
+  const aspect = s.w / s.h, fpad = 14, ow = Math.min(cw - fpad * 2, (rectH - fpad * 2) * aspect), oh = ow / aspect, cx = cw / 2, cy = rectH / 2;
   if (onPhoto && fov.photo.img) {
     const im = fov.photo.img, iw = im.naturalWidth || im.width, ih = im.naturalHeight || im.height, k = Math.max(ow / iw, oh / ih);
     const sw = ow / k, sh = oh / k;
@@ -5352,8 +5420,8 @@ const DOF_B64 = 'PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CjxtZXRhIGN
 let dofHtml = null, dofLoaded = false;
 function dofSource(query) {
   if (!dofHtml) {
-    const bin = atob(DOF_B64), u8 = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    const bytes = atob(DOF_B64), u8 = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) u8[i] = bytes.charCodeAt(i);
     dofHtml = new TextDecoder().decode(u8);
   }
   const pre = '<base target="_blank"><style>#copyLink{display:none}</style><script>window.DOF_QUERY=' + JSON.stringify(query || '') + ';<\/script>';
@@ -5536,8 +5604,20 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.23 beta';
+const VERSION = '0.9.25 beta';
 const RELEASES = [
+  { v: '0.9.25 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'Ratings and edits are protected if the browser\u2019s storage for FledgeView fills up: the rebuildable lists (viewed photos, sharpness scores) are trimmed first, and you\u2019re told if a rating still can\u2019t be saved.',
+      'Clear all now releases every cached image right away.',
+      'A code check and tidy-up: stricter checks pass, leftover styles removed, and folder names are always shown as plain text.',
+    ]],
+  ] },
+  { v: '0.9.24 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'Move picks and rejects now asks what to move: Picks and rejects, Rejects only (keepers stay where they are), or Picks only, with how many photos each would move. Your choice is remembered, and a note explains how Lightroom treats the _rejects folder.',
+    ]],
+  ] },
   { v: '0.9.23 beta', date: 'November 2026', groups: [
     ['Improved', [
       'Sharpness labels on thumbnails now use bands: Best, Sharp (within 90% of the best, as sharp as the eye can tell), a percentage for slightly softer frames, and Soft below 70%. The exact percentage is in the tip and on screen.',
@@ -5817,8 +5897,8 @@ function camKeyOf(it) {
   const m = it.meta, model = String(m.Model || '').trim(), make = String(m.Make || '').trim();
   if (!model) return 'Unknown camera';
   /* Sony stores internal codes (ILCE-1M2); show the names people use (Sony A1 II) */
-  const sm = model.match(/^IL[CM]E-(\d+)([A-Z]*?)(?:M(\d))?$/);
-  if (sm) { const roman = ['', '', 'II', 'III', 'IV', 'V', 'VI'][+sm[3] || 0] || ''; return `Sony ${model.startsWith('ILME') ? 'FX' : 'A'}${sm[1]}${sm[2]}${roman ? ' ' + roman : ''}`; }
+  const sonyM = model.match(/^IL[CM]E-(\d+)([A-Z]*?)(?:M(\d))?$/);
+  if (sonyM) { const roman = ['', '', 'II', 'III', 'IV', 'V', 'VI'][+sonyM[3] || 0] || ''; return `Sony ${model.startsWith('ILME') ? 'FX' : 'A'}${sonyM[1]}${sonyM[2]}${roman ? ' ' + roman : ''}`; }
   return make && !model.toLowerCase().startsWith(make.split(' ')[0].toLowerCase()) && !/^(ILCE|DSC|ILME|NIKON|Canon)/i.test(model) ? `${make.split(' ')[0]} ${model}` : model;
 }
 const typeKeyOf = it => RAW.has(it.ext) ? 'RAW' : (it.ext === 'jpg' || it.ext === 'jpeg') ? 'JPEG' : ['heic', 'heif', 'hif'].includes(it.ext) ? 'HEIF' : it.ext.toUpperCase();
