@@ -165,6 +165,7 @@ html[data-look="clean"] .knob.eexp{background:var(--acc)!important;color:#fff!im
 .btn .ic{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px;margin-right:6px}
 .btn.out{background:#b5d4f4;color:#0c447c;border-color:#85b7eb;font-weight:600}
 .btn.out:hover:not(:disabled){background:#c6def7}
+@media (max-width:1760px){#fullBtn .lbl,#pvBtn .lbl{display:none}#fullBtn .ic,#pvBtn .ic{margin-right:0}}
 @media (max-width:1500px){
   .bar{column-gap:8px}
   .actions{gap:5px}
@@ -588,7 +589,24 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;white-space:no
 .under.framing .upath{display:none!important}
 .th.on{border-color:var(--amber)}
 
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--page);padding:8px 14px;border-radius:6px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:min(560px,90vw);text-align:center;z-index:5}
+body.pview{overflow:hidden}
+body.pview .bezel{position:fixed;inset:0;z-index:60;padding:0;border-radius:0;box-shadow:none;background:#000}
+body.pview .screen{width:100vw!important;height:100vh!important;aspect-ratio:auto;border-radius:0}
+body.pview:not(.pvinfo) .screen .osd{display:none!important}
+body.pview .editnote{display:none!important}
+.pvui{position:fixed;inset:0;z-index:65;pointer-events:none}
+.pvui button{pointer-events:auto}
+.pvnav{position:absolute;top:50%;transform:translateY(-50%);width:56px;height:104px;border:0;border-radius:12px;background:rgba(0,0,0,.35);color:#fff;font-size:48px;line-height:1;cursor:pointer;transition:opacity .3s,background .15s}
+.pvnav:hover{background:rgba(0,0,0,.65)}
+.pvprev{left:16px}.pvnext{right:16px}
+.pvclose{position:absolute;top:16px;right:16px;width:42px;height:42px;border:0;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;font-size:18px;cursor:pointer;transition:opacity .3s}
+.pvclose:hover{background:rgba(0,0,0,.75)}
+.pvhint{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#e8e6e1;font-size:13px;padding:7px 14px;border-radius:7px;white-space:nowrap;transition:opacity .8s}
+.pvhint.gone{opacity:0}
+.pvflash{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.68);color:#fff;font-size:30px;font-weight:600;letter-spacing:2px;padding:14px 26px;border-radius:14px}
+body.pvidle .pvnav,body.pvidle .pvclose{opacity:0}
+body.pvidle .screen{cursor:none}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--page);padding:8px 14px;border-radius:6px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:min(560px,90vw);text-align:center;z-index:70}
 .toast.show{opacity:1}
 dialog{background:var(--panel);color:var(--ink);border:1px solid var(--panel-line);border-radius:10px;width:min(640px,92vw);padding:18px 20px}
 dialog::backdrop{background:rgba(0,0,0,.45)}
@@ -729,6 +747,8 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
     <div class="menu">
       <button class="btn mbtn" aria-haspopup="true" aria-expanded="false">View ▾</button>
       <div class="mpanel" hidden>
+        <button class="mi" id="pvMenu">Photo view (V)</button>
+        <div class="msep"></div>
         <button class="mi check" id="panelBtn" aria-pressed="true">Sidebar</button>
         <div class="msep"></div>
         <div class="mlabel">Appearance</div>
@@ -757,7 +777,8 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
     <button data-size="50">50%</button>
     <button data-size="100">Max</button>
   </div>
-  <button class="btn" id="fullBtn">Full screen</button>
+  <button class="btn" id="pvBtn" title="Photo view: just the photo, filling the screen. Arrows move, Esc returns. (V)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span class="lbl">Photo view</span></button>
+  <button class="btn" id="fullBtn" title="Full screen: hide the browser’s bars"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg><span class="lbl">Full screen</span></button>
   <input type="file" id="fileInput" multiple hidden>
   <input type="file" id="dirInput" webkitdirectory multiple hidden>
 </header>
@@ -1129,6 +1150,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <h3>The camera screen</h3>
         <ul>
           <li>The overlay shows your settings the way your camera does: mode, shutter speed, aperture, exposure compensation, ISO, focal length, and lens. With a teleconverter or APS-C crop mode, it also shows the effective focal length.</li>
+          <li><strong>Photo view</strong> (top right, or <kbd>V</kbd>) shows just the photo, filling the screen. <kbd>←</kbd> <kbd>→</kbd> or the arrows at the edges move between photos, rating keys still work, <kbd>Z</kbd> or a double-click zooms to 100%, and <kbd>I</kbd> shows the photo info. Press <kbd>Esc</kbd> or click ✕ to return, on the photo you were viewing. Edited photos are shown with their edits.</li>
           <li><strong>Zoom</strong> with the scroll wheel or <kbd>+</kbd> <kbd>−</kbd>, in 10% steps. Double-click or press <kbd>Z</kbd> to jump to 100% and back. 100% means one photo pixel per screen pixel.</li>
           <li>On RAW files, an amber <strong>Beyond preview detail</strong> notice appears when you zoom past what the embedded preview can show.</li>
           <li>Under the screen, the gradient and the red, green, and blue bars show the brightness under your cursor, with a “near max” note when a channel is close to clipping.</li>
@@ -1422,6 +1444,14 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
   <div class="keys" id="keyList"></div>
   <div class="end"><button class="btn primary" data-close>Close</button></div>
 </dialog>
+
+<div class="pvui" id="pvUi" hidden>
+  <button class="pvnav pvprev" id="pvPrev" aria-label="Previous photo">‹</button>
+  <button class="pvnav pvnext" id="pvNext" aria-label="Next photo">›</button>
+  <button class="pvclose" id="pvClose" aria-label="Back to FledgeView (Esc)" title="Back to FledgeView (Esc)">✕</button>
+  <div class="pvhint" id="pvHint">← → move · 1–5 P X rate · Z zoom · I info · Esc back</div>
+  <div class="pvflash" id="pvFlash" hidden></div>
+</div>
 
 <script>
 (() => {
@@ -2357,7 +2387,7 @@ async function show(i) {
   i = Math.max(0, Math.min(n - 1, i));
   state.idx = i; state.cmpSide = 0; const tok = ++state.token; const it = state.view[i];
   if (state.show.quad && (i < state.quadBase || i > state.quadBase + 3)) state.quadBase = i;
-  updateStrip(); updateReadout(); refreshCullUi(); markActive(); updateSidePath(); $('bigWarn').hidden = true;
+  updateStrip(); updateReadout(); refreshCullUi(); markActive(); updateSidePath(); if (state.pview) pvSyncEdit(); $('bigWarn').hidden = true;
   $('empty').hidden = true;
   const m = await getMeta(it);
   if (tok !== state.token) return;
@@ -5475,7 +5505,7 @@ $('dofUse').onclick = async () => {
 
 /* ---------- help ---------- */
 const KEYS = [
-  ['← →', 'Previous or next photo'], ['↑ ↓', 'Up or down a row in the grid'], ['Home  End', 'First or last photo'],
+  ['V', 'Photo view: just the photo, filling the screen (Esc returns)'], ['← →', 'Previous or next photo'], ['↑ ↓', 'Up or down a row in the grid'], ['Home  End', 'First or last photo'],
   ['1 – 5', 'Star rating (press again to clear)'], ['0', 'Clear stars'], ['P', 'Pick'], ['X', 'Reject'], ['U', 'Clear flag'],
   ['Z', 'Zoom in or back to fit'], ['+  −', 'Zoom in or out'], ['B', 'Highlight blinkies'], ['E', 'Focus peaking'], ['G', 'Composition guides in Frame mode and the export crop: thirds, golden ratio, diagonals, off'], ['J', 'In Quick finish: show or hide clipping (red highlights, blue blacks)'], ['\\', 'In Quick finish: hold to see the original'],
   ['A', 'Focus point'], ['C', 'Compare with the next frame'], ['Q', '4-up view: click a photo to select it, P picks it and loads the next four, ← → move four at a time'], ['I', 'Change info display'], ['F', 'Full screen'], ['?', 'This list'],
@@ -5517,6 +5547,14 @@ document.addEventListener('keydown', e => {
   }
   if (e.target.closest('input,textarea,select,dialog') || e.ctrlKey || e.metaKey || e.altKey) return;
   const k = e.key, it = cur();
+  if (k === 'v' || k === 'V') { e.preventDefault(); setPhotoView(!state.pview); return; }
+  if (state.pview) {
+    if (k === 'Escape') { e.preventDefault(); setPhotoView(false); return; }
+    if (k === 'i' || k === 'I') { document.body.classList.toggle('pvinfo'); return; }
+    /* only moving, rating and zooming work in Photo view; other modes wait until you return */
+    if (!/^(ArrowLeft|ArrowRight|Home|End|[0-5]|[pPxXuUzZ=+-])$/.test(k)) return;
+    if (/^[0-5pPxXuU]$/.test(k)) { const t0 = rateTarget(); setTimeout(() => pvFlash(t0), 0); }
+  }
   const cols = () => getComputedStyle($('strip')).gridTemplateColumns.split(' ').length || 1;
   if (k === 'ArrowRight') { e.preventDefault(); state.show.quad ? quadStep(1) : show(state.idx + 1); }
   else if (k === 'ArrowLeft') { e.preventDefault(); state.show.quad ? quadStep(-1) : show(state.idx - 1); }
@@ -5587,9 +5625,56 @@ $('fullBtn').onclick = async () => {
   } catch { toast('Full screen is blocked here. Press F11 (or Ctrl+⌘+F on a Mac) instead.'); }
 };
 document.addEventListener('fullscreenchange', () => {
-  $('fullBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen';
+  const fsOn = !!document.fullscreenElement;
+  $('fullBtn').querySelector('.lbl').textContent = fsOn ? 'Exit full screen' : 'Full screen';
+  $('fullBtn').title = fsOn ? 'Exit full screen' : 'Full screen: hide the browser\u2019s bars';
+  if (state.pview && pv.fs && !document.fullscreenElement) { pv.fs = false; setPhotoView(false); return; }
   fitLayout();
+  if (state.pview) requestAnimationFrame(() => { layoutAll(); if (state.editing) renderEditSoon(); });
 });
+/* ---------- Photo view: just the photo, filling the screen; Esc returns to the tool on the same photo ---------- */
+const pv = { fs: false, wasEditing: false, idle: 0, hint: 0 };
+state.pview = false;
+/* edited photos are shown with their edits, through the same rendering as the edit panel */
+function pvSyncEdit() { if (!state.pview) return; const want = !!editOf(cur()); if (want !== !!state.editing) setEditing(want, false); }
+async function setPhotoView(v) {
+  v = !!v && !!cur();
+  if (v === state.pview) return;
+  if (v) {
+    if (state.show.quad) setQuad(false, true);
+    if (state.show.compare) setCompare(false);
+    if (state.framing) setFraming(false);
+    closeMenus();
+    pv.wasEditing = !!state.editing;
+    state.pview = true; document.body.classList.add('pview'); $('pvUi').hidden = false;
+    pvSyncEdit();
+    requestAnimationFrame(() => { layoutAll(); if (state.editing) renderEditSoon(); });
+    if (!document.fullscreenElement) { try { await document.documentElement.requestFullscreen(); pv.fs = true; } catch { pv.fs = false; } }
+    pvWake(); $('pvHint').classList.remove('gone'); clearTimeout(pv.hint); pv.hint = setTimeout(() => $('pvHint').classList.add('gone'), 3500);
+  } else {
+    state.pview = false; document.body.classList.remove('pview', 'pvidle', 'pvinfo'); $('pvUi').hidden = true; $('pvFlash').hidden = true;
+    if (!!state.editing !== pv.wasEditing) setEditing(pv.wasEditing, false);
+    if (pv.fs && document.fullscreenElement) { pv.fs = false; try { await document.exitFullscreen(); } catch {} }
+    pv.fs = false;
+    const t = cur(); if (t && t.el) t.el.scrollIntoView({ block: 'nearest' });
+    requestAnimationFrame(() => { fitLayout(); layoutAll(); if (state.editing) renderEditSoon(); });
+  }
+}
+function pvWake() { document.body.classList.remove('pvidle'); clearTimeout(pv.idle); pv.idle = setTimeout(() => { if (state.pview) document.body.classList.add('pvidle'); }, 2500); }
+document.addEventListener('mousemove', () => { if (state.pview) pvWake(); });
+function pvFlash(t) {
+  if (!state.pview || !t) return;
+  const c = cullOf(t), parts = [];
+  if (c.r) parts.push('\u2605'.repeat(c.r));
+  if (c.f === 1) parts.push('Pick'); else if (c.f === -1) parts.push('Reject');
+  const el = $('pvFlash'); el.textContent = parts.join('  ') || 'Cleared'; el.hidden = false;
+  clearTimeout(el._t); el._t = setTimeout(() => { el.hidden = true; }, 900);
+}
+$('pvBtn').onclick = () => setPhotoView(!state.pview);
+$('pvMenu').onclick = () => { closeMenus(); setPhotoView(true); };
+$('pvClose').onclick = () => setPhotoView(false);
+$('pvPrev').onclick = () => show(state.idx - 1);
+$('pvNext').onclick = () => show(state.idx + 1);
 
 /* ---------- menus ---------- */
 function closeMenus() {
@@ -5617,8 +5702,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.27 beta';
+const VERSION = '0.9.28 beta';
 const RELEASES = [
+  { v: '0.9.28 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Photo view (top right, or press V): just the photo, filling the screen. Move with the arrow keys or the arrows at the edges, rate with 1\u20135, P, and X, zoom with Z or a double-click, and press I for the photo info. Esc returns to FledgeView on the photo you were viewing. Edited photos are shown with their edits.',
+    ]],
+  ] },
   { v: '0.9.27 beta', date: 'November 2026', groups: [
     ['Improved', [
       'Quick finish now opens from a button in the control panel, at the top of the Edit and share section, instead of a tab on the edge of the camera body. The photo gets that space back when the panel is closed.',
