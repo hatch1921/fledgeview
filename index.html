@@ -17,6 +17,8 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="assets/fonts/fonts.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "FledgeView", "url": "https://fledgeview.com/", "applicationCategory": "MultimediaApplication", "operatingSystem": "Windows, macOS (runs in Chrome or Edge)", "description": "Free photo viewer and culler for burst shooters, built by a wildlife photographer. Import your card, cull, make quick edits, and share, right in your browser. Nothing is uploaded.", "image": "https://fledgeview.com/assets/img/og.jpg", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "author": {"@type": "Person", "name": "Frank Hatcher", "url": "https://www.frankhatcher.com"}, "publisher": {"@type": "Organization", "name": "HatchApps LLC", "url": "https://hatchappsllc.com"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is it really free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, every feature, with no account and no trial. If FledgeView saves you time, you can leave a tip on Ko-fi. Tips are optional and nothing is locked."}}, {"@type": "Question", "name": "Are my photos uploaded anywhere?", "acceptedAnswer": {"@type": "Answer", "text": "No. FledgeView runs in your browser and reads photos directly from your computer. There’s no server to send them to. Some browsers (Safari and Firefox) label their folder button “Upload,” but that’s the browser’s wording: your photos never leave your computer."}}, {"@type": "Question", "name": "Can it copy straight from my memory card?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Import copies a card (or any folder) into your main photo folder, sorted by date and lens, or by your own folder pattern. Every copy is checked, photos you’ve already imported are skipped, and nothing on the card is changed or deleted. Import works in Chrome and Edge."}}, {"@type": "Question", "name": "Which browsers does it work in?", "acceptedAnswer": {"@type": "Answer", "text": "Everything works in Chrome and Edge, on Windows and Mac, including Import, moving files, and saving to folders. Safari and Firefox can view, rate, edit, and export, but can’t import or move files."}}, {"@type": "Question", "name": "Does it work with RAW files?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, for viewing and culling: FledgeView shows the preview your camera stores inside each RAW file, and writes ratings to .xmp sidecars for Lightroom. It isn’t a raw developer, so do heavy editing in Lightroom, DxO, or similar. Quick finish works best on JPEGs."}}, {"@type": "Question", "name": "I use Lightroom. Will moving files cause problems?", "acceptedAnswer": {"@type": "Answer", "text": "Import and organize in FledgeView first, then bring the folders into Lightroom, and everything lines up. If photos were already imported, Lightroom marks them as missing after a move; FledgeView explains how to relink them, and Undo puts everything back."}}, {"@type": "Question", "name": "Can I use it offline, or as an app?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. After your first visit, fledgeview.com works without internet, and Chrome or Edge can install it from the address bar. You can also download the single file and open it on your computer."}}, {"@type": "Question", "name": "Does FledgeView delete my rejects?", "acceptedAnswer": {"@type": "Answer", "text": "No. Rejects move into a _rejects folder next to your photos, and you can move just the rejects, just the picks, or both. Once you’re sure, delete that folder yourself in File Explorer or Finder, which sends it to the Recycle Bin or Trash."}}, {"@type": "Question", "name": "Where are my ratings and edits kept?", "acceptedAnswer": {"@type": "Answer", "text": "In your browser on that computer. Clearing your browsing data removes them, so use Write ratings, Move picks and rejects, or exports for a lasting record."}}]}</script>
 <style>
 :root{--bg:#121315;--panel:#1b1c20;--line:#2c2e33;--text:#ecebe7;--muted:#a3a6ab;--amber:#f2b53b;--amber2:#e9a53b;--green:#b6eaa0}
 *{box-sizing:border-box}
@@ -42,6 +44,9 @@ nav a.nl:hover{color:var(--text)}
 .hero p.lead{max-width:760px;margin:18px auto 0;color:#d8d6d0;font-size:20px}
 .ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:26px}
 .fine{color:var(--muted);font-size:15px;margin-top:14px}
+.keys{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;padding:0;margin:22px auto 0;max-width:900px}
+.keys li{display:flex;align-items:center;gap:8px;font-size:16px;color:#e2e0da}
+.keys li::before{content:"";width:18px;height:18px;flex:none;border-radius:50%;background:var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='%23132010' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat}
 .shot{border-radius:14px;border:1px solid var(--line);overflow:hidden;box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
 .herosh{margin:34px auto 0;max-width:1100px}
 section{padding:70px 0}
@@ -99,7 +104,13 @@ footer a:hover{color:var(--text)}
       <a class="btn" href="download/FledgeView.html" download>Download the file</a>
       <a class="btn" id="heroVideo" href="#" target="_blank" rel="noopener" hidden>Watch the walkthrough</a>
     </div>
-    <p class="fine">Free &middot; No account &middot; Your photos stay on your computer &middot; Best in Chrome or Edge</p>
+    <ul class="keys">
+      <li>Free, no subscription</li>
+      <li>Works offline</li>
+      <li>No account</li>
+      <li>Your photos stay on your computer</li>
+    </ul>
+    <p class="fine">Best in Chrome or Edge, on Windows and Mac</p>
     <div class="shot herosh"><img src="assets/img/viewer.jpg" width="1600" height="900" alt="FledgeView showing a hummingbird on a camera-style screen with its settings, the sidebar filtered to one lens with a teleconverter, and bursts sorted sharpest first."></div>
   </header>
 </div>
@@ -113,6 +124,7 @@ footer a:hover{color:var(--text)}
         <p>Choose your card and your main photo folder, and FledgeView copies everything into folders by date and lens, with teleconverter shots in their own subfolder.</p>
         <ul>
           <li>Use a preset, or your own pattern to match the folder system you already have.</li>
+          <li>Optional <strong>backup</strong>: a second, verified copy to another drive at the same time.</li>
           <li>Every copy is checked, photos already imported are skipped, and the card is never changed.</li>
           <li>Then cull the new folders and bring them into Lightroom whenever you like.</li>
         </ul>
@@ -131,7 +143,7 @@ footer a:hover{color:var(--text)}
         <p>FledgeView groups each burst and scores how sharp every frame is, so the keeper stands out.</p>
         <ul>
           <li><strong>4-up and Compare</strong> show frames side by side, zoomed together. Click any frame to pick, reject, or rate it.</li>
-          <li><strong>Auto-pick sharpest</strong> chooses the keeper from every burst for you.</li>
+          <li><strong>Sharpness measured where your camera focused</strong> (on Sony files straight from the camera), so the sharp eye wins, not the busy background. <strong>Auto-pick sharpest</strong> chooses the keeper from every burst.</li>
           <li><strong>Filter by lens, camera, or teleconverter,</strong> and rate with the keyboard: 1 to 5, P to pick, X to reject.</li>
         </ul>
       </div>
@@ -149,6 +161,7 @@ footer a:hover{color:var(--text)}
         <p>A slide-out panel with the adjustments most photos need: exposure, contrast, highlights, shadows, whites and blacks, color, sharpening, and vignette.</p>
         <ul>
           <li>A live histogram, with optional warnings for blown highlights and crushed blacks.</li>
+          <li><strong>Black &amp; white</strong> with classic film filters, from neutral to dramatic red-filter skies.</li>
           <li>Select a series and paste the same edits onto all of it at once.</li>
           <li>Your originals never change. Edits apply when you export.</li>
         </ul>
@@ -215,6 +228,7 @@ footer a:hover{color:var(--text)}
       <details><summary>Does it work with RAW files?</summary><p>Yes, for viewing and culling: FledgeView shows the preview your camera stores inside each RAW file, and writes ratings to .xmp sidecars for Lightroom. It isn&rsquo;t a raw developer, so do heavy editing in Lightroom, DxO, or similar. Quick finish works best on JPEGs.</p></details>
       <details><summary>I use Lightroom. Will moving files cause problems?</summary><p>Import and organize in FledgeView first, then bring the folders into Lightroom, and everything lines up. If photos were already imported, Lightroom marks them as missing after a move; FledgeView explains how to relink them, and Undo puts everything back.</p></details>
       <details><summary>Can I use it offline, or as an app?</summary><p>Yes. After your first visit, fledgeview.com works without internet, and Chrome or Edge can install it from the address bar. You can also download the single file and open it on your computer.</p></details>
+      <details><summary>Does FledgeView delete my rejects?</summary><p>No. Rejects move into a <code>_rejects</code> folder next to your photos, and you can move just the rejects, just the picks, or both. Once you&rsquo;re sure, delete that folder yourself in File Explorer or Finder, which sends it to the Recycle Bin or Trash.</p></details>
       <details><summary>Where are my ratings and edits kept?</summary><p>In your browser on that computer. Clearing your browsing data removes them, so use Write ratings, Move picks and rejects, or exports for a lasting record.</p></details>
     </div>
   </div>
