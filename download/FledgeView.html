@@ -87,15 +87,19 @@ button{font:inherit;color:inherit;cursor:pointer}
 .cbtns .wide{grid-column:1 / -1}
 .frameview{position:absolute;inset:0;z-index:3}
 .editview{position:absolute;inset:0;z-index:3;background:#000}
-.drawer{display:flex;align-items:stretch;align-self:center;gap:8px;margin-left:-8px}
-.drawer .editpanel{width:180px}
+.drawer{display:flex;align-items:flex-start;align-self:start;gap:8px;margin-left:-8px}
+.drawer .dtab{align-self:center}
+.drawer .editpanel{width:180px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
+.efoot{position:sticky;bottom:-12px;align-self:stretch;margin:6px -8px -12px;padding:8px 8px 12px;background:linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.2)),var(--body);border-radius:0 0 14px 14px;box-shadow:0 -8px 12px -8px rgba(0,0,0,.6);display:flex;flex-direction:column;align-items:stretch;gap:6px;z-index:2}
+.efoot .knob.ebtn{width:100%;margin:0}
+html[data-look="clean"] .efoot{background:#232325;border-radius:0}
 .dtab{width:24px;min-height:120px;border:1px solid #afa9ec;border-radius:8px;background:#cecbf6;color:#3c3489;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:6px 0;font-weight:600}
 .dtab:hover{filter:brightness(1.06)}
 .dtab .dlabel{writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--cond);font-size:13px;letter-spacing:.5px}
 .dtab .dchev{font-size:14px;line-height:1}
 .drawer.open .dtab{color:#1b1b1b;background:var(--amber);border-color:var(--amber)}
 .drawer.open .dchev{transform:rotate(180deg)}
-.drawer.overlay.open{position:absolute;right:214px;top:50%;transform:translateY(-50%);z-index:6;margin:0;background:var(--body);padding:8px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.drawer.overlay.open{position:absolute;right:214px;top:12px;transform:none;z-index:6;margin:0;background:var(--body);padding:8px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 .editview canvas{width:100%;height:100%;display:block}
 .editnote{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.65);color:#e8e6e1;font-size:13px;padding:3px 9px;border-radius:4px;pointer-events:none}
 .editbadge{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.65);color:#fff;font-family:var(--cond);font-size:14px;padding:2px 8px;border-radius:4px}
@@ -114,6 +118,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 .knob.ebtn{width:auto;flex:1;height:28px;font-size:12px;padding:0 6px}
 .knob.ebtn.wide{width:100%;margin-top:4px}
 .knob.edone{background:var(--amber);color:#1b1b1b}
+.knob.eexp{background:#b5d4f4;color:#0c447c;font-weight:600}
+html[data-look="clean"] .knob.eexp{background:var(--acc)!important;color:#fff!important}
 #editBtn[aria-pressed="true"]{background:var(--amber);border-color:var(--amber);color:#1b1b1b}
 .enote{font-size:11px;color:var(--lcd-dim);margin:6px 0 0;line-height:1.35}
 .ehist{position:relative;height:64px;background:#0d0d0f;border:1px solid #2c2e33;border-radius:6px;margin:2px 0 2px;overflow:hidden}
@@ -893,7 +899,8 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <button class="knob ebtn wide" id="ePasteSel" title="Paste copied edits onto the selected photos. Ctrl-click or Shift-click thumbnails to select.">Paste to selected</button>
         <button class="knob ebtn wide" id="ePasteAll" title="Paste copied edits onto every photo shown in the sidebar">Paste to all shown</button>
         <p class="enote">Edits are applied when you export, make a gallery, or use Frame mode. Your originals never change.</p>
-        <button class="knob ebtn wide edone" id="eDone">Done</button>
+        <div class="efoot"><button class="knob ebtn wide eexp" id="eExport" title="Export this photo with its edits (or the selected photos, if you’ve selected several)">Export…</button>
+        <button class="knob ebtn wide edone" id="eDone">Done</button></div>
       </div>
     </aside>
     <div class="under" id="under">
@@ -1185,7 +1192,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
           <li>Hold <strong>Before</strong> (or the <kbd>\</kbd> key) to see the original.</li>
           <li><strong>The histogram</strong> at the top updates as you drag, and its corner triangles light up when highlights blow out (right) or blacks get crushed (left), with how much. Tick <strong>Clipping warnings</strong> (or press <kbd>J</kbd>) to also see where on the photo: red for blown highlights, blue for crushed blacks. It’s off by default.</li>
           <li><strong>Copy</strong> and <strong>Paste</strong> move edits between photos. To apply them to a series, select the photos first: <strong>Ctrl-click</strong> (<strong>Cmd-click</strong> on a Mac) thumbnails one by one, <strong>Shift-click</strong> for a range, or <kbd>Ctrl</kbd>+<kbd>A</kbd> for every photo shown. Then click <strong>Paste to selected</strong>. <strong>Paste to all shown</strong> does the whole sidebar at once.</li>
-          <li>Edited photos show an <strong>Edited</strong> mark. Edits are saved in this browser and applied when you export, make a gallery, or use Frame mode. <strong>Your originals never change.</strong></li>
+          <li>Edited photos show an <strong>Edited</strong> mark. Edits are saved in this browser and applied when you export, make a gallery, or use Frame mode. <strong>Your originals never change.</strong> <strong>Export…</strong> at the bottom of the drawer opens Export with this photo (or your selected photos) already chosen.</li>
         </ul>
         <div class="tip">Quick finish works best on finished or straight-from-camera JPEGs. RAW files edit their embedded preview, and blown highlights can’t be brought back from a JPEG; for heavy work, use your raw editor.</div>
       </section>
@@ -4050,9 +4057,10 @@ async function exportOne(it, o) {
   return { blob, ext, w: r.w, h: r.h, canvas: r.canvas, crop: r.crop };
 }
 function webSources() {
-  return { view: state.view, all: state.items, picks: state.items.filter(i => cullOf(i).f === 1), current: cur() ? [cur()] : [], folder: state.webFolder ? state.webFolder.items : [] };
+  return { view: state.view, all: state.items, picks: state.items.filter(i => cullOf(i).f === 1), sel: state.sel ? state.view.filter(i => state.sel.has(i.key)) : [], current: cur() ? [cur()] : [], folder: state.webFolder ? state.webFolder.items : [] };
 }
 const canFolder = () => !!window.showDirectoryPicker && !framed;
+let webSrcOnce = null;
 function webStatus(t, ok = false) { const el = $('webStatus'); el.textContent = t; el.classList.toggle('ok', ok); }
 function resetWebDone() {
   const b = $('webGo');
@@ -4063,6 +4071,9 @@ function fillWebForm() {
   const o = S.web, src = webSources();
   const sel = $('wSrc'); sel.innerHTML = '';
   const opts = [['view', 'Photos shown'], ['all', 'All loaded photos'], ['picks', 'Picks only'], ['current', 'This photo only']];
+  if (src.sel.length) opts.splice(1, 0, ['sel', 'Selected photos']);
+  if (o.src === 'sel' && !src.sel.length) o.src = 'view';
+  if (webSrcOnce && (webSrcOnce !== 'sel' || src.sel.length)) { o.src = webSrcOnce; } webSrcOnce = null;
   if (state.webFolder) opts.unshift(['folder', 'Folder: ' + state.webFolder.name]);
   if (o.src === 'folder' && !state.webFolder) o.src = 'view';
   if (!['1080', '1600', '2000', 'p50', 'p75', 'orig', 'custom'].includes(o.size)) o.size = '2000';
@@ -4893,6 +4904,7 @@ $('ePasteSel').onclick = () => {
 };
 $('editBtn').onclick = () => setEditing(!state.editing);
 $('eDone').onclick = () => setEditing(false);
+$('eExport').onclick = () => { webSrcOnce = state.sel && state.sel.size > 1 ? 'sel' : 'current'; $('webBtn').click(); };
 $('eAuto').onclick = () => { const it = cur(), r = autoEdit(); if (!it || !r) return; const prev = EDITS[it.key]; if (prev && prev.bw) { r.bw = 1; r.bwf = prev.bwf; r.bwt = prev.bwt; r.vib = 0; } setRecipe(it, r); editLoad(); };
 $('eReset').onclick = () => { const it = cur(); if (!it) return; setRecipe(it, null); editLoad(); };
 $('eCopy').onclick = () => { const r = editOf(cur()); if (!r) return toast('This photo has no edits to copy'); editClip = { ...r }; editLoad(); toast('Edits copied'); };
@@ -5557,6 +5569,8 @@ function fitLayout() {
   /* on short windows the control column scrolls inside itself instead of stretching the page */
   const ctl = document.querySelector('.controls'), und = document.querySelector('.under');
   if (ctl) ctl.style.maxHeight = stacked ? '' : Math.max(320, vh - top - 28 - camPad * 2 - (und ? und.offsetHeight + 12 : 48)) + 'px';
+  /* the edit drawer shares the control column's height, so it never stretches the camera body; it scrolls inside itself */
+  $('editPanel').style.maxHeight = stacked ? '' : Math.max(280, vh - top - 28 - camPad * 2 - (und ? und.offsetHeight + 12 : 48)) + 'px';
 }
 function setSize(n) {
   if (![25, 50, 100].includes(n)) n = 100;
@@ -5604,8 +5618,14 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.25 beta';
+const VERSION = '0.9.26 beta';
 const RELEASES = [
+  { v: '0.9.26 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Export\u2026 in the edit drawer, just above Done: it opens Export with this photo chosen, or the selected photos if you\u2019ve selected several, edits included.',
+      'Export has a Selected photos choice whenever photos are selected.',
+    ]],
+  ] },
   { v: '0.9.25 beta', date: 'November 2026', groups: [
     ['Improved', [
       'Ratings and edits are protected if the browser\u2019s storage for FledgeView fills up: the rebuildable lists (viewed photos, sharpness scores) are trimmed first, and you\u2019re told if a rating still can\u2019t be saved.',
