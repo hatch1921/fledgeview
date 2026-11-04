@@ -98,6 +98,9 @@ html[data-look="clean"] .knob.eopen[aria-expanded="true"]{background:var(--acc)!
 .knob.ebtn#eAuto{flex:none;height:32px;padding:0 20px;font-size:14px}
 .esec{font-family:var(--cond);font-size:12px;color:var(--lcd-dim);margin:6px 0 0}
 .esec.etitle{font-size:15px;color:var(--lcd);margin:0 0 6px}
+/* Auto stands out with a thin outline in the look's accent color (blue in Clean, amber in Camera), without competing with Done and Export */
+#eAuto{box-shadow:inset 0 0 0 1.5px var(--amber)!important}
+#eAuto:hover{background:color-mix(in srgb, var(--amber) 16%, transparent)!important}
 .ecropsec{padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,.1)}
 /* the drawer scrolls when its content is tall, so nothing in it shrinks (the histogram used to be squeezed to a sliver while cropping) */
 .editpanel > *{flex-shrink:0}
@@ -6011,8 +6014,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.38 beta';
+const VERSION = '0.9.39 beta';
 const RELEASES = [
+  { v: '0.9.39 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'Quick finish\u2019s Auto button has a thin outline in the accent color, so it\u2019s easier to spot.',
+    ]],
+  ] },
   { v: '0.9.38 beta', date: 'November 2026', groups: [
     ['Improved', [
       'The Crop panel now sits centered beside the control column, instead of hanging from the top.',
