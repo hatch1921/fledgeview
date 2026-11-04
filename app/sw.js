@@ -1,12 +1,14 @@
 /* FledgeView offline support. The app works offline after the first visit.
    When you publish a new version, change CACHE below (it follows the app's version number). */
-const CACHE = 'fledgeview-0.9.45-beta';
+const CACHE = 'fledgeview-0.9.46-beta';
 const ASSETS = [
   "/app/",
   "/app/index.html",
   "/app/manifest.webmanifest",
   "/assets/exifr.umd.js",
   "/assets/jszip.min.js",
+  "/assets/pako_inflate.min.js",
+  "/assets/utif.js",
   "/assets/fonts/fonts.css",
   "/assets/fonts/barlow-latin-400-normal.woff2",
   "/assets/fonts/barlow-latin-500-normal.woff2",

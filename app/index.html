@@ -17,6 +17,8 @@
 <link rel="stylesheet" href="/assets/fonts/fonts.css">
 <script src="/assets/exifr.umd.js"></script>
 <script src="/assets/jszip.min.js"></script>
+<script src="/assets/pako_inflate.min.js"></script>
+<script src="/assets/utif.js"></script>
 <link rel="manifest" href="/app/manifest.webmanifest">
 <meta name="theme-color" content="#16171a">
 <meta name="description" content="FledgeView: free photo culling for burst shooters. Find the sharp frame, sort by lens, finish, and share, right in your browser. Nothing uploaded.">
@@ -1173,6 +1175,48 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.</pre></details>
+  <details class="lic"><summary><strong>UTIF.js</strong> 4.1.0 (the utif2 package), reads TIFF files · MIT License · © 2017 Photopea</summary><pre>MIT License
+
+Copyright (c) 2017 Photopea
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</pre></details>
+  <details class="lic"><summary><strong>pako</strong> 1.0.11, decompresses ZIP-compressed TIFFs · MIT License · © 2014–2017 Vitaly Puzrin and Andrei Tuputcyn</summary><pre>(The MIT License)
+
+Copyright (C) 2014-2017 by Vitaly Puzrin and Andrei Tuputcyn
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.</pre></details>
   <details class="lic"><summary><strong>Barlow</strong> and <strong>Barlow Condensed</strong> fonts · SIL Open Font License 1.1 · © 2017 The Barlow Project Authors</summary><pre>Copyright 2017 The Barlow Project Authors (https://github.com/jpt/barlow)
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
@@ -2111,7 +2155,32 @@ async function rawPreviews(it) {
   list.sort((a, b) => (b.w * b.h) - (a.w * a.h));
   return (it._pv = list);
 }
+/* TIFF: only Safari can show TIFFs itself, and exports from raw converters (NX Studio, OM Workspace, Topaz, FastStone) carry only a
+   small thumbnail, so decode the full image with UTIF.js: 8- or 16-bit, uncompressed, LZW, ZIP or PackBits, strips or tiles */
+const TIF = new Set(['tif', 'tiff']);
+async function decodeTiff(file) {
+  if (typeof UTIF === 'undefined') return null;
+  const buf = await file.arrayBuffer(), ifds = UTIF.decode(buf);
+  let best = null;
+  for (const f of ifds) {
+    const w = f.t256 && f.t256[0], h = f.t257 && f.t257[0], sub = f.t254 ? f.t254[0] : 0;
+    if (!w || !h || (sub & 1)) continue;   // skip reduced-size thumbnail pages
+    if (!best || w * h > best.w * best.h) best = { f, w, h };
+  }
+  if (!best) return null;
+  UTIF.decodeImage(buf, best.f, ifds);
+  const rgba = UTIF.toRGBA8(best.f), W = best.f.width, H = best.f.height;
+  if (!rgba || rgba.length < W * H * 4) return null;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  c.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(rgba.buffer, rgba.byteOffset, W * H * 4), W, H), 0, 0);
+  c.naturalWidth = W; c.naturalHeight = H;   // so the rest of FledgeView can treat it like a loaded image
+  return c;
+}
 async function getPreview(it) {
+  if (TIF.has(it.ext)) {
+    try { return { img: await loadImage(it.file), extracted: false }; } catch {}
+    try { const c = await decodeTiff(it.file); if (c) return { img: c, extracted: true }; } catch {}
+  }
   if (DIRECT.has(it.ext)) {
     try { return { img: await loadImage(it.file), extracted: false }; } catch {}
   } else {
@@ -2122,7 +2191,6 @@ async function getPreview(it) {
     for (const c of embeddedJpegs(u).slice(0, 3)) {
       try { return { img: await loadImage(new Blob([u.subarray(c.s, c.e)], { type: 'image/jpeg' })), extracted: true }; } catch {}
     }
-    if (it.ext === 'tif' || it.ext === 'tiff') { try { return { img: await loadImage(it.file), extracted: false }; } catch {} }
   }
   try {
     const t = await exifr.thumbnail(it.file);
@@ -2393,7 +2461,7 @@ function focalInfo(m) {
    (edited exports and photos with camera data removed often don't record their size) */
 function pixelDims(it, m) {
   let w = m.ExifImageWidth || m.ImageWidth || m.PixelXDimension, h = m.ExifImageHeight || m.ImageHeight || m.PixelYDimension;
-  if (!(w && h) && it.prev && DIRECT.has(it.ext)) { const sw = [5, 6, 7, 8].includes(it.orient); w = sw ? it.prev.h : it.prev.w; h = sw ? it.prev.w : it.prev.h; }
+  if (!(w && h) && it.prev && (DIRECT.has(it.ext) || TIF.has(it.ext))) { const sw = [5, 6, 7, 8].includes(it.orient); w = sw ? it.prev.h : it.prev.w; h = sw ? it.prev.w : it.prev.h; }
   return w && h ? [w, h] : null;
 }
 const fmtMp = (w, h) => { const mp = w * h / 1e6; return mp >= 10 ? String(Math.round(mp)) : mp.toFixed(1); };
@@ -2487,7 +2555,7 @@ function essentialRows(it, m) {
   add('Capture', 'Date taken', fmtDate(m.DateTimeOriginal || m.CreateDate));
   { const dm = pixelDims(it, m); add('Capture', 'Dimensions', dm ? `${dm[0]} × ${dm[1]} (${fmtMp(dm[0], dm[1])} MP)` : ''); }
   add('Capture', 'Focus distance', fmtDist(distOf(m)));
-  if (it.prev) add('Capture', 'Preview shown', `${it.prev.w} × ${it.prev.h}` + (DIRECT.has(it.ext) ? ' (full image)' : ' (embedded JPEG)'));
+  if (it.prev) add('Capture', 'Preview shown', `${it.prev.w} × ${it.prev.h}` + (DIRECT.has(it.ext) || TIF.has(it.ext) ? ' (full image)' : ' (embedded JPEG)'));
   if (on('bursts') && it.burst) add('Capture', 'Burst', `Frame ${it.burst.pos} of ${it.burst.size}`);
   if (on('sharp') && it.sharp != null) {
     const p = sharpPct(it); if (p != null) add('Capture', 'Sharpness in burst', p === 100 ? 'Sharpest frame' : p + '% of best');
@@ -3755,6 +3823,7 @@ function pickScoreJpeg(list) {
 }
 async function smallPreviewImg(it) {
   if (DIRECT.has(it.ext)) { try { return await loadImage(it.file); } catch { return null; } }
+  if (TIF.has(it.ext)) { const p = await getPreview(it).catch(() => null); if (p && Math.max(p.img.naturalWidth, p.img.naturalHeight) >= 1500) return p.img; }
   const pv = await rawPreviews(it);
   if (pv.length) {
     const big = pv.filter(c => Math.max(c.w, c.h) >= 1500), c = big.length ? big[big.length - 1] : pv[0];
@@ -6278,8 +6347,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.45 beta';
+const VERSION = '0.9.46 beta';
 const RELEASES = [
+  { v: '0.9.46 beta', date: 'November 2026', groups: [
+    ['Fixed', [
+      'TIFF files now show at full resolution in Chrome and Edge. FledgeView used to fall back to the small thumbnail inside TIFFs exported from NX Studio, OM Workspace, Topaz, FastStone and others, which looked very blurry. It now decodes the TIFF itself (8- or 16-bit; uncompressed, LZW, ZIP or PackBits), and sharpness scores for TIFFs use the full image too. Thanks to soundbyte for the report.',
+    ]],
+  ] },
   { v: '0.9.45 beta', date: 'November 2026', groups: [
     ['New', [
       'Pick neutral in Adjust (W): click something that should be gray or white, such as a gray card, a white feather, or a cloud, and Temperature and Tint are set to make it neutral. It reads the unedited colors, works zoomed in, and won\u2019t guess from blown-out, very dark, or strongly colored spots.',
