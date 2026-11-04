@@ -86,6 +86,11 @@ html[data-look="clean"] .knob.eopen[aria-expanded="true"]{background:var(--acc)!
 .ephead{display:flex;justify-content:space-between;align-items:center;font-family:var(--cond);font-size:15px;color:var(--lcd);margin-bottom:2px}
 .knob.ebtn#eAuto{flex:none;height:32px;padding:0 20px;font-size:14px}
 .esec{font-family:var(--cond);font-size:12px;color:var(--lcd-dim);margin:6px 0 0}
+.esec.etitle{font-size:15px;color:var(--lcd);margin:0 0 6px}
+.ecropsec{padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,.1)}
+/* the drawer scrolls when its content is tall, so nothing in it shrinks (the histogram used to be squeezed to a sliver while cropping) */
+.editpanel > *{flex-shrink:0}
+.ecropsec:empty{display:none}
 .erow{display:flex;justify-content:space-between;font-family:var(--cond);font-size:12px;color:var(--lcd);margin-top:2px}
 .erow b{font-weight:400;color:var(--lcd-dim);cursor:pointer}
 .editpanel input[type=range]{width:100%;accent-color:var(--amber);height:14px;margin:0}
@@ -914,6 +919,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
     </div>
     <aside class="drawer" id="editDrawer" aria-label="Quick finish">
       <div class="csec editpanel" id="editPanel" hidden aria-label="Quick finish">
+        <div class="ecropsec" id="eCropSec" aria-label="Crop and straighten"></div>
         <div class="ephead"><span>Quick finish</span><button class="knob ebtn" id="eAuto" title="Set a starting point from this photo’s histogram">Auto</button></div>
         <div class="ehist"><canvas id="eHist" width="360" height="120" aria-label="Histogram of the edited photo"></canvas><button class="eclip lo" id="eClipLo" aria-pressed="false" title="Crushed blacks indicator. Click to turn clipping warnings on or off (J)"></button><button class="eclip hi" id="eClipHi" aria-pressed="false" title="Blown highlights indicator. Click to turn clipping warnings on or off (J)"></button><span class="eclipnote" id="eClipNote"></span></div>
         <label class="ewarn" title="Show blown highlights in red and crushed blacks in blue on the photo (J)"><input type="checkbox" id="eWarn"> Clipping warnings</label>
@@ -5050,10 +5056,13 @@ $('editView').addEventListener('mousedown', e => { if (cropMode) e.preventDefaul
 document.addEventListener('keydown', e => { if (cropMode && (e.key === 'Enter' || e.key === 'Escape') && !e.target.closest('input,select,textarea')) { e.preventDefault(); e.stopImmediatePropagation(); setCropMode(false); } }, true);
 function renderEditSoon() { if (!editRaf) editRaf = requestAnimationFrame(() => { editRaf = 0; renderEdit(); }); }
 function buildEditSliders() {
-  const box = $('eSliders'); box.innerHTML = '';
+  /* crop and straighten come first, in their own section above Quick finish: crop, then edit, then export */
+  const cropBox = $('eCropSec'), mainBox = $('eSliders'); cropBox.innerHTML = ''; mainBox.innerHTML = '';
+  let box = cropBox;
   for (const [k, label, mn = -100, mx = 100] of EDIT_UI) {
     if (!label) {
-      const s = document.createElement('div'); s.className = 'esec'; s.textContent = k; box.append(s);
+      if (k === 'Light') box = mainBox;
+      const s = document.createElement('div'); s.className = k === 'Crop and straighten' ? 'esec etitle' : 'esec'; s.textContent = k; box.append(s);
       if (k === 'Crop and straighten') {
         const w = document.createElement('div'); w.className = 'ecrop';
         w.innerHTML = '<div class="ecropbtns"><button class="knob ebtn" id="eCropBtn" aria-pressed="false" title="Drag the corners or the whole box to crop. Click again, or press Enter, when you\u2019re done.">Crop</button><button class="knob ebtn" id="eCropUndo" disabled title="Step back through your crop and straighten changes, one at a time">Undo</button></div>'
@@ -5968,8 +5977,16 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.35 beta';
+const VERSION = '0.9.36 beta';
 const RELEASES = [
+  { v: '0.9.36 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'Crop and straighten now has its own section at the top of the Quick finish panel, with a dividing line below it, and the histogram and Auto sit with the color and tone adjustments they guide. Crop first, then edit, then export.',
+    ]],
+    ['Fixed', [
+      'The Quick finish histogram no longer shrinks to a thin line while cropping.',
+    ]],
+  ] },
   { v: '0.9.35 beta', date: 'November 2026', groups: [
     ['Fixed', [
       'The crop controls fit again: while cropping, the button reads Done (it had wrapped onto two lines beside Undo), and the Aspect menu is back to full width.',
