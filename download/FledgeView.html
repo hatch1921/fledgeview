@@ -94,6 +94,14 @@ button{font:inherit;color:inherit;cursor:pointer}
 .efoot .knob.ebtn{width:100%;margin:0}
 html[data-look="clean"] .efoot{background:#232325;border-radius:0}
 .knob.eopen{display:flex;justify-content:center;align-items:center;gap:8px}
+.eopenrow{display:flex;gap:5px;width:100%}
+.eopenrow .knob.sharebtn{width:auto}
+.eopenrow #cropTab{flex:0 0 auto;padding-left:12px;padding-right:12px}
+.eopenrow #editTab{flex:1 1 0;min-width:0;white-space:nowrap}
+/* the drawer shows one panel at a time: crop tools, or the Quick finish adjustments */
+.editpanel.pcrop > :not(#eCropSec){display:none!important}
+.editpanel.pcrop #eCropSec{border-bottom:0;margin-bottom:0;padding-bottom:4px}
+.editpanel.pedit #eCropSec{display:none}
 .knob.eopen .dchev{font-size:15px;line-height:1;transition:transform .15s}
 .knob.eopen[aria-expanded="true"]{background:var(--amber);color:#1b1b1b}
 .knob.eopen[aria-expanded="true"] .dchev{transform:rotate(180deg)}
@@ -930,7 +938,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
       </div>
       <div class="csec" aria-label="Edit and share">
         <div class="slabel">Edit and share</div>
-        <button class="knob sharebtn eopen" id="editTab" aria-expanded="false" aria-controls="editPanel" title="Quick finish: simple edits in a panel to the right (open or close)"><span>Quick finish</span><span class="dchev" aria-hidden="true">›</span></button>
+        <div class="eopenrow"><button class="knob sharebtn eopen" id="cropTab" aria-expanded="false" aria-controls="editPanel" title="Crop and straighten, in a panel to the right (R)"><span>Crop</span></button><button class="knob sharebtn eopen" id="editTab" aria-expanded="false" aria-controls="editPanel" title="Quick finish: simple edits in a panel to the right (open or close)"><span>Quick finish</span></button></div>
         <button class="knob sharebtn" id="shareGal" title="Make a gallery page to email or post">Web gallery</button>
         <button class="knob sharebtn" id="shareSocial" title="Resize and crop copies for Instagram, Facebook, and the web">Social media</button>
       </div>
@@ -1234,7 +1242,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
       </section>
       <section data-g="Quick finish">
         <h3>Quick finish: simple edits</h3>
-        <p>Click <strong>Quick finish</strong> in the Edit and share section of the control panel (or <strong>Edit</strong> in the top toolbar) to open the Quick finish panel to the right. Your other panels stay put, so you can rate and edit in one pass. Click <strong>Quick finish</strong> again or <strong>Done</strong> to close it; FledgeView remembers whether you left it open.</p>
+        <p>Click <strong>Crop</strong> or <strong>Quick finish</strong> in the Edit and share section of the control panel (or <strong>Edit</strong> in the top toolbar for Quick finish, or press <kbd>R</kbd> for Crop) to open that panel to the right. Crop first, then finish, then share. Your other panels stay put, so you can rate and edit in one pass. Click <strong>Quick finish</strong> again or <strong>Done</strong> to close it; FledgeView remembers whether you left it open.</p>
         <ul>
           <li><strong>Light:</strong> exposure, contrast, highlights, shadows, whites, and blacks. <strong>Color:</strong> temperature (blue to amber) and tint (green to magenta), shown on colored scales, plus vibrance. <strong>Detail and effects:</strong> sharpen and vignette. Double-click a slider to reset it.</li>
           <li><strong>Crop and straighten:</strong> click <strong>Crop</strong>, then drag the corners or the whole box; choose an <strong>Aspect</strong> or Free. <strong>Straighten</strong> levels a tilted horizon, showing a grid while you drag. Click <strong>Done</strong> (or press Enter) to finish. <strong>Undo</strong>, beside Crop, steps back through crop and straighten changes one at a time without touching your other edits. While you crop, the box shows the size you’re cropping to: pixels, megapixels, print size in inches (at 240, 300, or 360 ppi; choose under the readout), and the focal length the crop is equivalent to. <strong>Reach</strong> crops to what a 1.4× or 2× teleconverter would have framed, or to any focal length you type (Custom); <strong>Reach guides</strong> show those framings as dashed boxes you can click. In Export, the <strong>Crop reach</strong> info bar field adds the equivalent focal length on cropped photos. The crop is kept with your other edits, and Export\u2019s social shapes crop from the cropped photo.</li>
@@ -2472,6 +2480,7 @@ async function show(i) {
   if (state.framing) renderFrame();
   if (state.editing) editLoad();
   else if (S.editOpen && !state.pview && !state.framing && !state.show.quad && !state.show.compare) setEditing(true, false);
+  if (state.editing && drawerMode === 'crop' && !cropMode && !state.pview) setCropMode(true);
   preloadNeighbors(tok);
   markActive();
   if (on('sharp') && it.sharp == null && ok) scoreOnly(it).then(() => { paintThumb(it); if (cur() === it) { refreshOsd(); refreshRows(); } });
@@ -5073,7 +5082,7 @@ $('editView').addEventListener('pointerup', () => {
 }, true);
 /* dragging the crop box must not start a text selection across the page */
 $('editView').addEventListener('mousedown', e => { if (cropMode) e.preventDefault(); }, true);
-document.addEventListener('keydown', e => { if (cropMode && (e.key === 'Enter' || e.key === 'Escape') && !e.target.closest('input,select,textarea')) { e.preventDefault(); e.stopImmediatePropagation(); setCropMode(false); } }, true);
+document.addEventListener('keydown', e => { if (cropMode && (e.key === 'Enter' || e.key === 'Escape') && !e.target.closest('input,select,textarea')) { e.preventDefault(); e.stopImmediatePropagation(); if (drawerMode === 'crop') setEditing(false); else setCropMode(false); } }, true);
 function renderEditSoon() { if (!editRaf) editRaf = requestAnimationFrame(() => { editRaf = 0; renderEdit(); }); }
 function buildEditSliders() {
   /* crop and straighten come first, in their own section above Quick finish: crop, then edit, then export */
@@ -5092,7 +5101,7 @@ function buildEditSliders() {
           + '<label class="chk ereachg"><input type="checkbox" id="eReachGuides"> Reach guides</label></div>'
           + '<button class="knob ebtn" id="eCropReset">Reset crop</button><div class="ecropinfo" id="eCropInfo" aria-live="polite"></div><label class="ereachmm" title="Print size depends only on pixels and the ppi you print at; 300 is sharpest, 240 is common and fine for most prints">Print at <select id="eCropPpi"><option value="240">240</option><option value="300">300</option><option value="360">360</option></select> ppi</label></div>';
         box.append(w);
-        $('eCropBtn').onclick = () => setCropMode(!cropMode);
+        $('eCropBtn').onclick = () => { if (drawerMode === 'crop') { if (cropMode) setEditing(false); else setCropMode(true); } else setCropMode(!cropMode); };
         $('eCropUndo').onclick = undoGeom;
         $('eCropPpi').value = String(+S.cropPpi || 300);
         $('eCropPpi').onchange = e => { S.cropPpi = +e.target.value; saveS(); renderEditSoon(); };
@@ -5172,20 +5181,38 @@ function autoEdit() {
   if (med < 0.3) r.sh = 15;
   return r;
 }
+let drawerMode = 'edit';
+function setDrawerMode(m) {
+  drawerMode = m === 'crop' ? 'crop' : 'edit';
+  $('editPanel').classList.toggle('pcrop', drawerMode === 'crop'); $('editPanel').classList.toggle('pedit', drawerMode === 'edit');
+  $('editPanel').setAttribute('aria-label', drawerMode === 'crop' ? 'Crop and straighten' : 'Quick finish');
+  $('cropTab').setAttribute('aria-expanded', String(state.editing && drawerMode === 'crop'));
+  $('editTab').setAttribute('aria-expanded', String(state.editing && drawerMode === 'edit'));
+}
+/* open a panel, or close it if it's the one already open; switching panels commits a crop in progress */
+function openPanel(m) {
+  if (state.editing && drawerMode === m) { setEditing(false); return; }
+  if (m !== 'crop' && cropMode) setCropMode(false);
+  if (!state.editing) { setEditing(true); if (!state.editing) return; }
+  setDrawerMode(m);
+  if (m === 'crop' && !cropMode) setCropMode(true);
+  requestAnimationFrame(fitLayout);
+}
 function setEditing(v, remember = true) {
   if (!v && cropMode) setCropMode(false);
   if (v && !cur()) { if (remember) toast('Open a photo first'); return; }
   state.editing = v; setTog('editBtn', v);
   if (remember) { S.editOpen = v; saveS(); }
   if (v) { if (state.framing) setFraming(false); if (state.show && state.show.compare) setCompare(false); }
-  $('editDrawer').classList.toggle('open', v); $('editTab').setAttribute('aria-expanded', String(v));
+  $('editDrawer').classList.toggle('open', v); setTimeout(() => setDrawerMode(drawerMode), 0);
   $('editPanel').hidden = !v; $('editView').hidden = !v;
   editBeforeOn = false;
   fitLayout();
   if (v) { if (!$('eSliders').children.length) buildEditSliders(); editLoad(); }
   else { editBase = null; layoutAll(); }
 }
-$('editTab').onclick = () => setEditing(!state.editing);
+$('editTab').onclick = () => openPanel('edit');
+$('cropTab').onclick = () => openPanel('crop');
 /* ---------- selecting several thumbnails: Ctrl/Cmd-click toggles, Shift-click selects a range ---------- */
 state.sel = new Set(); state.selAnchor = null;
 function refreshSel() {
@@ -5223,7 +5250,7 @@ $('ePasteSel').onclick = () => {
   list.forEach(it => setRecipe(it, editClip)); editLoad(); refreshSel();
   toast(`Edits pasted to ${list.length} photo${list.length === 1 ? '' : 's'}`);
 };
-$('editBtn').onclick = () => setEditing(!state.editing);
+$('editBtn').onclick = () => openPanel('edit');
 $('eDone').onclick = () => setEditing(false);
 $('eExport').onclick = () => { webSrcOnce = state.sel && state.sel.size > 1 ? 'sel' : 'current'; $('webBtn').click(); };
 $('eAuto').onclick = () => { const it = cur(), r = autoEdit(); if (!it || !r) return; const prev = EDITS[it.key]; if (prev && prev.bw) { r.bw = 1; r.bwf = prev.bwf; r.bwt = prev.bwt; r.vib = 0; } if (prev) { r.rot = prev.rot || 0; r.crop = prev.crop || null; r.cropAr = prev.cropAr || 'orig'; } setRecipe(it, r); editLoad(); };
@@ -5797,7 +5824,7 @@ $('dofUse').onclick = async () => {
 
 /* ---------- help ---------- */
 const KEYS = [
-  ['V', 'Photo view: just the photo, filling the screen (Esc returns)'], ['← →', 'Previous or next photo'], ['↑ ↓', 'Up or down a row in the grid'], ['Home  End', 'First or last photo'],
+  ['V', 'Photo view: just the photo, filling the screen (Esc returns)'], ['R', 'Crop and straighten panel'], ['← →', 'Previous or next photo'], ['↑ ↓', 'Up or down a row in the grid'], ['Home  End', 'First or last photo'],
   ['1 – 5', 'Star rating (press again to clear)'], ['0', 'Clear stars'], ['P', 'Pick'], ['X', 'Reject'], ['U', 'Clear flag'],
   ['Z', 'Zoom in or back to fit'], ['+  −', 'Zoom in or out'], ['B', 'Highlight blinkies'], ['E', 'Focus peaking'], ['G', 'Composition guides in Frame mode and the export crop: thirds, golden ratio, diagonals, off'], ['J', 'In Quick finish: show or hide clipping (red highlights, blue blacks)'], ['\\', 'In Quick finish: hold to see the original'],
   ['A', 'Focus point'], ['C', 'Compare with the next frame'], ['Q', '4-up view: click a photo to select it, P picks it and loads the next four, ← → move four at a time'], ['I', 'Change info display'], ['F', 'Full screen'], ['?', 'This list'],
@@ -5870,6 +5897,7 @@ document.addEventListener('keydown', e => {
   else if ((k === 'e' || k === 'E') && on('peak')) $('tPeak').click();
   else if ((k === 'a' || k === 'A') && on('af')) $('tAf').click();
   else if ((k === 'c' || k === 'C') && on('bursts')) $('tCompare').click();
+  else if (k === 'r' || k === 'R') openPanel('crop');
   else if (on('cull') && it) {
     const t = rateTarget(), adv = !state.show.quad;
     if (/^[0-5]$/.test(k)) { const n = +k; setCull(t, { r: n && cullOf(t).r === n ? 0 : n }, adv); }
@@ -5937,6 +5965,9 @@ async function setPhotoView(v) {
     if (state.show.compare) setCompare(false);
     if (state.framing) setFraming(false);
     closeMenus();
+    if (cropMode) setCropMode(false);
+    if (drawerMode === 'crop' && state.editing) setEditing(false, false);
+    setDrawerMode('edit');
     pv.wasEditing = !!state.editing;
     /* Photo view always opens fitted to the screen; the tool's own zoom comes back on return */
     pv.z = { ...Z }; Z.k = 1; Z.cx = Z.cy = 0.5;
@@ -5997,8 +6028,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.36 beta';
+const VERSION = '0.9.37 beta';
 const RELEASES = [
+  { v: '0.9.37 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'Crop has its own panel: Edit and share now has Crop and Quick finish side by side. Crop opens straight into cropping, with all the crop tools, and Quick finish shows just the adjustments, with more room. Press R for Crop.',
+    ]],
+  ] },
   { v: '0.9.36 beta', date: 'November 2026', groups: [
     ['Improved', [
       'Crop and straighten now has its own section at the top of the Quick finish panel, with a dividing line below it, and the histogram and Auto sit with the color and tone adjustments they guide. Crop first, then edit, then export.',
