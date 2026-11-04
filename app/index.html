@@ -150,6 +150,8 @@ html[data-look="clean"] .knob.eopen[aria-expanded="true"]{background:var(--acc)!
 .knob.ebtn.wide{width:100%;margin-top:4px}
 .knob.edone{background:var(--amber);color:#1b1b1b}
 .knob.eexp{background:#b5d4f4;color:#0c447c;font-weight:600}
+.wout{display:flex;gap:6px;align-items:center;min-width:0}
+.wout select{min-width:0;flex:1}
 .aboutdlg{max-width:640px}
 .abouth{font-size:15px;margin:16px 0 4px}
 details.lic{border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:6px 10px;margin:6px 0}
@@ -1109,6 +1111,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
       </div>
       <div class="wrow"><label for="wSeqStart">Numbering</label><div class="wseq">Start at <input type="number" id="wSeqStart" min="0" max="999999" style="width:84px"> with <select id="wSeqDigits"><option value="2">2 digits</option><option value="3">3 digits</option><option value="4">4 digits</option></select></div></div>
       <p class="wnote" id="wSuffixEx"></p>
+      <div class="wrow" id="wOutRow" hidden><label for="wOut">Save to</label><div class="wout"><select id="wOut"><option value="ask">Ask each time</option><option value="fixed">Always: choose a folder…</option></select><button class="btn" id="wOutPick">Choose folder…</button></div></div>
       <p class="sub" id="wDest"></p>
     </div>
   </div>
@@ -1470,11 +1473,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
       <section data-g="Social media">
         <h3>Social media and export</h3>
         <ol>
-          <li>Click <strong>Social media</strong> in the Share panel (or <strong>Export</strong> in the toolbar) and choose which photos: this photo, your picks, everything shown, or any folder.</li>
+          <li>Click <strong>Social media</strong> in the Share panel (or <strong>Export</strong> in the toolbar) and choose which <strong>Photos</strong>: <strong>This photo only</strong> (first in the list), selected photos, your picks, everything shown, or any folder.</li>
           <li>Pick a <strong>Shape</strong>: the original shape, a platform size (Instagram feed, grid, square, Stories and Reels, landscape, YouTube), or <strong>All platforms</strong> for one copy in every shape.</li>
           <li>For social shapes, the crop starts on your subject. Drag the preview to reposition, use Crop zoom, and step through photos with ◀ ▶. Press <kbd>S</kbd> to skip a photo, and <kbd>G</kbd> for composition guides.</li>
           <li>Turn on the <strong>Info bar</strong> to add a slim strip with your camera settings and your text under each photo.</li>
-          <li>Set the file names, then click <strong>Export</strong>.</li>
+          <li>Set the file names, choose where to save (<strong>Save to</strong>: ask each time, or always a folder you pick once with <strong>Choose folder…</strong>), then click the Export button, which says how many photos it will export. Exporting one photo saves a single file; several are saved into the folder, or as a ZIP where folders aren’t available.</li>
         </ol>
         <ul>
           <li><strong>Presets</strong> at the top of the Export window save your settings by name (shape, size, info bar, metadata, file names). Pick one to fill everything in; change anything and it shows <em>(modified)</em> with <strong>Save</strong> to update it. Use the <strong>⋯</strong> menu to save a new preset, rename, delete, or export and import <code>.fvpreset</code> files to share. Presets never include which photos or their crops.</li>
@@ -1734,7 +1737,7 @@ const FEATURES = [
   ['stats', 'Folder stats', 'Charts of the focal lengths, ISOs, shutter speeds, and lenses you use.'],
   ['web', 'Export for web', 'Resizes finished photos for the web, with an optional info bar under each one.'],
 ];
-const WEB_DEF = { src: 'view', size: '2000', custom: 2000, fmt: 'jpeg', q: 85, sharp: '0.35', bar: true, fields: { camera: true, lens: true, focal: true, reach: true, shutter: true, aperture: true, iso: true, date: false, dist: false }, text: '', color: 'dark', tsize: 'm', meta: 'none', shape: 'orig', framed: false, grid: true, suffix: '_web', pattern: '{name}_web', seqStart: 1, seqDigits: '3', allShapes: { '4x5': true, '3x4': true, '1x1': true, '9x16': true, '191x1': true, '16x9': true }, allBar: { '4x5': false, '3x4': false, '1x1': false, '9x16': false, '191x1': true, '16x9': true }, allFolders: true, allCur: '4x5' };
+const WEB_DEF = { src: 'current', size: '2000', custom: 2000, fmt: 'jpeg', q: 85, sharp: '0.35', bar: true, fields: { camera: true, lens: true, focal: true, reach: true, shutter: true, aperture: true, iso: true, date: false, dist: false }, text: '', color: 'dark', tsize: 'm', meta: 'none', shape: 'orig', framed: false, grid: true, suffix: '_web', pattern: '{name}_web', seqStart: 1, seqDigits: '3', allShapes: { '4x5': true, '3x4': true, '1x1': true, '9x16': true, '191x1': true, '16x9': true }, allBar: { '4x5': false, '3x4': false, '1x1': false, '9x16': false, '191x1': true, '16x9': true }, allFolders: true, allCur: '4x5' };
 const DEF = { features: { cull: true, bursts: true, sharp: true, peak: true, blink: true, af: true, stats: true, web: true }, burstGap: 0.5, advance: false, peakPct: 8, size: 100, web: JSON.parse(JSON.stringify(WEB_DEF)), autoPct: 90, autoRej: false, autoKeep: true };
 let S = DEF;
 try {
@@ -3040,6 +3043,7 @@ async function pumpThumbs() {
       const t = await exifr.thumbnail(it.file);
       if (t && t.length && await thumbFits(it, t)) it.thumb = URL.createObjectURL(new Blob([t], { type: 'image/jpeg' }));
     } catch {}
+    if (!it.thumb && !DIRECT.has(it.ext)) { try { const b = await rawThumb(it); if (b) it.thumb = URL.createObjectURL(b); } catch {} }
     if (!it.thumb && ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif'].includes(it.ext)) {
       try {
         const bm = await createImageBitmap(it.file, { resizeWidth: 320, resizeQuality: 'medium' });
@@ -3052,6 +3056,27 @@ async function pumpThumbs() {
     paintThumb(it);
   }
   thumbBusy--; pumpThumbs();
+}
+/* Raw files keep their small thumbnail in different places (Olympus inside the maker data, some Nikons elsewhere), and many
+   TIFFs have none, so when the standard slot is empty: use the smallest embedded preview that's still sharp at thumbnail size,
+   or for a TIFF, decode it, one at a time, since large 16-bit TIFFs use a lot of memory */
+let tiffThumbChain = Promise.resolve();
+async function shrinkToBlob(src) {
+  const bm = await createImageBitmap(src, { resizeWidth: 320, resizeQuality: 'medium' });
+  const c = document.createElement('canvas'); c.width = bm.width; c.height = bm.height; c.getContext('2d').drawImage(bm, 0, 0); bm.close?.();
+  return new Promise(res => c.toBlob(res, 'image/jpeg', 0.82));
+}
+async function rawThumb(it) {
+  if (!TIF.has(it.ext)) {
+    const pv = await rawPreviews(it).catch(() => []);
+    const ok = pv.filter(c => Math.max(c.w || 0, c.h || 0) >= 300).sort((a, b) => Math.max(a.w, a.h) - Math.max(b.w, b.h));
+    const c = ok[0] || pv[pv.length - 1];
+    if (c) { try { return await shrinkToBlob(it.file.slice(c.off, c.off + c.len, 'image/jpeg')); } catch {} }
+  }
+  if (!TIF.has(it.ext)) return null;
+  const run = async () => { const p = await getPreview(it).catch(() => null); return p ? shrinkToBlob(p.img) : null; };
+  const job = tiffThumbChain.then(run, run); tiffThumbChain = job.catch(() => null);
+  return job;
 }
 /* An embedded thumbnail can be stale: an edited or cropped export may still carry the original photo's
    thumbnail. Only use it when its shape matches the photo itself. */
@@ -4405,16 +4430,39 @@ function webSources() {
 }
 const canFolder = () => !!window.showDirectoryPicker && !framed;
 let webSrcOnce = null;
+/* Save to: a folder FledgeView remembers, like Import's main folder, so exports go straight there; or ask each time */
+let webOutDir = null, webOutLoaded = false;
+async function loadWebOut() { if (webOutLoaded) return; webOutLoaded = true; try { webOutDir = await idbKV.get('exportDest') || null; } catch {} syncWebOut(); }
+function syncWebOut() {
+  const row = $('wOutRow'); if (!row) return;
+  row.hidden = !canFolder();
+  if (!canFolder()) { $('wDest').textContent = 'Exports download as one ZIP file, or as a single image when you export one photo.'; return; }
+  const fixed = S.webOut === 'fixed' && !!webOutDir;
+  $('wOut').options[1].textContent = webOutDir ? 'Always: ' + webOutDir.name : 'Always: choose a folder\u2026';
+  $('wOut').value = fixed ? 'fixed' : 'ask';
+  $('wDest').textContent = fixed ? `Files are saved straight into ${webOutDir.name}. Change it with Choose folder.` : 'When you export, you\u2019ll pick a folder and the files are saved straight into it.';
+}
+async function pickWebOut() {
+  try { const h = await window.showDirectoryPicker({ mode: 'readwrite', id: 'fv-export' }); webOutDir = h; idbKV.set('exportDest', h); S.webOut = 'fixed'; saveS(); }
+  catch (e) { if (e.name !== 'AbortError') toast('That folder can\u2019t be used. Try another.'); }
+  syncWebOut();
+}
 function webStatus(t, ok = false) { const el = $('webStatus'); el.textContent = t; el.classList.toggle('ok', ok); }
 function resetWebDone() {
   const b = $('webGo');
   if (!b.classList.contains('done')) return;
-  b.classList.remove('done'); b.textContent = 'Export'; webStatus('');
+  b.classList.remove('done'); webStatus(''); webGoLabel();
+}
+/* the button says exactly what will happen: Export 1 photo, Export 48 photos */
+function webGoLabel() {
+  const b = $('webGo'); if (webBusy || b.classList.contains('done')) return;
+  const n = (webSources()[$('wSrc').value] || []).length;
+  b.textContent = n === 1 ? 'Export 1 photo' : `Export ${n} photos`;
 }
 function fillWebForm() {
   const o = S.web, src = webSources();
   const sel = $('wSrc'); sel.innerHTML = '';
-  const opts = [['view', 'Photos shown'], ['all', 'All loaded photos'], ['picks', 'Picks only'], ['current', 'This photo only']];
+  const opts = [['current', 'This photo only' + (cur() ? ': ' + cur().name : '')], ['view', 'Photos shown'], ['all', 'All loaded photos'], ['picks', 'Picks only']];
   if (src.sel.length) opts.splice(1, 0, ['sel', 'Selected photos']);
   if (o.src === 'sel' && !src.sel.length) o.src = 'view';
   if (webSrcOnce && (webSrcOnce !== 'sel' || src.sel.length)) { o.src = webSrcOnce; } webSrcOnce = null;
@@ -4426,6 +4474,7 @@ function fillWebForm() {
     const op = document.createElement('option'); op.value = v; op.textContent = `${label} (${src[v].length})`; sel.append(op);
   }
   sel.value = o.src;
+  webGoLabel(); syncWebOut();
   $('wShape').value = isAll(o) ? 'all' : (SHAPES[o.shape] ? o.shape : 'orig');
   o.allShapes = { ...WEB_DEF.allShapes, ...(o.allShapes || {}) }; o.allBar = { ...WEB_DEF.allBar, ...(o.allBar || {}) };
   const ar = $('wAllRows');
@@ -4456,9 +4505,7 @@ function fillWebForm() {
   $('wText').value = o.text; $('wColor').value = o.color; $('wTsize').value = o.tsize;
   $('wMeta').value = o.meta; $('wPattern').value = o.pattern; $('wSeqStart').value = o.seqStart; $('wSeqDigits').value = o.seqDigits;
   syncWebUi();
-  $('wDest').textContent = canFolder()
-    ? 'When you export, you’ll pick a folder and the files are saved straight into it.'
-    : 'Exports download as one ZIP file, or as a single image when you export one photo.';
+  syncWebOut();
 }
 function readWebForm() {
   resetWebDone();
@@ -4805,7 +4852,7 @@ $('webPrev').addEventListener('pointercancel', endCropDrag);
 $('wform').addEventListener('input', () => { readWebForm(); schedulePreview(); });
 $('wform').addEventListener('change', () => { readWebForm(); schedulePreview(); });
 $('wBar').addEventListener('change', () => { readWebForm(); schedulePreview(); });
-$('webBtn').onclick = () => { fillWebForm(); resetWebDone(); webStatus(''); { const l = webList(), i = l.indexOf(cur()); webIdx = i >= 0 ? i : 0; } resumeSnap = webLast ? { ...webLast } : null; checkResume(); $('webDlg').showModal(); schedulePreview(); };
+$('webBtn').onclick = () => { loadWebOut(); fillWebForm(); resetWebDone(); webStatus(''); { const l = webList(), i = l.indexOf(cur()); webIdx = i >= 0 ? i : 0; } resumeSnap = webLast ? { ...webLast } : null; checkResume(); $('webDlg').showModal(); schedulePreview(); };
 function setWebFolder(name, files) {
   const list = files.map(en => { const f = en.file || en; return { file: f, name: f.name, ext: extOf(f.name), key: keyOf(f), meta: null, metaP: null, orient: 1, cache: null, af: undefined, burst: null }; })
     .filter(i => SUPPORTED.has(i.ext))
@@ -4849,6 +4896,9 @@ async function saveFile(name, blob) {
   return 'failed';
 }
 let webBusy = false;
+$('wOutPick').onclick = pickWebOut;
+$('wOut').onchange = e => { if (e.target.value === 'fixed' && !webOutDir) { pickWebOut(); return; } S.webOut = e.target.value; saveS(); syncWebOut(); };
+$('wSrc').addEventListener('change', () => { resetWebDone(); webGoLabel(); });
 $('webGo').onclick = async () => {
   if (webBusy || $('webGo').classList.contains('done')) return;
   readWebForm();
@@ -4862,8 +4912,13 @@ $('webGo').onclick = async () => {
   const useSub = isAll(o) && o.allFolders !== false && list.length > 1;
   let dir = null;
   if (canFolder()) {
-    try { dir = await window.showDirectoryPicker({ mode: 'readwrite', id: 'chimp-web' }); }
-    catch (e) { if (e.name === 'AbortError') return; dir = null; }
+    if (S.webOut === 'fixed' && webOutDir) {
+      try { if ((await webOutDir.queryPermission({ mode: 'readwrite' })) === 'granted' || (await webOutDir.requestPermission({ mode: 'readwrite' })) === 'granted') dir = webOutDir; } catch {}
+    }
+    if (!dir) {
+      try { dir = await window.showDirectoryPicker({ mode: 'readwrite', id: 'chimp-web' }); }
+      catch (e) { if (e.name === 'AbortError') return; dir = null; }
+    }
   }
   webBusy = true; $('webGo').disabled = true; $('webGo').classList.remove('done'); $('webGo').textContent = 'Exporting…';
   const used = new Set(), files = [], subs = new Map();
@@ -4911,7 +4966,7 @@ $('webGo').onclick = async () => {
   webBusy = false; $('webGo').disabled = false;
   const allGood = ok > 0 && !fail && !note;
   if (allGood) { webLast = null; resumeSnap = null; $('wResume').hidden = true; saveCrops(); tipNudge(); }
-  $('webGo').textContent = allGood ? '✓ Exported' : 'Export';
+  if (allGood) $('webGo').textContent = '\u2713 Exported'; else webGoLabel();
   $('webGo').classList.toggle('done', allGood);
   webStatus((allGood ? '✓ ' : '') + (isAll(o) ? `Exported ${ok} file${ok === 1 ? '' : 's'} (${list.length} photo${list.length === 1 ? '' : 's'} × ${shapes.length} shape${shapes.length === 1 ? '' : 's'})` + (useSub ? ', in a folder for each shape' : '') : `Exported ${ok} photo${ok === 1 ? '' : 's'}`) + (dir ? ' to the folder you picked' : '') + '.' + (nSkipped ? ` Skipped ${nSkipped}.` : '') + (fail ? ` ${fail} couldn’t be exported.` : '') + note + (allGood ? ' Change any setting to export again.' : ''), allGood);
 };
@@ -6347,8 +6402,19 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.46 beta';
+const VERSION = '0.9.47 beta';
 const RELEASES = [
+  { v: '0.9.47 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Export has a Save to choice: pick a folder once with Choose folder\u2026, and exports go straight there every time (FledgeView remembers it, like Import\u2019s main folder). Or keep Ask each time.',
+    ]],
+    ['Improved', [
+      'Exporting one photo is easier to find: This photo only is now first in the Photos list, with the photo\u2019s name, and the button says exactly what will happen, such as Export 1 photo or Export 48 photos. A single photo is saved as one file, not a ZIP.',
+    ]],
+    ['Fixed', [
+      'Thumbnails now appear for raw files and TIFFs that don\u2019t keep a thumbnail in the usual place, such as many Olympus ORF, some Nikon NEF, and TIFFs from raw converters. Before, they showed only the file type until you viewed the photo. Thanks to soundbyte for the report.',
+    ]],
+  ] },
   { v: '0.9.46 beta', date: 'November 2026', groups: [
     ['Fixed', [
       'TIFF files now show at full resolution in Chrome and Edge. FledgeView used to fall back to the small thumbnail inside TIFFs exported from NX Studio, OM Workspace, Topaz, FastStone and others, which looked very blurry. It now decodes the TIFF itself (8- or 16-bit; uncompressed, LZW, ZIP or PackBits), and sharpness scores for TIFFs use the full image too. Thanks to soundbyte for the report.',
