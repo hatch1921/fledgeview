@@ -802,7 +802,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
       <span class="tsize-ico" aria-hidden="true" style="font-size:18px">■</span>
       <button class="btn collapse" id="panelHide" aria-label="Hide sidebar" title="Hide sidebar">‹</button>
     </div>
-    <div class="side-sort"><label class="tl" for="sortSel">Sort</label><select id="sortSel"><option value="name">File name</option><option value="time">Capture time</option><option value="burst">Sharpest first in each burst</option><option value="sharp">Sharpest first (whole folder)</option><option value="rating">Rating (best first)</option></select></div>
+    <div class="side-sort"><label class="tl" for="sortSel">Sort</label><select id="sortSel"><option value="name">File name</option><option value="time">Capture time – Oldest</option><option value="timeNew">Capture time – Newest</option><option value="burst">Sharpest first in each burst</option><option value="sharp">Sharpest first (whole folder)</option><option value="rating">Rating (best first)</option></select></div>
     <div class="side-filter" id="sideFilter" hidden><label class="tl" for="fLens">Filter</label><button class="btn fclear" id="fClear" hidden title="Show photos from every lens, camera, and file type">Clear</button><select id="fLens" title="Show only photos taken with one lens"></select><select id="fCam" hidden title="Show only photos from one camera"></select><select id="fType" hidden title="Show only one kind of file"></select></div>
     <nav class="strip" id="strip" aria-label="Loaded photos"></nav>
     <section class="info" id="infoSec">
@@ -1316,7 +1316,8 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
   <p class="sub">You can change this anytime with Sort, above the thumbnails.</p>
   <div class="sortopts" id="sortOpts">
     <label><input type="radio" name="sortPick" value="name"><strong>File name</strong><span>The order your camera numbered them.</span></label>
-    <label><input type="radio" name="sortPick" value="time"><strong>Capture time</strong><span>The order they were shot, even across cameras or cards.</span></label>
+    <label><input type="radio" name="sortPick" value="time"><strong>Capture time – Oldest</strong><span>The order they were shot, oldest first, even across cameras or cards.</span></label>
+    <label><input type="radio" name="sortPick" value="timeNew"><strong>Capture time – Newest</strong><span>Most recent shots first.</span></label>
     <label><input type="radio" name="sortPick" value="burst"><strong>Sharpest first in each burst</strong><span>Shooting order, but the sharpest frame of every burst comes first. Recommended for bursts.</span></label>
     <label><input type="radio" name="sortPick" value="sharp"><strong>Sharpest first (whole folder)</strong><span>A rough ranking across all photos. Detailed or noisy scenes tend to rank higher than smooth ones.</span></label>
     <label><input type="radio" name="sortPick" value="rating"><strong>Rating</strong><span>Picks and higher star ratings first.</span></label>
@@ -5880,8 +5881,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.31 beta';
+const VERSION = '0.9.32 beta';
 const RELEASES = [
+  { v: '0.9.32 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'Sort by Capture time \u2013 Newest, as well as Capture time \u2013 Oldest. Photos without a capture time go last either way.',
+    ]],
+  ] },
   { v: '0.9.31 beta', date: 'November 2026', groups: [
     ['Improved', [
       'While you crop, the box shows the size you\u2019re cropping to, updating as you drag: pixels, megapixels, and print size in inches at 300 ppi. The same line appears in the drawer under Aspect.',
@@ -6154,9 +6160,10 @@ function sortView(list) {
   if (mode === 'name') return list;
   const ord = new Map(state.items.map((it, i) => [it, i]));
   const byOrd = (a, b) => ord.get(a) - ord.get(b);
-  if (mode === 'time') {
-    const t = it => it._t ?? timeOf(it.meta) ?? Infinity;
-    return list.slice().sort((a, b) => (t(a) - t(b)) || byOrd(a, b));
+  if (mode === 'time' || mode === 'timeNew') {
+    /* photos without a capture time go last either way */
+    const dir = mode === 'timeNew' ? -1 : 1, t = it => it._t ?? timeOf(it.meta);
+    return list.slice().sort((a, b) => { const ta = t(a), tb = t(b); if (ta == null || tb == null) return (ta == null) - (tb == null) || byOrd(a, b); return dir * (ta - tb) || dir * byOrd(a, b); });
   }
   if (mode === 'rating') {
     const sc = it => { const c = cullOf(it); return (c.f === 1 ? 10 : 0) + (c.r || 0) - (c.f === -1 ? 20 : 0); };
