@@ -100,6 +100,9 @@ html[data-look="clean"] .efoot{background:#232325;border-radius:0}
 .eopenrow #editTab{flex:1 1 0;min-width:0;white-space:nowrap}
 /* the drawer shows one panel at a time: crop tools, or the Quick finish adjustments */
 .editpanel.pcrop > :not(#eCropSec){display:none!important}
+/* the Crop panel is short, so it sits centered beside the control column instead of hanging from the top */
+.drawer.open:has(.editpanel.pcrop){align-self:center}
+.drawer.overlay.open:has(.editpanel.pcrop){top:50%;transform:translateY(-50%)}
 .editpanel.pcrop #eCropSec{border-bottom:0;margin-bottom:0;padding-bottom:4px}
 .editpanel.pedit #eCropSec{display:none}
 .knob.eopen .dchev{font-size:15px;line-height:1;transition:transform .15s}
@@ -6028,8 +6031,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.37 beta';
+const VERSION = '0.9.38 beta';
 const RELEASES = [
+  { v: '0.9.38 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'The Crop panel now sits centered beside the control column, instead of hanging from the top.',
+    ]],
+  ] },
   { v: '0.9.37 beta', date: 'November 2026', groups: [
     ['Improved', [
       'Crop has its own panel: Edit and share now has Crop and Quick finish side by side. Crop opens straight into cropping, with all the crop tools, and Quick finish shows just the adjustments, with more room. Press R for Crop.',
