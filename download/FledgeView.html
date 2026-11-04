@@ -1814,8 +1814,10 @@ html[data-look="clean"] .knob.eopen[aria-expanded="true"]{background:var(--acc)!
 .erow{display:flex;justify-content:space-between;font-family:var(--cond);font-size:12px;color:var(--lcd);margin-top:2px}
 .erow b{font-weight:400;color:var(--lcd-dim);cursor:pointer}
 .evw{display:inline-flex;align-items:center;gap:4px}
-.erst{all:unset;cursor:pointer;font-size:12px;line-height:1;width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;color:var(--amber);opacity:.85}
-.erst:hover,.erst:focus-visible{opacity:1;background:color-mix(in srgb, var(--amber) 18%, transparent)}
+.erst{all:unset;cursor:pointer;font-size:13px;font-weight:700;line-height:1;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;color:var(--amber)}
+/* a changed slider's value takes the accent color, so active adjustments stand out down the panel */
+.erow b.chg{color:var(--amber);font-weight:600}
+.erst:hover,.erst:focus-visible{background:color-mix(in srgb, var(--amber) 22%, transparent)}
 .erst[hidden]{display:none}
 .editpanel input[type=range]{width:100%;accent-color:var(--amber);height:14px;margin:0}
 .editpanel input.escale{-webkit-appearance:none;appearance:none;height:8px;border-radius:4px;background:var(--scale);margin:4px 0 3px}
@@ -7187,13 +7189,13 @@ function setEdit(k, val) {
   const it = cur(); if (!it) return;
   const r = EDITS[it.key] || blankEdit(); r[k] = Math.round(val);
   if (hasEdit(r)) EDITS[it.key] = r; else delete EDITS[it.key];
-  $('ev_' + k).textContent = editVal(k, Math.round(val)); $('er_' + k).hidden = !Math.round(val);
+  $('ev_' + k).textContent = editVal(k, Math.round(val)); $('er_' + k).hidden = !Math.round(val); $('ev_' + k).classList.toggle('chg', !!Math.round(val));
   if (k === 'rot') { clearTimeout(straightening); straightening = setTimeout(() => { straightening = 0; renderEditSoon(); }, 900); }
   saveEdits(); paintThumb(it); renderEditSoon();
 }
 function editLoad() {
   const r = (cur() && EDITS[cur().key]) || blankEdit();
-  for (const k of EDIT_KEYS) { const v = r[k] || 0; $('e_' + k).value = v; $('ev_' + k).textContent = editVal(k, v); $('er_' + k).hidden = !v; }
+  for (const k of EDIT_KEYS) { const v = r[k] || 0; $('e_' + k).value = v; $('ev_' + k).textContent = editVal(k, v); $('er_' + k).hidden = !v; $('ev_' + k).classList.toggle('chg', !!v); }
   $('eCropBtn').classList.toggle('has', !!r.crop); syncUndo();
   const bw = !!r.bw;
   $('eBw').checked = bw; $('eBwOpts').hidden = !bw; $('eBwF').value = r.bwf || 'orange'; $('eBwT').value = r.bwt || 'none';
@@ -8083,8 +8085,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.48 beta';
+const VERSION = '0.9.49 beta';
 const RELEASES = [
+  { v: '0.9.49 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'Changed sliders stand out more: their values are shown in the accent color, and the \u21ba reset buttons are brighter.',
+    ]],
+  ] },
   { v: '0.9.48 beta', date: 'November 2026', groups: [
     ['Improved', [
       'Each slider you\u2019ve changed in Adjust (and Straighten in Crop) shows a small \u21ba button beside its value: click it to reset just that adjustment. It also shows at a glance which adjustments are active. Double-clicking a slider or its number still resets it too.',
