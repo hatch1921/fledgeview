@@ -1813,6 +1813,10 @@ html[data-look="clean"] .knob.eopen[aria-expanded="true"]{background:var(--acc)!
 .ecropsec:empty{display:none}
 .erow{display:flex;justify-content:space-between;font-family:var(--cond);font-size:12px;color:var(--lcd);margin-top:2px}
 .erow b{font-weight:400;color:var(--lcd-dim);cursor:pointer}
+.evw{display:inline-flex;align-items:center;gap:4px}
+.erst{all:unset;cursor:pointer;font-size:12px;line-height:1;width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;color:var(--amber);opacity:.85}
+.erst:hover,.erst:focus-visible{opacity:1;background:color-mix(in srgb, var(--amber) 18%, transparent)}
+.erst[hidden]{display:none}
 .editpanel input[type=range]{width:100%;accent-color:var(--amber);height:14px;margin:0}
 .editpanel input.escale{-webkit-appearance:none;appearance:none;height:8px;border-radius:4px;background:var(--scale);margin:4px 0 3px}
 .editpanel input.escale::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#f4f2ee;border:2px solid #2a2b2f;box-shadow:0 1px 2px rgba(0,0,0,.5);cursor:pointer}
@@ -3133,6 +3137,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
           <li><strong>Crop and straighten:</strong> click <strong>Crop</strong>, then drag the corners or the whole box; choose an <strong>Aspect</strong> or Free. <strong>Straighten</strong> levels a tilted horizon, showing a grid while you drag. Click <strong>Done</strong> (or press Enter) to finish. <strong>Undo</strong>, beside Crop, steps back through crop and straighten changes one at a time without touching your other edits. While you crop, the box shows the size you’re cropping to: pixels, megapixels, print size in inches (at 240, 300, or 360 ppi; choose under the readout), and the focal length the crop is equivalent to. <strong>Reach</strong> crops to what a 1.4× or 2× teleconverter would have framed, or to any focal length you type (Custom); <strong>Reach guides</strong> show those framings as dashed boxes you can click. In Export, the <strong>Crop reach</strong> info bar field adds the equivalent focal length on cropped photos. The crop is kept with your other edits, and Export\u2019s social shapes crop from the cropped photo.</li>
           <li><strong>Saturation</strong> boosts or calms every color evenly, while <strong>Vibrance</strong> favors muted colors. <strong>Clarity</strong> adds contrast to mid-size detail, such as feathers and fur, without sharpening smooth backgrounds.</li>
           <li><strong>Pick neutral</strong> (<kbd>W</kbd>), at the top of Color: click it, then click something that should be neutral gray or white, such as a gray card, a white feather, or a cloud. Temperature and Tint are set so that spot becomes neutral, which corrects a color cast; for the most accurate skin tones, photograph a gray card in the same light and pick it. Zoom in first to pick a small spot.</li>
+          <li><strong>Reset one adjustment:</strong> a changed slider shows a small <strong>↺</strong> beside its value; click it to reset just that slider (or double-click the slider or its number). The ↺ also shows at a glance which adjustments are active.</li>
           <li><strong>Black &amp; white:</strong> tick it in the Color section, then choose a <strong>Filter</strong> to control how colors turn into grays (Orange darkens skies and is a good all-rounder; Red is dramatic; Green lightens foliage) and an optional warm or cool <strong>Tone</strong>. Temperature, tint, and vibrance step aside while it’s on; the Light sliders do the rest.</li>
           <li><strong>Sharpen here</strong> is for individual photos, like crisping feathers or fur. The <strong>Sharpen</strong> setting in Export is lighter output sharpening for resized copies. They work together.</li>
           <li><strong>Auto</strong> sets a starting point. It leaves well-exposed photos nearly alone and does more for dark, bright, or flat ones.</li>
@@ -7165,12 +7170,15 @@ function buildEditSliders() {
     const row = document.createElement('div'); row.className = 'erow'; row.dataset.k = k;
     const l = document.createElement('label'); l.textContent = label; l.htmlFor = 'e_' + k;
     const v = document.createElement('b'); v.id = 'ev_' + k; v.title = 'Double-click to reset'; v.textContent = '0';
-    row.append(l, v);
+    /* a small reset button, shown only on sliders that have been changed */
+    const rb = document.createElement('button'); rb.type = 'button'; rb.className = 'erst'; rb.id = 'er_' + k; rb.hidden = true; rb.textContent = '\u21ba'; rb.title = 'Reset ' + label; rb.setAttribute('aria-label', 'Reset ' + label);
+    const vw = document.createElement('span'); vw.className = 'evw'; vw.append(rb, v);
+    row.append(l, vw);
     const inp = document.createElement('input'); inp.type = 'range'; inp.min = mn; inp.max = mx; inp.step = 1; inp.value = 0; inp.id = 'e_' + k; inp.dataset.k = k;
     inp.addEventListener('input', () => setEdit(k, +inp.value));
     if (EDIT_SCALE[k]) { inp.classList.add('escale'); inp.style.setProperty('--scale', EDIT_SCALE[k]); inp.title = k === 'temp' ? 'Left: cooler (blue). Right: warmer (amber).' : 'Left: greener. Right: more magenta.'; }
     const reset = () => { inp.value = 0; setEdit(k, 0); };
-    inp.addEventListener('dblclick', reset); v.addEventListener('dblclick', reset);
+    inp.addEventListener('dblclick', reset); v.addEventListener('dblclick', reset); rb.addEventListener('click', reset);
     box.append(row, inp);
   }
 }
@@ -7179,13 +7187,13 @@ function setEdit(k, val) {
   const it = cur(); if (!it) return;
   const r = EDITS[it.key] || blankEdit(); r[k] = Math.round(val);
   if (hasEdit(r)) EDITS[it.key] = r; else delete EDITS[it.key];
-  $('ev_' + k).textContent = editVal(k, Math.round(val));
+  $('ev_' + k).textContent = editVal(k, Math.round(val)); $('er_' + k).hidden = !Math.round(val);
   if (k === 'rot') { clearTimeout(straightening); straightening = setTimeout(() => { straightening = 0; renderEditSoon(); }, 900); }
   saveEdits(); paintThumb(it); renderEditSoon();
 }
 function editLoad() {
   const r = (cur() && EDITS[cur().key]) || blankEdit();
-  for (const k of EDIT_KEYS) { const v = r[k] || 0; $('e_' + k).value = v; $('ev_' + k).textContent = editVal(k, v); }
+  for (const k of EDIT_KEYS) { const v = r[k] || 0; $('e_' + k).value = v; $('ev_' + k).textContent = editVal(k, v); $('er_' + k).hidden = !v; }
   $('eCropBtn').classList.toggle('has', !!r.crop); syncUndo();
   const bw = !!r.bw;
   $('eBw').checked = bw; $('eBwOpts').hidden = !bw; $('eBwF').value = r.bwf || 'orange'; $('eBwT').value = r.bwt || 'none';
@@ -8075,8 +8083,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.47 beta';
+const VERSION = '0.9.48 beta';
 const RELEASES = [
+  { v: '0.9.48 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'Each slider you\u2019ve changed in Adjust (and Straighten in Crop) shows a small \u21ba button beside its value: click it to reset just that adjustment. It also shows at a glance which adjustments are active. Double-clicking a slider or its number still resets it too.',
+    ]],
+  ] },
   { v: '0.9.47 beta', date: 'November 2026', groups: [
     ['New', [
       'Export has a Save to choice: pick a folder once with Choose folder\u2026, and exports go straight there every time (FledgeView remembers it, like Import\u2019s main folder). Or keep Ask each time.',
