@@ -176,6 +176,9 @@ details.lic pre{white-space:pre-wrap;font-size:11.5px;line-height:1.45;max-heigh
 .ereachg{grid-column:1 / -1;font-size:12px}
 .ecropinfo{grid-column:1 / -1;font-size:11.5px;line-height:1.35;color:var(--lcd-dim)}
 .editview.cropping canvas{cursor:crosshair}
+.editview.picking canvas{cursor:crosshair}
+.ewbpick{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin:2px 0 6px}
+.ewbpick[aria-pressed="true"]{box-shadow:inset 0 0 0 1.5px var(--amber)!important;color:var(--amber)}
 .editview.cropping{user-select:none;-webkit-user-select:none;touch-action:none}
 html[data-look="clean"] .knob.eexp{background:var(--acc)!important;color:#fff!important}
 #editBtn[aria-pressed="true"]{background:var(--amber);border-color:var(--amber);color:#1b1b1b}
@@ -931,7 +934,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <button class="knob" id="zIn" aria-label="Zoom in" disabled>+</button>
       </div>
       <div class="cbtns" role="group" aria-label="Review tools">
-        <button class="knob ck" id="tBlink" data-f="blink" aria-pressed="false" title="Highlight blinkies (B)">Blinkies</button>
+        <button class="knob ck" id="tBlink" data-f="blink" aria-pressed="false" title="Blinkies (B): blown highlights flash red, crushed blacks flash blue">Blinkies</button>
         <button class="knob ck" id="tPeak" data-f="peak" aria-pressed="false" title="Focus peaking (E)">Peaking</button>
         <button class="knob ck" id="tAf" data-f="af" aria-pressed="true" title="Focus point (A)">Focus pt</button>
         <button class="knob ck" id="tCompare" data-f="bursts" aria-pressed="false" title="Compare with the next frame (C)">Compare</button>
@@ -1366,7 +1369,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
       <section data-g="Review tools">
         <h3>Review tools</h3>
         <ul>
-          <li><strong>Blinkies</strong> (<kbd>B</kbd>): blown highlights flash red.</li>
+          <li><strong>Blinkies</strong> (<kbd>B</kbd>): blown highlights flash red, and shadows crushed to pure black flash blue.</li>
           <li><strong>Peaking</strong> (<kbd>E</kbd>): paints the sharpest edges yellow. The slider under the screen sets how much is highlighted.</li>
           <li><strong>Focus pt</strong> (<kbd>A</kbd>): a green box shows where the camera focused. Sony files only, and only straight-from-camera files; edited exports usually lose this information.</li>
           <li><strong>Compare</strong> (<kbd>C</kbd>): the current photo and the next one side by side, with zoom linked. Click either photo to select it; ratings, <kbd>P</kbd>, and <kbd>X</kbd> apply to the selected one.</li>
@@ -1409,6 +1412,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
           <li><strong>Light:</strong> exposure, contrast, highlights, shadows, whites, and blacks. <strong>Color:</strong> temperature (blue to amber) and tint (green to magenta), shown on colored scales, plus vibrance. <strong>Detail and effects:</strong> sharpen and vignette. Double-click a slider to reset it.</li>
           <li><strong>Crop and straighten:</strong> click <strong>Crop</strong>, then drag the corners or the whole box; choose an <strong>Aspect</strong> or Free. <strong>Straighten</strong> levels a tilted horizon, showing a grid while you drag. Click <strong>Done</strong> (or press Enter) to finish. <strong>Undo</strong>, beside Crop, steps back through crop and straighten changes one at a time without touching your other edits. While you crop, the box shows the size you’re cropping to: pixels, megapixels, print size in inches (at 240, 300, or 360 ppi; choose under the readout), and the focal length the crop is equivalent to. <strong>Reach</strong> crops to what a 1.4× or 2× teleconverter would have framed, or to any focal length you type (Custom); <strong>Reach guides</strong> show those framings as dashed boxes you can click. In Export, the <strong>Crop reach</strong> info bar field adds the equivalent focal length on cropped photos. The crop is kept with your other edits, and Export\u2019s social shapes crop from the cropped photo.</li>
           <li><strong>Saturation</strong> boosts or calms every color evenly, while <strong>Vibrance</strong> favors muted colors. <strong>Clarity</strong> adds contrast to mid-size detail, such as feathers and fur, without sharpening smooth backgrounds.</li>
+          <li><strong>Pick neutral</strong> (<kbd>W</kbd>), at the top of Color: click it, then click something that should be neutral gray or white, such as a gray card, a white feather, or a cloud. Temperature and Tint are set so that spot becomes neutral, which corrects a color cast; for the most accurate skin tones, photograph a gray card in the same light and pick it. Zoom in first to pick a small spot.</li>
           <li><strong>Black &amp; white:</strong> tick it in the Color section, then choose a <strong>Filter</strong> to control how colors turn into grays (Orange darkens skies and is a good all-rounder; Red is dramatic; Green lightens foliage) and an optional warm or cool <strong>Tone</strong>. Temperature, tint, and vibrance step aside while it’s on; the Light sliders do the rest.</li>
           <li><strong>Sharpen here</strong> is for individual photos, like crisping feathers or fur. The <strong>Sharpen</strong> setting in Export is lighter output sharpening for resized copies. They work together.</li>
           <li><strong>Auto</strong> sets a starting point. It leaves well-exposed photos nearly alone and does more for dark, bright, or flat ones.</li>
@@ -1681,7 +1685,7 @@ const FEATURES = [
   ['bursts', 'Burst grouping and compare', 'Groups frames shot close together and shows two frames side by side.'],
   ['sharp', 'Sharpness score', 'Estimates how sharp the sharpest part of each frame is, shown as a percentage of the best frame in its burst.'],
   ['peak', 'Focus peaking', 'Highlights the sharpest edges in the frame. Overlay only; your files are never changed.'],
-  ['blink', 'Highlight blinkies', 'Flashes areas that are blown out in the preview.'],
+  ['blink', 'Blinkies', 'Flashes areas that are blown out (red) or crushed to pure black (blue) in the preview.'],
   ['af', 'Focus point', 'Shows where the camera focused. Sony files only for now.'],
   ['stats', 'Folder stats', 'Charts of the focal lengths, ISOs, shutter speeds, and lenses you use.'],
   ['web', 'Export for web', 'Resizes finished photos for the web, with an optional info bar under each one.'],
@@ -2195,6 +2199,7 @@ function analyze(it) {
     const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
     lum[p] = L; hist[L | 0]++;
     if (r >= 250 || g >= 250 || b >= 250) { bd[i] = 255; bd[i + 1] = 30; bd[i + 2] = 30; bd[i + 3] = 255; }
+    else if (r <= 2 && g <= 2 && b <= 2) { bd[i] = 40; bd[i + 1] = 130; bd[i + 2] = 255; bd[i + 3] = 255; }   // crushed to pure black
   }
   const mag = new Uint16Array(N), mh = new Uint32Array(1024);
   for (let y = 1; y < h - 1; y++) {
@@ -4873,9 +4878,13 @@ const BW_TONES = { none: [1, 1, 1], warm: [1.06, 1.0, 0.88], cool: [0.95, 0.99, 
 const sm = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 const toLin = new Float32Array(256).map((_, i) => { const c = i / 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); });
 const toSrgb = l => { l = Math.max(0, Math.min(1, l)); return l <= 0.0031308 ? l * 12.92 : 1.055 * Math.pow(l, 1 / 2.4) - 0.055; };
+const WB_A = 0.6, WB_C = 0.25;
+const wbCurve = t => t * (0.35 + 0.65 * Math.abs(t));
+const wbCurveInv = T => Math.sign(T) * (-0.35 + Math.sqrt(0.1225 + 2.6 * Math.abs(T))) / 1.3;
 function editLuts(r) {
   const ev = Math.pow(2, (r.exp || 0) / 100 * 2), t = (r.temp || 0) / 100, ti = (r.tint || 0) / 100;
-  const wb = [1 + 0.18 * t + 0.06 * ti, 1 - 0.12 * ti, 1 - 0.18 * t + 0.06 * ti];
+  /* white balance in stops: gentle near zero, with enough reach at the ends for strong indoor or shade casts */
+  const T = wbCurve(t), I = wbCurve(ti), wb = [Math.pow(2, WB_A * T + WB_C * I), Math.pow(2, -2 * WB_C * I), Math.pow(2, -WB_A * T + WB_C * I)];
   const b0 = -(r.bl || 0) / 100 * 0.12, w0 = 1 - (r.wh || 0) / 100 * 0.15, g = Math.pow(2, (r.con || 0) / 100);
   return wb.map(m => {
     const lut = new Float32Array(256);
@@ -5034,6 +5043,7 @@ function renderEdit() {
   }
   const clip = drawEditHist(fit.data);
   let disp = fit, dx0 = b.ox, dy0 = b.oy;
+  b.pick = { data: b.data, x0: b.ox, y0: b.oy };
   if (Z.k > 1.001 && p.ok && p.img && !cropMode) {
     /* zoomed: render exactly what the viewer would show, from the full-resolution image, with the edits applied */
     const dpr = DPR(), pr = p.el.getBoundingClientRect(), sr = scr.getBoundingClientRect();
@@ -5053,6 +5063,7 @@ function renderEdit() {
       sharpenData(zd.data, dw, dh, (r.shp || 0) / 100 * 1.6);
     }
     disp = zd; dx0 = Math.round(vx0 * dpr); dy0 = Math.round(vy0 * dpr);
+    b.pick = { data: tx.getImageData(0, 0, dw, dh), x0: dx0, y0: dy0 };
   }
   const warn = S.clipWarn === true, showHi = warn && clip.hi > 0, showLo = warn && clip.lo > 0;
   if (showHi || showLo) {
@@ -5268,6 +5279,46 @@ $('editView').addEventListener('pointerup', () => {
 /* dragging the crop box must not start a text selection across the page */
 $('editView').addEventListener('mousedown', e => { if (cropMode) e.preventDefault(); }, true);
 document.addEventListener('keydown', e => { if (cropMode && (e.key === 'Enter' || e.key === 'Escape') && !e.target.closest('input,select,textarea')) { e.preventDefault(); e.stopImmediatePropagation(); if (drawerMode === 'crop') setEditing(false); else setCropMode(false); } }, true);
+/* Pick neutral: Temperature and Tint set channel gains in stops (see editLuts): red A*T + C*I, green -2C*I, blue -A*T + C*I.
+   For a sampled color, red/green and blue/green must each equal 1 after the gains, which solves T and I directly */
+let wbPick = false;
+function setWbPick(v) {
+  wbPick = !!v && !!state.editing && drawerMode === 'edit';
+  $('eWbPick').setAttribute('aria-pressed', String(wbPick)); $('editView').classList.toggle('picking', wbPick);
+  if (wbPick) toast('Click something that should be neutral gray or white. Esc cancels.');
+}
+function wbFromSample(Rl, Gl, Bl) {
+  if (!(Rl > 0 && Gl > 0 && Bl > 0)) return null;
+  const u = Math.log2(Gl / Rl), v = Math.log2(Gl / Bl), T = (u - v) / (2 * WB_A), I = (u + v) / (6 * WB_C);
+  return { T, I, t: wbCurveInv(T), ti: wbCurveInv(I) };
+}
+function pickNeutralAt(e) {
+  const b = editBase; if (!b || !b.pick) return;
+  const cv = $('editCanvas'), rr = cv.getBoundingClientRect(), k = cv.width / rr.width;
+  const px = Math.round((e.clientX - rr.left) * k) - b.pick.x0, py = Math.round((e.clientY - rr.top) * k) - b.pick.y0, D = b.pick.data, R0 = Math.max(2, Math.round(4 * k));
+  let n = 0, R = 0, G = 0, B = 0, clipped = 0;
+  for (let y = py - R0; y <= py + R0; y++) for (let x = px - R0; x <= px + R0; x++) {
+    if (x < 0 || y < 0 || x >= D.width || y >= D.height) continue;
+    const i = (y * D.width + x) * 4, r8 = D.data[i], g8 = D.data[i + 1], b8 = D.data[i + 2];
+    if (r8 >= 250 || g8 >= 250 || b8 >= 250) clipped++;
+    R += toLin[r8]; G += toLin[g8]; B += toLin[b8]; n++;
+  }
+  if (!n) { toast('Click on the photo itself.'); return; }
+  R /= n; G /= n; B /= n;
+  if (clipped > n / 3) { toast('That spot is blown out, so its true color is unknown. Pick a gray or white that still has detail.'); return; }
+  if (Math.max(R, G, B) < 0.004) { toast('That spot is too dark to read its color. Pick something lighter.'); return; }
+  const sol = wbFromSample(R, G, B);
+  if (!sol || Math.abs(sol.T) > 1.8 || Math.abs(sol.I) > 1.8) { toast('That spot looks strongly colored, not neutral. Pick something gray or white.'); return; }
+  const tv = Math.max(-100, Math.min(100, Math.round(sol.t * 100))), tiv = Math.max(-100, Math.min(100, Math.round(sol.ti * 100)));
+  setEdit('temp', tv); setEdit('tint', tiv); editLoad(); setWbPick(false);
+  toast(Math.abs(sol.T) > 1 || Math.abs(sol.I) > 1 ? 'Corrected as far as the sliders go. Fine-tune with Temperature and Tint.' : 'Neutral set. Fine-tune with Temperature and Tint if you like.');
+}
+$('editView').addEventListener('pointerdown', e => { if (!wbPick || e.button !== 0) return; e.preventDefault(); e.stopPropagation(); pickNeutralAt(e); }, true);
+document.addEventListener('keydown', e => {
+  if (e.target.closest('input,select,textarea') || document.querySelector('dialog[open]')) return;
+  if (wbPick && e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); setWbPick(false); return; }
+  if ((e.key === 'w' || e.key === 'W') && !e.ctrlKey && !e.metaKey && !e.altKey && state.editing && drawerMode === 'edit' && !(editOf(cur()) || {}).bw) { e.preventDefault(); setWbPick(!wbPick); }
+}, true);
 function renderEditSoon() { if (!editRaf) editRaf = requestAnimationFrame(() => { editRaf = 0; renderEdit(); }); }
 function buildEditSliders() {
   /* crop and straighten come first, in their own section above the adjustments: crop, then edit, then export */
@@ -5301,11 +5352,13 @@ function buildEditSliders() {
       }
       if (k === 'Color') {
         const w = document.createElement('div'); w.className = 'ebw';
-        w.innerHTML = '<label class="ewarn" title="Convert this photo to black and white"><input type="checkbox" id="eBw"> Black &amp; white</label>'
+        w.innerHTML = '<button class="knob ebtn ewbpick" id="eWbPick" title="Pick neutral (W): click something that should be gray or white, such as a gray card, a white feather, or a cloud. Temperature and Tint are set so it becomes neutral."><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M14.5 3.5l6 6-2 2-1-1-7.5 7.5H7v-3l7.5-7.5-1-1z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 20l3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Pick neutral</button>'
+          + '<label class="ewarn" title="Convert this photo to black and white"><input type="checkbox" id="eBw"> Black &amp; white</label>'
           + '<div class="ebwopts" id="eBwOpts" hidden><label class="erow" for="eBwF">Filter</label><select id="eBwF" title="How colors turn into grays, like film filters. Yellow: slightly darker skies. Orange: darker skies, a good all-rounder. Red: dramatic skies. Green: lighter foliage."><option value="neutral">Neutral</option><option value="yellow">Yellow</option><option value="orange">Orange</option><option value="red">Red</option><option value="green">Green</option></select>'
           + '<label class="erow" for="eBwT">Tone</label><select id="eBwT" title="A subtle tint over the grays: warm is sepia-like, cool is selenium-like"><option value="none">None</option><option value="warm">Warm</option><option value="cool">Cool</option></select></div>';
         box.append(w);
         const setBw = (key, val) => { const it = cur(); if (!it) return; const r = EDITS[it.key] || blankEdit(); r[key] = val; if (hasEdit(r)) EDITS[it.key] = { ...blankEdit(), ...r }; else delete EDITS[it.key]; saveEdits(); paintThumb(it); editLoad(); };
+        $('eWbPick').onclick = () => setWbPick(!wbPick);
         $('eBw').onchange = e => setBw('bw', e.target.checked ? 1 : 0);
         $('eBwF').onchange = e => setBw('bwf', e.target.value);
         $('eBwT').onchange = e => setBw('bwt', e.target.value);
@@ -5340,6 +5393,7 @@ function editLoad() {
   const bw = !!r.bw;
   $('eBw').checked = bw; $('eBwOpts').hidden = !bw; $('eBwF').value = r.bwf || 'orange'; $('eBwT').value = r.bwt || 'none';
   /* temperature, tint and vibrance don't apply to black and white; the filter takes their place */
+  $('eWbPick').hidden = bw; if (bw && wbPick) setWbPick(false);
   for (const k of ['temp', 'tint', 'vib', 'sat']) { $('e_' + k).hidden = bw; const row = document.querySelector(`#eSliders .erow[data-k="${k}"]`); if (row) row.hidden = bw; }
   $('ePaste').disabled = $('ePasteAll').disabled = !editClip;
   refreshSel();
@@ -5387,6 +5441,7 @@ function openPanel(m) {
   requestAnimationFrame(() => { fitLayout(); layoutAll(); if (lensOpen()) drawFov(); });
 }
 function setEditing(v, remember = true) {
+  if (!v && typeof wbPick !== 'undefined' && wbPick) setWbPick(false);
   state.viewEdits = false; $('screen').classList.remove('viewedits');
   if (!v && cropMode) setCropMode(false);
   if (v && !cur()) { if (remember) toast('Open a photo first'); return; }
@@ -6020,7 +6075,7 @@ $('dofUse').onclick = async () => {
 const KEYS = [
   ['V', 'Photo view: just the photo, filling the screen (Esc returns)'], ['R', 'Crop and straighten panel'], ['← →', 'Previous or next photo'], ['↑ ↓', 'Up or down a row in the grid'], ['Home  End', 'First or last photo'],
   ['1 – 5', 'Star rating (press again to clear)'], ['0', 'Clear stars'], ['P', 'Pick'], ['X', 'Reject'], ['U', 'Clear flag'],
-  ['Z', 'Zoom in or back to fit'], ['+  −', 'Zoom in or out'], ['B', 'Highlight blinkies'], ['E', 'Focus peaking'], ['G', 'Composition guides in Frame mode and the export crop: thirds, golden ratio, diagonals, off'], ['J', 'In Adjust: show or hide clipping (red highlights, blue blacks)'], ['\\', 'In Adjust: hold to see the original'],
+  ['W', 'In Adjust: pick neutral (click something gray or white to set the white balance)'], ['Z', 'Zoom in or back to fit'], ['+  −', 'Zoom in or out'], ['B', 'Blinkies: blown highlights (red) and crushed blacks (blue)'], ['E', 'Focus peaking'], ['G', 'Composition guides in Frame mode and the export crop: thirds, golden ratio, diagonals, off'], ['J', 'In Adjust: show or hide clipping (red highlights, blue blacks)'], ['\\', 'In Adjust: hold to see the original'],
   ['A', 'Focus point'], ['C', 'Compare with the next frame'], ['Q', '4-up view: click a photo to select it, P picks it and loads the next four, ← → move four at a time'], ['I', 'Change info display'], ['F', 'Full screen'], ['?', 'This list'],
 ];
 const kl = $('keyList');
@@ -6223,8 +6278,17 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.44 beta';
+const VERSION = '0.9.45 beta';
 const RELEASES = [
+  { v: '0.9.45 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Pick neutral in Adjust (W): click something that should be gray or white, such as a gray card, a white feather, or a cloud, and Temperature and Tint are set to make it neutral. It reads the unedited colors, works zoomed in, and won\u2019t guess from blown-out, very dark, or strongly colored spots.',
+      'Blinkies now also flash shadows crushed to pure black, in blue, alongside blown highlights in red.',
+    ]],
+    ['Improved', [
+      'Temperature and Tint reach further at the ends of the sliders, enough to correct strong indoor or shade casts, while small adjustments feel the same as before. Large Temperature or Tint values on photos you\u2019ve already adjusted will look somewhat stronger.',
+    ]],
+  ] },
   { v: '0.9.44 beta', date: 'November 2026', groups: [
     ['Improved', [
       'The viewer now shows your edits: after you crop, straighten, or adjust a photo and click Done, you see the result right away, as in Photo view. Zoom in to check focus on the full original; Peaking and Blinkies also show the original, so they read the real pixels.',
