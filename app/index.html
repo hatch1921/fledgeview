@@ -67,6 +67,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 .cbtns .wide{grid-column:1 / -1}
 .frameview{position:absolute;inset:0;z-index:3}
 .editview{position:absolute;inset:0;z-index:3;background:#000}
+/* when the viewer shows a photo's edits, the camera info stays on top */
+.screen.viewedits .osd{z-index:4}
 .drawer{display:flex;align-items:flex-start;align-self:start;gap:8px;margin-left:-8px}
 .drawer:not(.open){display:none}
 .drawer .editpanel{width:180px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
@@ -978,7 +980,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <div class="ebtns"><button class="knob ebtn" id="eCopy" title="Copy this photo’s edits">Copy</button><button class="knob ebtn" id="ePaste" title="Paste copied edits onto this photo">Paste</button></div>
         <button class="knob ebtn wide" id="ePasteSel" title="Paste copied edits onto the selected photos. Ctrl-click or Shift-click thumbnails to select.">Paste to selected</button>
         <button class="knob ebtn wide" id="ePasteAll" title="Paste copied edits onto every photo shown in the sidebar">Paste to all shown</button>
-        <p class="enote">Edits are applied when you export, make a gallery, or use Frame mode. Your originals never change.</p>
+        <p class="enote">Edits show in the viewer and Photo view, and are applied when you export, make a gallery, or use Frame mode. Your originals never change.</p>
         <div class="efoot"><button class="knob ebtn wide eexp" id="eExport" title="Export this photo with its edits (or the selected photos, if you’ve selected several)">Export…</button>
         <button class="knob ebtn wide edone" id="eDone">Done</button></div>
       </div>
@@ -2405,7 +2407,9 @@ function renderOsd(it, m) {
   $('oWb').textContent = m.WhiteBalance ? (m.WhiteBalance === 'Auto' ? 'AWB' : 'WB ' + m.WhiteBalance) : '';
   $('oMeter').textContent = METER[m.MeteringMode] || '';
   $('oFlash').textContent = typeof m.Flash === 'string' && /fired/i.test(m.Flash) && !/did not|no flash/i.test(m.Flash) ? 'Flash fired' : '';
-  { const dm = pixelDims(it, m); $('oDims').textContent = dm ? `${fmtMp(dm[0], dm[1])}M  ${dm[0]}×${dm[1]}` : ''; }
+  { const dm = pixelDims(it, m), er = editOf(it), c = er && er.crop;
+    const cw = dm && c ? Math.round(c.w * dm[0]) : 0, chh = dm && c ? Math.round(c.h * dm[1]) : 0;
+    $('oDims').textContent = dm ? `${fmtMp(dm[0], dm[1])}M  ${dm[0]}×${dm[1]}` + (c ? `  \u00b7  cropped ${fmtMp(cw, chh)}M  ${cw}×${chh}` : '') : ''; }
   { const dd = distOf(m); $('oDist').textContent = dd ? 'Distance ' + fmtDist(dd, true) : ''; }
   $('oBurst').textContent = on('bursts') && it.burst ? `Burst ${it.burst.pos}/${it.burst.size}` : '';
   $('oSharp').textContent = sharpText(it);
@@ -2648,6 +2652,7 @@ async function show(i) {
   else if (S.editOpen && !state.pview && !state.framing && !state.show.quad && !state.show.compare) setEditing(true, false);
   if (state.editing && drawerMode === 'crop' && !cropMode && !state.pview) setCropMode(true);
   if (lensOpen()) lensFollow();
+  syncViewEdits();
   preloadNeighbors(tok);
   markActive();
   if (on('sharp') && it.sharp == null && ok) scoreOnly(it).then(() => { paintThumb(it); if (cur() === it) { refreshOsd(); refreshRows(); } });
@@ -2694,7 +2699,8 @@ function layoutPane(p, primary) {
   if (p.afPt) { p.af.style.left = (x + p.afPt.x * cw) + 'px'; p.af.style.top = (y + p.afPt.y * ch) + 'px'; }
 }
 function layoutAll() {
-  if (state.framing) return frameZoomUi();
+  if (state.framing) { syncViewEdits(); return frameZoomUi(); }
+  syncViewEdits();
   if (state.editing) renderEditSoon();
   const vp = visPanes();
   vp.forEach((p, i) => layoutPane(p, i === 0));
@@ -3404,8 +3410,8 @@ $('orgUndo').onclick = async () => {
 /* ---------- tools ---------- */
 function setTog(id, v) { $(id).setAttribute('aria-pressed', v); }
 function repaintPanes() { visPanes().forEach(paintOverlays); layoutAll(); }
-$('tBlink').onclick = () => { state.show.blink = !state.show.blink; setTog('tBlink', state.show.blink); repaintPanes(); };
-$('tPeak').onclick = () => { state.show.peak = !state.show.peak; setTog('tPeak', state.show.peak); repaintPanes(); };
+$('tBlink').onclick = () => { state.show.blink = !state.show.blink; setTog('tBlink', state.show.blink); repaintPanes(); syncViewEdits(); };
+$('tPeak').onclick = () => { state.show.peak = !state.show.peak; setTog('tPeak', state.show.peak); repaintPanes(); syncViewEdits(); };
 $('tAf').onclick = () => {
   state.show.af = !state.show.af; setTog('tAf', state.show.af); repaintPanes();
   const it = cur();
@@ -5002,8 +5008,20 @@ function editPrep() {
   }
   return true;
 }
+/* the viewer shows a photo's edits (crop, straighten, adjustments) at fit, the same rendering as the edit panel and Photo view;
+   zooming in shows the full original for checking focus, and Peaking or Blinkies show the original so they read real pixels */
+function viewEditsWanted() {
+  const it = cur();
+  return !state.editing && !state.pview && !state.framing && !state.show.quad && !state.show.compare && !state.show.peak && !state.show.blink && !!it && !!editOf(it) && !!panes[0] && !!panes[0].img;
+}
+function syncViewEdits() {
+  refreshOsd();
+  const want = viewEditsWanted();
+  if (want !== !!state.viewEdits) { state.viewEdits = want; if (!state.editing) $('editView').hidden = !want; $('screen').classList.toggle('viewedits', want); if (want) editBase = null; }
+  if (state.viewEdits) renderEditSoon();
+}
 function renderEdit() {
-  if (!state.editing || !editPrep()) return;
+  if (!(state.editing || state.viewEdits) || !editPrep()) return;
   const cv = $('editCanvas'), x = cv.getContext('2d'), b = editBase, r = editOf(cur()), p = panes[0];
   x.fillStyle = '#000'; x.fillRect(0, 0, cv.width, cv.height);
   const edited = r && !editBeforeOn;
@@ -5369,6 +5387,7 @@ function openPanel(m) {
   requestAnimationFrame(() => { fitLayout(); layoutAll(); if (lensOpen()) drawFov(); });
 }
 function setEditing(v, remember = true) {
+  state.viewEdits = false; $('screen').classList.remove('viewedits');
   if (!v && cropMode) setCropMode(false);
   if (v && !cur()) { if (remember) toast('Open a photo first'); return; }
   state.editing = v; setTog('editBtn', v);
@@ -6204,8 +6223,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.43 beta';
+const VERSION = '0.9.44 beta';
 const RELEASES = [
+  { v: '0.9.44 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'The viewer now shows your edits: after you crop, straighten, or adjust a photo and click Done, you see the result right away, as in Photo view. Zoom in to check focus on the full original; Peaking and Blinkies also show the original, so they read the real pixels.',
+    ]],
+  ] },
   { v: '0.9.43 beta', date: 'November 2026', groups: [
     ['Fixed', [
       'Image size (pixels and megapixels) now shows for JPEGs and other photos whose camera data doesn\u2019t record it, such as edited exports or photos with their camera data removed, using the photo\u2019s actual size. Photo info also adds megapixels to Dimensions.',
