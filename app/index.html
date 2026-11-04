@@ -110,6 +110,8 @@ html[data-look="clean"] .knob.eopen[aria-expanded="true"]{background:var(--acc)!
 .ecropopts .erow{margin:0}
 .ecropopts select{min-width:0;font:inherit;font-size:12px;color:var(--lcd);background:#1d1e21;border:1px solid rgba(255,255,255,.18);border-radius:5px;padding:2px 4px;color-scheme:dark}
 #eCropReset{grid-column:1 / -1}
+.ecropopts > .ereachmm{grid-column:1 / -1}
+.ecropbtns .knob{white-space:nowrap}
 .ereach{grid-column:1 / -1;display:flex;flex-direction:column;gap:5px}
 .ereach .erow{margin:0}
 .ereachbtns{display:flex;flex-direction:column;gap:4px}
@@ -1209,7 +1211,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <p>Click <strong>Quick finish</strong> in the Edit and share section of the control panel (or <strong>Edit</strong> in the top toolbar) to open the Quick finish panel to the right. Your other panels stay put, so you can rate and edit in one pass. Click <strong>Quick finish</strong> again or <strong>Done</strong> to close it; FledgeView remembers whether you left it open.</p>
         <ul>
           <li><strong>Light:</strong> exposure, contrast, highlights, shadows, whites, and blacks. <strong>Color:</strong> temperature (blue to amber) and tint (green to magenta), shown on colored scales, plus vibrance. <strong>Detail and effects:</strong> sharpen and vignette. Double-click a slider to reset it.</li>
-          <li><strong>Crop and straighten:</strong> click <strong>Crop</strong>, then drag the corners or the whole box; choose an <strong>Aspect</strong> or Free. <strong>Straighten</strong> levels a tilted horizon, showing a grid while you drag. Click <strong>Done cropping</strong> (or press Enter) to finish. <strong>Undo</strong>, beside Crop, steps back through crop and straighten changes one at a time without touching your other edits. While you crop, the box shows the size you’re cropping to: pixels, megapixels, print size in inches (at 240, 300, or 360 ppi; choose under the readout), and the focal length the crop is equivalent to. <strong>Reach</strong> crops to what a 1.4× or 2× teleconverter would have framed, or to any focal length you type (Custom); <strong>Reach guides</strong> show those framings as dashed boxes you can click. In Export, the <strong>Crop reach</strong> info bar field adds the equivalent focal length on cropped photos. The crop is kept with your other edits, and Export\u2019s social shapes crop from the cropped photo.</li>
+          <li><strong>Crop and straighten:</strong> click <strong>Crop</strong>, then drag the corners or the whole box; choose an <strong>Aspect</strong> or Free. <strong>Straighten</strong> levels a tilted horizon, showing a grid while you drag. Click <strong>Done</strong> (or press Enter) to finish. <strong>Undo</strong>, beside Crop, steps back through crop and straighten changes one at a time without touching your other edits. While you crop, the box shows the size you’re cropping to: pixels, megapixels, print size in inches (at 240, 300, or 360 ppi; choose under the readout), and the focal length the crop is equivalent to. <strong>Reach</strong> crops to what a 1.4× or 2× teleconverter would have framed, or to any focal length you type (Custom); <strong>Reach guides</strong> show those framings as dashed boxes you can click. In Export, the <strong>Crop reach</strong> info bar field adds the equivalent focal length on cropped photos. The crop is kept with your other edits, and Export\u2019s social shapes crop from the cropped photo.</li>
           <li><strong>Saturation</strong> boosts or calms every color evenly, while <strong>Vibrance</strong> favors muted colors. <strong>Clarity</strong> adds contrast to mid-size detail, such as feathers and fur, without sharpening smooth backgrounds.</li>
           <li><strong>Black &amp; white:</strong> tick it in the Color section, then choose a <strong>Filter</strong> to control how colors turn into grays (Orange darkens skies and is a good all-rounder; Red is dramatic; Green lightens foliage) and an optional warm or cool <strong>Tone</strong>. Temperature, tint, and vibrance step aside while it’s on; the Light sliders do the rest.</li>
           <li><strong>Sharpen here</strong> is for individual photos, like crisping feathers or fur. The <strong>Sharpen</strong> setting in Export is lighter output sharpening for resized copies. They work together.</li>
@@ -4956,7 +4958,7 @@ function setCropMode(v) {
     saveEdits(); paintThumb(it);
   }
   cropMode = v; editBase = null; ecDrag = null;
-  $('eCropBtn').setAttribute('aria-pressed', String(v)); $('eCropBtn').textContent = v ? 'Done cropping' : 'Crop';
+  $('eCropBtn').setAttribute('aria-pressed', String(v)); $('eCropBtn').textContent = v ? 'Done' : 'Crop'; $('eCropBtn').title = v ? 'Done cropping (Enter)' : 'Crop: drag the corners or the whole box. Click Done, or press Enter, when you\u2019re finished.';
   $('eCropOpts').hidden = !v; $('eCropAr').value = cropAr;
   $('editView').classList.toggle('cropping', v);
   const rr = it && EDITS[it.key]; $('eCropBtn').classList.toggle('has', !!(rr && rr.crop));
@@ -5966,8 +5968,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.34 beta';
+const VERSION = '0.9.35 beta';
 const RELEASES = [
+  { v: '0.9.35 beta', date: 'November 2026', groups: [
+    ['Fixed', [
+      'The crop controls fit again: while cropping, the button reads Done (it had wrapped onto two lines beside Undo), and the Aspect menu is back to full width.',
+    ]],
+  ] },
   { v: '0.9.34 beta', date: 'November 2026', groups: [
     ['Improved', [
       'Crop now has an Undo button beside it: it steps back through your crop and straighten changes one at a time, while cropping or after, without touching your color and tone edits.',
