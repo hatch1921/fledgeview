@@ -78,7 +78,7 @@ html[data-look="clean"] .efoot{background:#232325;border-radius:0}
 .eopenrow .knob.sharebtn{width:auto}
 .eopenrow #cropTab{flex:0 0 auto;padding-left:12px;padding-right:12px}
 .eopenrow #editTab{flex:1 1 0;min-width:0;white-space:nowrap}
-/* the drawer shows one panel at a time: crop tools, or the Quick finish adjustments */
+/* the drawer shows one panel at a time: crop tools, Lens tools, or the Adjust panel */
 .editpanel.pcrop > :not(#eCropSec){display:none!important}
 /* Lens tools: the calculator or the field of view fill the photo area; the controls sit in a wider drawer panel */
 .editpanel.plens > :not(#eLensSec){display:none!important}
@@ -126,6 +126,7 @@ html[data-look="clean"] .knob.eopen[aria-expanded="true"]{background:var(--acc)!
 .knob.ebtn#eAuto{flex:none;height:32px;padding:0 20px;font-size:14px}
 .esec{font-family:var(--cond);font-size:12px;color:var(--lcd-dim);margin:6px 0 0}
 .esec.etitle{font-size:15px;color:var(--lcd);margin:0 0 6px}
+.editpanel .ephead{align-self:stretch;width:100%}
 /* Auto stands out with a thin outline in the look's accent color (blue in Clean, amber in Camera), without competing with Done and Export */
 #eAuto{box-shadow:inset 0 0 0 1.5px var(--amber)!important}
 #eAuto:hover{background:color-mix(in srgb, var(--amber) 16%, transparent)!important}
@@ -790,7 +791,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <button class="mi" id="csvDlBtn" disabled>Download CSV file</button>
       </div>
     </div>
-    <button class="btn" id="editBtn" aria-pressed="false" title="Quick finish: simple edits applied when you export"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h8M16 6h4M4 12h2M10 12h10M4 18h11M19 18h1"/><circle cx="14" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg>Edit</button>
+    <button class="btn" id="editBtn" aria-pressed="false" title="Adjust: simple edits applied when you export"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h8M16 6h4M4 12h2M10 12h10M4 18h11M19 18h1"/><circle cx="14" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg>Edit</button>
     <span class="tgap" aria-hidden="true"></span>
     <button class="btn out" id="webBtn" data-f="web" title="Export resized copies for the web and social media"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>Export</button>
     <button class="btn" id="dofBtn" title="Lens tools: depth of field and field of view calculators"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3l3.5 6.5M21 12h-7.5M16.5 19.8L12.5 13M7.5 19.8l3.8-6.6M3 12h7.5M7.5 4.2l4 6.8"/></svg>Lens tools</button>
@@ -953,18 +954,18 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
       </div>
       <div class="csec" aria-label="Edit and share">
         <div class="slabel">Edit and share</div>
-        <div class="eopenrow"><button class="knob sharebtn eopen" id="cropTab" aria-expanded="false" aria-controls="editPanel" title="Crop and straighten, in a panel to the right (R)"><span>Crop</span></button><button class="knob sharebtn eopen" id="editTab" aria-expanded="false" aria-controls="editPanel" title="Quick finish: simple edits in a panel to the right (open or close)"><span>Quick finish</span></button></div>
+        <div class="eopenrow"><button class="knob sharebtn eopen" id="cropTab" aria-expanded="false" aria-controls="editPanel" title="Crop and straighten, in a panel to the right (R)"><span>Crop</span></button><button class="knob sharebtn eopen" id="editTab" aria-expanded="false" aria-controls="editPanel" title="Adjust: exposure, contrast, color, and more, in a panel to the right (open or close)"><span>Adjust</span></button></div>
         <button class="knob sharebtn" id="shareGal" title="Make a gallery page to email or post">Web gallery</button>
         <button class="knob sharebtn" id="shareSocial" title="Resize and crop copies for Instagram, Facebook, and the web">Social media</button>
       </div>
       <button class="hint" id="hintBtn">Press ? for shortcuts</button>
       <a class="hint tiplink" href="https://ko-fi.com/J5Q729VR3X" target="_blank" rel="noopener" title="FledgeView is free. Tips on Ko-fi keep it going.">♥ Support FledgeView</a>
     </div>
-    <aside class="drawer" id="editDrawer" aria-label="Quick finish">
-      <div class="csec editpanel" id="editPanel" hidden aria-label="Quick finish">
+    <aside class="drawer" id="editDrawer" aria-label="Adjust">
+      <div class="csec editpanel" id="editPanel" hidden aria-label="Adjust">
         <div class="ecropsec" id="eCropSec" aria-label="Crop and straighten"></div>
         <div class="elenssec" id="eLensSec" aria-label="Lens tools"><div class="elenshead"><span class="esec etitle">Lens tools</span><button class="knob ebtn" id="eLensClose" title="Close Lens tools (Esc)">Close</button></div><div class="dtabs elenstabs" id="eLensTabs" role="tablist"></div><div class="dofside" id="dofSide"></div></div>
-        <div class="ephead"><span>Quick finish</span><button class="knob ebtn" id="eAuto" title="Set a starting point from this photo’s histogram">Auto</button></div>
+        <div class="ephead"><span>Adjust</span><button class="knob ebtn" id="eAuto" title="Set a starting point from this photo’s histogram">Auto</button></div>
         <div class="ehist"><canvas id="eHist" width="360" height="120" aria-label="Histogram of the edited photo"></canvas><button class="eclip lo" id="eClipLo" aria-pressed="false" title="Crushed blacks indicator. Click to turn clipping warnings on or off (J)"></button><button class="eclip hi" id="eClipHi" aria-pressed="false" title="Blown highlights indicator. Click to turn clipping warnings on or off (J)"></button><span class="eclipnote" id="eClipNote"></span></div>
         <label class="ewarn" title="Show blown highlights in red and crushed blacks in blue on the photo (J)"><input type="checkbox" id="eWarn"> Clipping warnings</label>
         <div id="eSliders"></div>
@@ -1256,9 +1257,9 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         </ul>
         <div class="tip">Frame mode is a visual preview, not a color-accurate proof. Real mat and frame colors vary by supplier.</div>
       </section>
-      <section data-g="Quick finish">
-        <h3>Quick finish: simple edits</h3>
-        <p>Click <strong>Crop</strong> or <strong>Quick finish</strong> in the Edit and share section of the control panel (or <strong>Edit</strong> in the top toolbar for Quick finish, or press <kbd>R</kbd> for Crop) to open that panel to the right. Crop first, then finish, then share. Your other panels stay put, so you can rate and edit in one pass. Click <strong>Quick finish</strong> again or <strong>Done</strong> to close it; FledgeView remembers whether you left it open.</p>
+      <section data-g="Adjust">
+        <h3>Adjust: simple edits</h3>
+        <p>Click <strong>Crop</strong> or <strong>Adjust</strong> in the Edit and share section of the control panel (or <strong>Edit</strong> in the top toolbar for Adjust, or press <kbd>R</kbd> for Crop) to open that panel to the right. Crop first, then finish, then share. Your other panels stay put, so you can rate and edit in one pass. Click <strong>Adjust</strong> again or <strong>Done</strong> to close it; FledgeView remembers whether you left it open.</p>
         <ul>
           <li><strong>Light:</strong> exposure, contrast, highlights, shadows, whites, and blacks. <strong>Color:</strong> temperature (blue to amber) and tint (green to magenta), shown on colored scales, plus vibrance. <strong>Detail and effects:</strong> sharpen and vignette. Double-click a slider to reset it.</li>
           <li><strong>Crop and straighten:</strong> click <strong>Crop</strong>, then drag the corners or the whole box; choose an <strong>Aspect</strong> or Free. <strong>Straighten</strong> levels a tilted horizon, showing a grid while you drag. Click <strong>Done</strong> (or press Enter) to finish. <strong>Undo</strong>, beside Crop, steps back through crop and straighten changes one at a time without touching your other edits. While you crop, the box shows the size you’re cropping to: pixels, megapixels, print size in inches (at 240, 300, or 360 ppi; choose under the readout), and the focal length the crop is equivalent to. <strong>Reach</strong> crops to what a 1.4× or 2× teleconverter would have framed, or to any focal length you type (Custom); <strong>Reach guides</strong> show those framings as dashed boxes you can click. In Export, the <strong>Crop reach</strong> info bar field adds the equivalent focal length on cropped photos. The crop is kept with your other edits, and Export\u2019s social shapes crop from the cropped photo.</li>
@@ -1271,7 +1272,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
           <li><strong>Copy</strong> and <strong>Paste</strong> move edits between photos. To apply them to a series, select the photos first: <strong>Ctrl-click</strong> (<strong>Cmd-click</strong> on a Mac) thumbnails one by one, <strong>Shift-click</strong> for a range, or <kbd>Ctrl</kbd>+<kbd>A</kbd> for every photo shown. Then click <strong>Paste to selected</strong>. <strong>Paste to all shown</strong> does the whole sidebar at once.</li>
           <li>Edited photos show an <strong>Edited</strong> mark. Edits are saved in this browser and applied when you export, make a gallery, or use Frame mode. <strong>Your originals never change.</strong> <strong>Export…</strong> at the bottom of the drawer opens Export with this photo (or your selected photos) already chosen.</li>
         </ul>
-        <div class="tip">Quick finish works best on finished or straight-from-camera JPEGs. RAW files edit their embedded preview, and blown highlights can’t be brought back from a JPEG; for heavy work, use your raw editor.</div>
+        <div class="tip">Adjust works best on finished or straight-from-camera JPEGs. RAW files edit their embedded preview, and blown highlights can’t be brought back from a JPEG; for heavy work, use your raw editor.</div>
       </section>
       <section data-g="Social media">
         <h3>Social media and export</h3>
@@ -5102,7 +5103,7 @@ $('editView').addEventListener('mousedown', e => { if (cropMode) e.preventDefaul
 document.addEventListener('keydown', e => { if (cropMode && (e.key === 'Enter' || e.key === 'Escape') && !e.target.closest('input,select,textarea')) { e.preventDefault(); e.stopImmediatePropagation(); if (drawerMode === 'crop') setEditing(false); else setCropMode(false); } }, true);
 function renderEditSoon() { if (!editRaf) editRaf = requestAnimationFrame(() => { editRaf = 0; renderEdit(); }); }
 function buildEditSliders() {
-  /* crop and straighten come first, in their own section above Quick finish: crop, then edit, then export */
+  /* crop and straighten come first, in their own section above the adjustments: crop, then edit, then export */
   const cropBox = $('eCropSec'), mainBox = $('eSliders'); cropBox.innerHTML = ''; mainBox.innerHTML = '';
   let box = cropBox;
   for (const [k, label, mn = -100, mx = 100] of EDIT_UI) {
@@ -5202,7 +5203,7 @@ let drawerMode = 'edit';
 function setDrawerMode(m) {
   drawerMode = m === 'crop' || m === 'lens' ? m : 'edit';
   $('editPanel').classList.toggle('pcrop', drawerMode === 'crop'); $('editPanel').classList.toggle('pedit', drawerMode === 'edit'); $('editPanel').classList.toggle('plens', drawerMode === 'lens');
-  $('editPanel').setAttribute('aria-label', drawerMode === 'crop' ? 'Crop and straighten' : drawerMode === 'lens' ? 'Lens tools' : 'Quick finish');
+  $('editPanel').setAttribute('aria-label', drawerMode === 'crop' ? 'Crop and straighten' : drawerMode === 'lens' ? 'Lens tools' : 'Adjust');
   const lens = !!state.editing && drawerMode === 'lens';
   $('lensView').hidden = !lens; $('screen').classList.toggle('lensing', lens); setTog('dofBtn', lens);
   $('cropTab').setAttribute('aria-expanded', String(state.editing && drawerMode === 'crop'));
@@ -5851,7 +5852,7 @@ $('dofUse').onclick = async () => {
 const KEYS = [
   ['V', 'Photo view: just the photo, filling the screen (Esc returns)'], ['R', 'Crop and straighten panel'], ['← →', 'Previous or next photo'], ['↑ ↓', 'Up or down a row in the grid'], ['Home  End', 'First or last photo'],
   ['1 – 5', 'Star rating (press again to clear)'], ['0', 'Clear stars'], ['P', 'Pick'], ['X', 'Reject'], ['U', 'Clear flag'],
-  ['Z', 'Zoom in or back to fit'], ['+  −', 'Zoom in or out'], ['B', 'Highlight blinkies'], ['E', 'Focus peaking'], ['G', 'Composition guides in Frame mode and the export crop: thirds, golden ratio, diagonals, off'], ['J', 'In Quick finish: show or hide clipping (red highlights, blue blacks)'], ['\\', 'In Quick finish: hold to see the original'],
+  ['Z', 'Zoom in or back to fit'], ['+  −', 'Zoom in or out'], ['B', 'Highlight blinkies'], ['E', 'Focus peaking'], ['G', 'Composition guides in Frame mode and the export crop: thirds, golden ratio, diagonals, off'], ['J', 'In Adjust: show or hide clipping (red highlights, blue blacks)'], ['\\', 'In Adjust: hold to see the original'],
   ['A', 'Focus point'], ['C', 'Compare with the next frame'], ['Q', '4-up view: click a photo to select it, P picks it and loads the next four, ← → move four at a time'], ['I', 'Change info display'], ['F', 'Full screen'], ['?', 'This list'],
 ];
 const kl = $('keyList');
@@ -6054,8 +6055,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.40 beta';
+const VERSION = '0.9.41 beta';
 const RELEASES = [
+  { v: '0.9.41 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'Quick finish is now called Adjust, so Edit and share reads Crop | Adjust. The toolbar\u2019s Edit button still opens it.',
+    ]],
+  ] },
   { v: '0.9.40 beta', date: 'November 2026', groups: [
     ['Improved', [
       'Lens tools is now a full workspace instead of a pop-up window: the depth of field calculator or the field of view frames fill the photo area, and the controls open in the panel beside the camera controls. Both follow the photo you\u2019re on as you move through a folder. Esc or Close returns to the normal view.',
