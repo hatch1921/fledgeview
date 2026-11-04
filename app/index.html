@@ -2382,6 +2382,14 @@ function focalInfo(m) {
   return { f, tc, tcInName, crop, eff: Math.round(f * crop) };
 }
 
+/* pixel size: from the camera data when it has it, otherwise from the photo itself once it has loaded
+   (edited exports and photos with camera data removed often don't record their size) */
+function pixelDims(it, m) {
+  let w = m.ExifImageWidth || m.ImageWidth || m.PixelXDimension, h = m.ExifImageHeight || m.ImageHeight || m.PixelYDimension;
+  if (!(w && h) && it.prev && DIRECT.has(it.ext)) { const sw = [5, 6, 7, 8].includes(it.orient); w = sw ? it.prev.h : it.prev.w; h = sw ? it.prev.w : it.prev.h; }
+  return w && h ? [w, h] : null;
+}
+const fmtMp = (w, h) => { const mp = w * h / 1e6; return mp >= 10 ? String(Math.round(mp)) : mp.toFixed(1); };
 function renderOsd(it, m) {
   const n = state.view.length;
   $('oMode').textContent = MODE[m.ExposureProgram] || (m.ExposureProgram ? 'Auto' : '');
@@ -2397,8 +2405,7 @@ function renderOsd(it, m) {
   $('oWb').textContent = m.WhiteBalance ? (m.WhiteBalance === 'Auto' ? 'AWB' : 'WB ' + m.WhiteBalance) : '';
   $('oMeter').textContent = METER[m.MeteringMode] || '';
   $('oFlash').textContent = typeof m.Flash === 'string' && /fired/i.test(m.Flash) && !/did not|no flash/i.test(m.Flash) ? 'Flash fired' : '';
-  const w = m.ExifImageWidth || m.ImageWidth, h = m.ExifImageHeight || m.ImageHeight;
-  $('oDims').textContent = w && h && w * h > 1e6 ? `${Math.round(w * h / 1e6)}M  ${w}×${h}` : '';
+  { const dm = pixelDims(it, m); $('oDims').textContent = dm ? `${fmtMp(dm[0], dm[1])}M  ${dm[0]}×${dm[1]}` : ''; }
   { const dd = distOf(m); $('oDist').textContent = dd ? 'Distance ' + fmtDist(dd, true) : ''; }
   $('oBurst').textContent = on('bursts') && it.burst ? `Burst ${it.burst.pos}/${it.burst.size}` : '';
   $('oSharp').textContent = sharpText(it);
@@ -2469,8 +2476,7 @@ function essentialRows(it, m) {
   add('Lens', 'Effective focal length', fi ? fi.eff + ' mm' : '');
   add('Capture', 'Camera', [m.Make, m.Model].filter(Boolean).join(' '));
   add('Capture', 'Date taken', fmtDate(m.DateTimeOriginal || m.CreateDate));
-  const w = m.ExifImageWidth || m.ImageWidth, h = m.ExifImageHeight || m.ImageHeight;
-  add('Capture', 'Dimensions', w && h && w * h > 1e6 ? `${w} × ${h}` : '');
+  { const dm = pixelDims(it, m); add('Capture', 'Dimensions', dm ? `${dm[0]} × ${dm[1]} (${fmtMp(dm[0], dm[1])} MP)` : ''); }
   add('Capture', 'Focus distance', fmtDist(distOf(m)));
   if (it.prev) add('Capture', 'Preview shown', `${it.prev.w} × ${it.prev.h}` + (DIRECT.has(it.ext) ? ' (full image)' : ' (embedded JPEG)'));
   if (on('bursts') && it.burst) add('Capture', 'Burst', `Frame ${it.burst.pos} of ${it.burst.size}`);
@@ -6198,8 +6204,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.42 beta';
+const VERSION = '0.9.43 beta';
 const RELEASES = [
+  { v: '0.9.43 beta', date: 'November 2026', groups: [
+    ['Fixed', [
+      'Image size (pixels and megapixels) now shows for JPEGs and other photos whose camera data doesn\u2019t record it, such as edited exports or photos with their camera data removed, using the photo\u2019s actual size. Photo info also adds megapixels to Dimensions.',
+    ]],
+  ] },
   { v: '0.9.42 beta', date: 'November 2026', groups: [
     ['Improved', [
       'Help \u25be \u2192 About and licenses now lists the open-source components FledgeView includes (exifr, JSZip, and the Barlow fonts), with their full license texts.',
