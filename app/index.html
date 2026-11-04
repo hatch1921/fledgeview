@@ -99,12 +99,24 @@ html[data-look="clean"] .knob.eopen[aria-expanded="true"]{background:var(--acc)!
 .knob.edone{background:var(--amber);color:#1b1b1b}
 .knob.eexp{background:#b5d4f4;color:#0c447c;font-weight:600}
 .ecrop{display:flex;flex-direction:column;gap:6px;margin:2px 0 4px}
+.ecropbtns{display:flex;gap:5px}
+.ecropbtns #eCropBtn{flex:1}
+.ecropbtns #eCropUndo{flex:none;padding-left:12px;padding-right:12px}
+.ecropbtns #eCropUndo:disabled{opacity:.4}
+.ereachmm select{font:inherit;font-size:12px;color:var(--lcd);background:#1d1e21;border:1px solid rgba(255,255,255,.18);border-radius:5px;padding:1px 4px;color-scheme:dark}
 #eCropBtn[aria-pressed="true"]{background:var(--amber);color:#1b1b1b}
 #eCropBtn.has:not([aria-pressed="true"])::after{content:" \2713";color:var(--amber)}
 .ecropopts{display:grid;grid-template-columns:auto 1fr;gap:6px 8px;align-items:center}
 .ecropopts .erow{margin:0}
 .ecropopts select{min-width:0;font:inherit;font-size:12px;color:var(--lcd);background:#1d1e21;border:1px solid rgba(255,255,255,.18);border-radius:5px;padding:2px 4px;color-scheme:dark}
 #eCropReset{grid-column:1 / -1}
+.ereach{grid-column:1 / -1;display:flex;flex-direction:column;gap:5px}
+.ereach .erow{margin:0}
+.ereachbtns{display:flex;flex-direction:column;gap:4px}
+.ereachbtns .knob{width:100%;font-size:12px;white-space:nowrap}
+.ereachmm{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--lcd-dim);white-space:nowrap}
+.ereachmm input{width:74px;font:inherit;font-size:12px;color:var(--lcd);background:#1d1e21;border:1px solid rgba(255,255,255,.18);border-radius:5px;padding:2px 6px;color-scheme:dark}
+.ereachg{grid-column:1 / -1;font-size:12px}
 .ecropinfo{grid-column:1 / -1;font-size:11.5px;line-height:1.35;color:var(--lcd-dim)}
 .editview.cropping canvas{cursor:crosshair}
 .editview.cropping{user-select:none;-webkit-user-select:none;touch-action:none}
@@ -1197,7 +1209,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <p>Click <strong>Quick finish</strong> in the Edit and share section of the control panel (or <strong>Edit</strong> in the top toolbar) to open the Quick finish panel to the right. Your other panels stay put, so you can rate and edit in one pass. Click <strong>Quick finish</strong> again or <strong>Done</strong> to close it; FledgeView remembers whether you left it open.</p>
         <ul>
           <li><strong>Light:</strong> exposure, contrast, highlights, shadows, whites, and blacks. <strong>Color:</strong> temperature (blue to amber) and tint (green to magenta), shown on colored scales, plus vibrance. <strong>Detail and effects:</strong> sharpen and vignette. Double-click a slider to reset it.</li>
-          <li><strong>Crop and straighten:</strong> click <strong>Crop</strong>, then drag the corners or the whole box; choose an <strong>Aspect</strong> or Free. <strong>Straighten</strong> levels a tilted horizon, showing a grid while you drag. Click <strong>Done cropping</strong> (or press Enter) to finish. While you crop, the box shows the size you’re cropping to: pixels, megapixels, and print size in inches at 300 ppi. The crop is kept with your other edits, and Export\u2019s social shapes crop from the cropped photo.</li>
+          <li><strong>Crop and straighten:</strong> click <strong>Crop</strong>, then drag the corners or the whole box; choose an <strong>Aspect</strong> or Free. <strong>Straighten</strong> levels a tilted horizon, showing a grid while you drag. Click <strong>Done cropping</strong> (or press Enter) to finish. <strong>Undo</strong>, beside Crop, steps back through crop and straighten changes one at a time without touching your other edits. While you crop, the box shows the size you’re cropping to: pixels, megapixels, print size in inches (at 240, 300, or 360 ppi; choose under the readout), and the focal length the crop is equivalent to. <strong>Reach</strong> crops to what a 1.4× or 2× teleconverter would have framed, or to any focal length you type (Custom); <strong>Reach guides</strong> show those framings as dashed boxes you can click. In Export, the <strong>Crop reach</strong> info bar field adds the equivalent focal length on cropped photos. The crop is kept with your other edits, and Export\u2019s social shapes crop from the cropped photo.</li>
           <li><strong>Saturation</strong> boosts or calms every color evenly, while <strong>Vibrance</strong> favors muted colors. <strong>Clarity</strong> adds contrast to mid-size detail, such as feathers and fur, without sharpening smooth backgrounds.</li>
           <li><strong>Black &amp; white:</strong> tick it in the Color section, then choose a <strong>Filter</strong> to control how colors turn into grays (Orange darkens skies and is a good all-rounder; Red is dramatic; Green lightens foliage) and an optional warm or cool <strong>Tone</strong>. Temperature, tint, and vibrance step aside while it’s on; the Light sliders do the rest.</li>
           <li><strong>Sharpen here</strong> is for individual photos, like crisping feathers or fur. The <strong>Sharpen</strong> setting in Export is lighter output sharpening for resized copies. They work together.</li>
@@ -1476,7 +1488,7 @@ const FEATURES = [
   ['stats', 'Folder stats', 'Charts of the focal lengths, ISOs, shutter speeds, and lenses you use.'],
   ['web', 'Export for web', 'Resizes finished photos for the web, with an optional info bar under each one.'],
 ];
-const WEB_DEF = { src: 'view', size: '2000', custom: 2000, fmt: 'jpeg', q: 85, sharp: '0.35', bar: true, fields: { camera: true, lens: true, focal: true, shutter: true, aperture: true, iso: true, date: false, dist: false }, text: '', color: 'dark', tsize: 'm', meta: 'none', shape: 'orig', framed: false, grid: true, suffix: '_web', pattern: '{name}_web', seqStart: 1, seqDigits: '3', allShapes: { '4x5': true, '3x4': true, '1x1': true, '9x16': true, '191x1': true, '16x9': true }, allBar: { '4x5': false, '3x4': false, '1x1': false, '9x16': false, '191x1': true, '16x9': true }, allFolders: true, allCur: '4x5' };
+const WEB_DEF = { src: 'view', size: '2000', custom: 2000, fmt: 'jpeg', q: 85, sharp: '0.35', bar: true, fields: { camera: true, lens: true, focal: true, reach: true, shutter: true, aperture: true, iso: true, date: false, dist: false }, text: '', color: 'dark', tsize: 'm', meta: 'none', shape: 'orig', framed: false, grid: true, suffix: '_web', pattern: '{name}_web', seqStart: 1, seqDigits: '3', allShapes: { '4x5': true, '3x4': true, '1x1': true, '9x16': true, '191x1': true, '16x9': true }, allBar: { '4x5': false, '3x4': false, '1x1': false, '9x16': false, '191x1': true, '16x9': true }, allFolders: true, allCur: '4x5' };
 const DEF = { features: { cull: true, bursts: true, sharp: true, peak: true, blink: true, af: true, stats: true, web: true }, burstGap: 0.5, advance: false, peakPct: 8, size: 100, web: JSON.parse(JSON.stringify(WEB_DEF)), autoPct: 90, autoRej: false, autoKeep: true };
 let S = DEF;
 try {
@@ -3855,7 +3867,7 @@ $('kUnit').onchange = renderKeepers;
 $('keepCopy').onclick = () => keepText ? copyText(keepText, 'Copied the keeper summary') : toast('Nothing to copy yet');
 
 /* ---------- web export ---------- */
-const WFIELDS = [['camera', 'Camera'], ['lens', 'Lens and TC'], ['focal', 'Focal length'], ['shutter', 'Shutter speed'], ['aperture', 'Aperture'], ['iso', 'ISO'], ['date', 'Date taken'], ['dist', 'Focus distance']];
+const WFIELDS = [['camera', 'Camera'], ['lens', 'Lens and TC'], ['focal', 'Focal length'], ['reach', 'Crop reach'], ['shutter', 'Shutter speed'], ['aperture', 'Aperture'], ['iso', 'ISO'], ['date', 'Date taken'], ['dist', 'Focus distance']];
 const SONY = { 'ILCE-1M2': 'α1 II', 'ILCE-1': 'α1', 'ILCE-9M3': 'α9 III', 'ILCE-9M2': 'α9 II', 'ILCE-9': 'α9', 'ILCE-7RM5': 'α7R V', 'ILCE-7RM4': 'α7R IV', 'ILCE-7RM4A': 'α7R IVA', 'ILCE-7M4': 'α7 IV', 'ILCE-7M5': 'α7 V', 'ILCE-7CR': 'α7CR', 'ILCE-6700': 'α6700', 'ILCE-6600': 'α6600' };
 const titleCase = w => w.length > 3 && w === w.toUpperCase() ? w.charAt(0) + w.slice(1).toLowerCase() : w;
 function cameraName(m) {
@@ -3871,6 +3883,9 @@ function barText(it, o) {
   const lens = m.LensModel || m.Lens;
   if (f.lens && lens) parts.push(lens + (fi && fi.tc && !fi.tcInName ? ` + ${fi.tc}× TC` : ''));
   if (f.focal && fi) parts.push(Math.round(fi.f) + 'mm' + (fi.crop > 1 ? ` (${fi.eff}mm eq.)` : ''));
+  /* cropped photos: the focal length the crop is equivalent to, worded so it can't be mistaken for the lens */
+  if (f.reach && fi) { const er = editOf(it); if (er && er.crop) { const w0 = m.ExifImageWidth || m.ImageWidth || 3, h0 = m.ExifImageHeight || m.ImageHeight || 2, sw90 = [5, 6, 7, 8].includes(it.orient);
+    const eq = cropEquiv(reachBase(it), sw90 ? h0 : w0, sw90 ? w0 : h0, er.crop, er.rot); if (eq) parts.push('cropped \u2248 ' + fmtMm(eq).replace(' mm', 'mm')); } }
   if (f.shutter && m.ExposureTime) parts.push(fmtShutter(m.ExposureTime).replace('″', ' s') + (m.ExposureTime < 0.3 ? ' s' : ''));
   if (f.aperture && m.FNumber) parts.push('f/' + (Math.round(m.FNumber * 10) / 10));
   const iso = isoOf(m);
@@ -4868,6 +4883,59 @@ $('eClipHi').onclick = () => setClipWarn(S.clipWarn !== true);
 $('eClipLo').onclick = () => setClipWarn(S.clipWarn !== true);
 function toggleClipAll() { setClipWarn(S.clipWarn !== true); toast(S.clipWarn ? 'Clipping warnings on' : 'Clipping warnings off'); }
 syncClipButtons();
+/* the focal length a crop is equivalent to: the photo's focal length (full-frame equivalent on crop sensors) times how much
+   narrower the crop's view is, measured on the diagonal, including Straighten's slight zoom */
+function reachBase(it) { const fi = focalInfo((it && it.meta) || {}); return fi && fi.f ? (fi.crop > 1 ? fi.eff : fi.f) : 0; }
+function straightenZoom(W, H, rot10) { const t = (rot10 || 0) / 10 * Math.PI / 180, ca = Math.abs(Math.cos(t)), sa = Math.abs(Math.sin(t)); return Math.max((W * ca + H * sa) / W, (W * sa + H * ca) / H); }
+function cropEquiv(f, W, H, c, rot10) { if (!f || !c) return 0; return f * straightenZoom(W, H, rot10) * Math.hypot(W, H) / Math.hypot(c.w * W, c.h * H); }
+const fmtMm = v => (v >= 500 ? Math.round(v / 10) * 10 : Math.round(v)).toLocaleString() + ' mm';
+/* the crop box (in fractions of the straightened frame) that matches focal length T, in the current aspect, centered at cx, cy */
+function reachRect(T, cx, cy) {
+  const it = cur(), b = editBase, f = reachBase(it); if (!b || !f) return null;
+  const W = b.srcW, H = b.srcH, rr = EDITS[it.key] || {}, kd = f * straightenZoom(W, H, rr.rot) / T;
+  if (kd >= 0.999) return null;
+  let nr = cropRatio(); if (!nr) nr = cropRect ? cropRect.w / cropRect.h : 1;
+  let w = kd * Math.sqrt((W * W + H * H) / (W * W + H * H / (nr * nr))), h = w / nr;
+  if (w > 1) { w = 1; h = w / nr; } if (h > 1) { h = 1; w = h * nr; }
+  return { w, h, x: Math.min(1 - w, Math.max(0, cx - w / 2)), y: Math.min(1 - h, Math.max(0, cy - h / 2)) };
+}
+function cropCenter() {
+  const c = cropRect || { x: 0, y: 0, w: 1, h: 1 }, fresh = c.w > 0.996 && c.h > 0.996, rr = EDITS[(cur() || {}).key] || {};
+  if (fresh && !rr.rot) { const it = cur(); try { const a = it && it.af ? afFor(it) : null; if (a && a.x >= 0 && a.x <= 1) return [a.x, a.y]; } catch {} }
+  return [c.x + c.w / 2, c.y + c.h / 2];
+}
+function setReach(T) {
+  const [cx, cy] = cropCenter(), rect = reachRect(T, cx, cy);
+  if (rect) pushGeom();
+  if (!rect) { toast('That\u2019s no longer than this photo\u2019s own focal length, so there\u2019s nothing to crop.'); return; }
+  cropRect = rect; renderEditSoon();
+}
+let cropGuideHits = [];
+/* Undo for crop and straighten: each gesture (a drag, a Reach snap, an aspect change, a Straighten movement) saves the
+   state before it, per photo, for this session; Undo steps back one at a time without touching color or tone edits */
+const geomHist = new Map();
+const fullRect = c => !c || (c.x < 0.002 && c.y < 0.002 && c.w > 0.996 && c.h > 0.996);
+function geomState(it) {
+  const rr = EDITS[it.key] || {};
+  return cropMode ? { crop: fullRect(cropRect) ? null : { ...cropRect }, cropAr, rot: rr.rot || 0 } : { crop: rr.crop ? { ...rr.crop } : null, cropAr: rr.cropAr || 'orig', rot: rr.rot || 0 };
+}
+function pushGeom() {
+  const it = cur(); if (!it) return;
+  const st = geomState(it), h = geomHist.get(it.key) || [], last = h[h.length - 1];
+  if (!last || JSON.stringify(last) !== JSON.stringify(st)) { h.push(st); if (h.length > 60) h.shift(); geomHist.set(it.key, h); }
+  syncUndo();
+}
+function syncUndo() { const it = cur(), h = it && geomHist.get(it.key); if ($('eCropUndo')) $('eCropUndo').disabled = !(h && h.length); }
+function undoGeom() {
+  const it = cur(); if (!it) return; const h = geomHist.get(it.key); if (!h || !h.length) return;
+  const st = h.pop(), rr = EDITS[it.key] || blankEdit();
+  rr.rot = st.rot;
+  if (cropMode) { cropRect = st.crop ? { ...st.crop } : { x: 0, y: 0, w: 1, h: 1 }; cropAr = st.cropAr; $('eCropAr').value = cropAr; }
+  else { rr.crop = st.crop; rr.cropAr = st.cropAr; }
+  if (hasEdit(rr)) EDITS[it.key] = { ...blankEdit(), ...rr }; else delete EDITS[it.key];
+  saveEdits(); paintThumb(it); editBase = null; editLoad(); syncUndo(); renderEditSoon();
+}
+let rotGesture = 0;
 const CROP_AR = { '1:1': 1, '4:5': 4 / 5, '5:4': 5 / 4, '3:2': 3 / 2, '2:3': 2 / 3, '16:9': 16 / 9 };
 /* the crop box's width-to-height ratio in its own fractional units (1 for Original), or null for Free */
 function cropRatio() { const b = editBase; if (cropAr === 'free' || !b) return null; if (cropAr === 'orig') return 1; return CROP_AR[cropAr] * b.ih / b.iw; }
@@ -4902,10 +4970,27 @@ function drawCropBox(x, b) {
   x.strokeStyle = 'rgba(255,255,255,.35)'; x.lineWidth = d;
   x.beginPath(); for (const f of [1 / 3, 2 / 3]) { x.moveTo(X + W * f, Y); x.lineTo(X + W * f, Y + H); x.moveTo(X, Y + H * f); x.lineTo(X + W, Y + H * f); } x.stroke();
   x.strokeStyle = '#fff'; x.lineWidth = 2 * d; x.strokeRect(X, Y, W, H);
+  cropGuideHits = [];
+  if (S.cropGuides && reachBase(cur())) {
+    const f0 = reachBase(cur()), [gcx, gcy] = [c.x + c.w / 2, c.y + c.h / 2];
+    x.font = `600 ${Math.round(12 * d)}px system-ui, sans-serif`; x.textBaseline = 'middle';
+    for (const [k, col] of [[1.4, '#7ee0ff'], [2, '#c6ff7a']]) {
+      const g = reachRect(f0 * k, gcx, gcy); if (!g) continue;
+      const gX = b.ox + g.x * b.iw, gY = b.oy + g.y * b.ih, gW = g.w * b.iw, gH = g.h * b.ih;
+      x.setLineDash([6 * d, 5 * d]); x.strokeStyle = col; x.lineWidth = 1.6 * d; x.strokeRect(gX, gY, gW, gH); x.setLineDash([]);
+      const gmp = g.w * b.srcW * g.h * b.srcH / 1e6, gl = `+${k}\u00d7 TC (${fmtMm(f0 * k)}) \u00b7 ${gmp < 10 ? gmp.toFixed(1) : Math.round(gmp)} MP \u00b7 click to use`;
+      const gw = x.measureText(gl).width + 14 * d, gh = 22 * d, glx = gX + 4 * d, gly = gY + 4 * d;
+      x.fillStyle = 'rgba(0,0,0,.7)'; x.fillRect(glx, gly, gw, gh); x.fillStyle = col; x.fillText(gl, glx + 7 * d, gly + gh / 2);
+      cropGuideHits.push({ x0: glx, y0: gly, x1: glx + gw, y1: gly + gh, T: f0 * k });
+    }
+  }
   /* the size the crop will be, from the full-resolution photo: pixels, megapixels, and print size at 300 ppi */
-  const pw = Math.round(c.w * b.srcW), ph = Math.round(c.h * b.srcH), mp = pw * ph / 1e6, inch = v => (v / 300).toFixed(1);
-  const label = `${pw.toLocaleString()} \u00d7 ${ph.toLocaleString()} px  \u00b7  ${mp < 10 ? mp.toFixed(1) : Math.round(mp)} MP  \u00b7  ${inch(pw)} \u00d7 ${inch(ph)} in at 300 ppi`;
-  $('eCropInfo').textContent = `${pw.toLocaleString()} \u00d7 ${ph.toLocaleString()} px \u00b7 ${mp < 10 ? mp.toFixed(1) : Math.round(mp)} MP \u00b7 ${inch(pw)} \u00d7 ${inch(ph)} in at 300 ppi`;
+  const pw = Math.round(c.w * b.srcW), ph = Math.round(c.h * b.srcH), mp = pw * ph / 1e6, ppi = +S.cropPpi || 300, inch = v => (v / ppi).toFixed(1);
+  const fBase = reachBase(cur()), eq = cropEquiv(fBase, b.srcW, b.srcH, c, (EDITS[(cur() || {}).key] || {}).rot), eqTxt = eq ? `  \u00b7  \u2248 ${fmtMm(eq)}` : '';
+  const label = `${pw.toLocaleString()} \u00d7 ${ph.toLocaleString()} px  \u00b7  ${mp < 10 ? mp.toFixed(1) : Math.round(mp)} MP  \u00b7  ${inch(pw)} \u00d7 ${inch(ph)} in at ${ppi} ppi${eqTxt}`;
+  $('eCropInfo').textContent = `${pw.toLocaleString()} \u00d7 ${ph.toLocaleString()} px \u00b7 ${mp < 10 ? mp.toFixed(1) : Math.round(mp)} MP \u00b7 ${inch(pw)} \u00d7 ${inch(ph)} in at ${ppi} ppi` + (eq ? ` \u00b7 \u2248 ${fmtMm(eq)} equivalent` : '');
+  $('eReach').hidden = !fBase;
+  if (fBase) { $('eReach14').textContent = `+1.4\u00d7 TC \u00b7 ${fmtMm(fBase * 1.4)}`; $('eReach2').textContent = `+2\u00d7 TC \u00b7 ${fmtMm(fBase * 2)}`; }
   x.font = `600 ${Math.round(13 * d)}px system-ui, sans-serif`; x.textBaseline = 'middle';
   const tw = x.measureText(label).width + 20 * d, th = 26 * d, inside = H > th * 2.6 && W > tw + 12 * d;
   const lx = Math.min(cw - tw - 6 * d, Math.max(6 * d, X + (W - tw) / 2)), ly = inside ? Y + H - th - 10 * d : Math.min(ch - th - 6 * d, Y + H + 8 * d);
@@ -4925,11 +5010,14 @@ $('editView').addEventListener('pointerdown', e => {
   if (!cropMode || !editBase || e.button !== 0) return;
   e.preventDefault(); e.stopPropagation();
   const b = editBase, q = cropPoint(e), c = cropRect, hit = 24 * DPR();
+  const gHit = cropGuideHits.find(h => q.px >= h.x0 && q.px <= h.x1 && q.py >= h.y0 && q.py <= h.y1);
+  if (gHit) { setReach(gHit.T); return; }
   const corners = [[c.x, c.y], [c.x + c.w, c.y], [c.x, c.y + c.h], [c.x + c.w, c.y + c.h]];
   const ci = corners.findIndex(([cx, cy]) => Math.hypot(b.ox + cx * b.iw - q.px, b.oy + cy * b.ih - q.py) < hit);
   if (ci >= 0) ecDrag = { mode: 'corner', ax: corners[3 - ci][0], ay: corners[3 - ci][1] };
   else if (q.nx > c.x && q.nx < c.x + c.w && q.ny > c.y && q.ny < c.y + c.h) ecDrag = { mode: 'move', sx: q.nx, sy: q.ny, rect: { ...c } };
   else return;
+  ecDrag.before = geomState(cur());
   $('editView').setPointerCapture(e.pointerId);
 }, true);
 $('editView').addEventListener('pointermove', e => {
@@ -4950,7 +5038,11 @@ $('editView').addEventListener('pointermove', e => {
   }
   renderEditSoon();
 }, true);
-$('editView').addEventListener('pointerup', () => { ecDrag = null; }, true);
+$('editView').addEventListener('pointerup', () => {
+  /* a drag that changed the box is one Undo step */
+  if (ecDrag && ecDrag.before) { const it = cur(), now = it && geomState(it); if (now && JSON.stringify(now) !== JSON.stringify(ecDrag.before)) { const h = geomHist.get(it.key) || []; h.push(ecDrag.before); if (h.length > 60) h.shift(); geomHist.set(it.key, h); syncUndo(); } }
+  ecDrag = null;
+}, true);
 /* dragging the crop box must not start a text selection across the page */
 $('editView').addEventListener('mousedown', e => { if (cropMode) e.preventDefault(); }, true);
 document.addEventListener('keydown', e => { if (cropMode && (e.key === 'Enter' || e.key === 'Escape') && !e.target.closest('input,select,textarea')) { e.preventDefault(); e.stopImmediatePropagation(); setCropMode(false); } }, true);
@@ -4962,13 +5054,25 @@ function buildEditSliders() {
       const s = document.createElement('div'); s.className = 'esec'; s.textContent = k; box.append(s);
       if (k === 'Crop and straighten') {
         const w = document.createElement('div'); w.className = 'ecrop';
-        w.innerHTML = '<button class="knob ebtn wide" id="eCropBtn" aria-pressed="false" title="Drag the corners or the whole box to crop. Click again, or press Enter, when you\u2019re done.">Crop</button>'
+        w.innerHTML = '<div class="ecropbtns"><button class="knob ebtn" id="eCropBtn" aria-pressed="false" title="Drag the corners or the whole box to crop. Click again, or press Enter, when you\u2019re done.">Crop</button><button class="knob ebtn" id="eCropUndo" disabled title="Step back through your crop and straighten changes, one at a time">Undo</button></div>'
           + '<div class="ecropopts" id="eCropOpts" hidden><label class="erow" for="eCropAr">Aspect</label><select id="eCropAr" title="Keep the crop to a shape, or Free for any shape"><option value="orig">Original</option><option value="free">Free</option><option value="1:1">1:1</option><option value="4:5">4:5</option><option value="5:4">5:4</option><option value="3:2">3:2</option><option value="2:3">2:3</option><option value="16:9">16:9</option></select>'
-          + '<button class="knob ebtn" id="eCropReset">Reset crop</button><div class="ecropinfo" id="eCropInfo" aria-live="polite"></div></div>';
+          + '<div class="ereach" id="eReach" hidden><span class="erow">Reach: crop to match</span><div class="ereachbtns"><button class="knob ebtn" id="eReach14" title="Crop to the framing a 1.4\u00d7 teleconverter would have given">+1.4\u00d7</button><button class="knob ebtn" id="eReach2" title="Crop to the framing a 2\u00d7 teleconverter would have given">+2\u00d7</button></div>'
+          + '<label class="ereachmm" title="Crop to the framing of any focal length">Custom <input type="number" id="eReachMm" min="10" max="9999" step="10" placeholder="mm"> mm</label>'
+          + '<label class="chk ereachg"><input type="checkbox" id="eReachGuides"> Reach guides</label></div>'
+          + '<button class="knob ebtn" id="eCropReset">Reset crop</button><div class="ecropinfo" id="eCropInfo" aria-live="polite"></div><label class="ereachmm" title="Print size depends only on pixels and the ppi you print at; 300 is sharpest, 240 is common and fine for most prints">Print at <select id="eCropPpi"><option value="240">240</option><option value="300">300</option><option value="360">360</option></select> ppi</label></div>';
         box.append(w);
         $('eCropBtn').onclick = () => setCropMode(!cropMode);
-        $('eCropAr').onchange = e => { cropAr = e.target.value; fitCropAr(); renderEditSoon(); };
-        $('eCropReset').onclick = () => { cropRect = { x: 0, y: 0, w: 1, h: 1 }; fitCropAr(); renderEditSoon(); };
+        $('eCropUndo').onclick = undoGeom;
+        $('eCropPpi').value = String(+S.cropPpi || 300);
+        $('eCropPpi').onchange = e => { S.cropPpi = +e.target.value; saveS(); renderEditSoon(); };
+        $('eCropAr').onchange = e => { pushGeom(); cropAr = e.target.value; fitCropAr(); renderEditSoon(); };
+        $('eCropReset').onclick = () => { pushGeom(); cropRect = { x: 0, y: 0, w: 1, h: 1 }; fitCropAr(); renderEditSoon(); };
+        $('eReach14').onclick = () => setReach(reachBase(cur()) * 1.4);
+        $('eReach2').onclick = () => setReach(reachBase(cur()) * 2);
+        $('eReachMm').onchange = e => { const v = +e.target.value; if (v > 0) setReach(v); };
+        $('eReachMm').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); const v = +e.target.value; if (v > 0) setReach(v); } };
+        $('eReachGuides').checked = !!S.cropGuides;
+        $('eReachGuides').onchange = e => { S.cropGuides = e.target.checked; saveS(); renderEditSoon(); };
       }
       if (k === 'Color') {
         const w = document.createElement('div'); w.className = 'ebw';
@@ -4996,6 +5100,7 @@ function buildEditSliders() {
   }
 }
 function setEdit(k, val) {
+  if (k === 'rot') { if (!rotGesture) pushGeom(); clearTimeout(rotGesture); rotGesture = setTimeout(() => { rotGesture = 0; }, 700); }
   const it = cur(); if (!it) return;
   const r = EDITS[it.key] || blankEdit(); r[k] = Math.round(val);
   if (hasEdit(r)) EDITS[it.key] = r; else delete EDITS[it.key];
@@ -5006,7 +5111,7 @@ function setEdit(k, val) {
 function editLoad() {
   const r = (cur() && EDITS[cur().key]) || blankEdit();
   for (const k of EDIT_KEYS) { const v = r[k] || 0; $('e_' + k).value = v; $('ev_' + k).textContent = editVal(k, v); }
-  $('eCropBtn').classList.toggle('has', !!r.crop);
+  $('eCropBtn').classList.toggle('has', !!r.crop); syncUndo();
   const bw = !!r.bw;
   $('eBw').checked = bw; $('eBwOpts').hidden = !bw; $('eBwF').value = r.bwf || 'orange'; $('eBwT').value = r.bwt || 'none';
   /* temperature, tint and vibrance don't apply to black and white; the filter takes their place */
@@ -5091,7 +5196,7 @@ $('editBtn').onclick = () => setEditing(!state.editing);
 $('eDone').onclick = () => setEditing(false);
 $('eExport').onclick = () => { webSrcOnce = state.sel && state.sel.size > 1 ? 'sel' : 'current'; $('webBtn').click(); };
 $('eAuto').onclick = () => { const it = cur(), r = autoEdit(); if (!it || !r) return; const prev = EDITS[it.key]; if (prev && prev.bw) { r.bw = 1; r.bwf = prev.bwf; r.bwt = prev.bwt; r.vib = 0; } if (prev) { r.rot = prev.rot || 0; r.crop = prev.crop || null; r.cropAr = prev.cropAr || 'orig'; } setRecipe(it, r); editLoad(); };
-$('eReset').onclick = () => { const it = cur(); if (!it) return; if (cropMode) { cropRect = { x: 0, y: 0, w: 1, h: 1 }; cropAr = 'orig'; $('eCropAr').value = 'orig'; } setRecipe(it, null); editLoad(); };
+$('eReset').onclick = () => { const it = cur(); if (!it) return; pushGeom(); if (cropMode) { cropRect = { x: 0, y: 0, w: 1, h: 1 }; cropAr = 'orig'; $('eCropAr').value = 'orig'; } setRecipe(it, null); editLoad(); };
 $('eCopy').onclick = () => { const r = editOf(cur()); if (!r) return toast('This photo has no edits to copy'); editClip = { ...r }; editLoad(); toast('Edits copied'); };
 $('ePaste').onclick = () => { const it = cur(); if (!it || !editClip) return; setRecipe(it, editClip); editLoad(); };
 $('ePasteAll').onclick = () => {
@@ -5861,8 +5966,20 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.32 beta';
+const VERSION = '0.9.34 beta';
 const RELEASES = [
+  { v: '0.9.34 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'Crop now has an Undo button beside it: it steps back through your crop and straighten changes one at a time, while cropping or after, without touching your color and tone edits.',
+      'Choose the print size the crop readout uses: 240, 300, or 360 ppi. Your choice is remembered.',
+    ]],
+  ] },
+  { v: '0.9.33 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Reach in the crop tool: while you crop, the size label also shows the focal length your crop is equivalent to. Reach buttons crop to what a 1.4\u00d7 or 2\u00d7 teleconverter would have framed, or type any focal length. Reach guides (optional) show those framings as dashed boxes; click one to use it.',
+      'Crop reach in the export info bar: on cropped photos, it adds the equivalent focal length after the real one, for example 644mm \u00b7 cropped \u2248 1,290mm.',
+    ]],
+  ] },
   { v: '0.9.32 beta', date: 'November 2026', groups: [
     ['Improved', [
       'Sort by Capture time \u2013 Newest, as well as Capture time \u2013 Oldest. Photos without a capture time go last either way.',
