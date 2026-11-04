@@ -1,6 +1,6 @@
 /* FledgeView offline support. The app works offline after the first visit.
    When you publish a new version, change CACHE below (it follows the app's version number). */
-const CACHE = 'fledgeview-0.9.36-beta';
+const CACHE = 'fledgeview-0.9.37-beta';
 const ASSETS = [
   "/app/",
   "/app/index.html",
