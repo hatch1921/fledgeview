@@ -2330,6 +2330,10 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;white-space:no
 .th .bbar.b1{background:var(--teal)}
 .th .bn,.th .sp{position:absolute;bottom:7px;font-family:var(--cond);font-size:12px;color:#fff;background:rgba(0,0,0,.65);padding:0 4px;border-radius:3px}
 .th .bn{right:4px}.th .sp{left:4px}
+.th .lrow{position:absolute;left:4px;bottom:7px;display:flex;gap:4px;align-items:center;max-width:calc(100% - 52px)}
+.th .lrow > .sp,.th .lrow > .ed{position:static}
+.th .ed{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100% - 52px)}
+.th .lrow > .ed{max-width:none;min-width:0}
 .th .xp{position:absolute;top:4px;right:4px;font-family:var(--cond);font-size:11px;color:#fff;padding:0 4px;border-radius:3px}
 .th .xp.over{background:#d9822b}.th .xp.under{background:#3a6fd8}
 .th{container-type:inline-size}
@@ -4751,6 +4755,16 @@ function setInfo(open) {
   $('infoToggle').setAttribute('aria-expanded', open);
 }
 $('infoToggle').onclick = () => setInfo(!S.infoOpen);
+/* one label that says what was done: Cropped, Edited, or Cropped + edited; the tip lists the specifics */
+function editKind(r) {
+  const geo = [], tone = [];
+  if (r.crop) { const ar = r.cropAr && r.cropAr !== 'orig' && r.cropAr !== 'free' ? ' ' + r.cropAr : ''; geo.push('Crop' + ar); }
+  if (r.rot) geo.push('Straighten ' + editVal('rot', r.rot));
+  if (r.bw) tone.push('Black & white');
+  for (const [k, label] of EDIT_UI) if (label && k !== 'rot' && r[k]) tone.push(label + ' ' + editVal(k, r[k]));
+  const label = geo.length && tone.length ? 'Cropped + edited' : geo.length ? (r.crop ? 'Cropped' : 'Straightened') : 'Edited';
+  return { label, tip: [...geo, ...tone].join(' \u00b7 ') };
+}
 function paintThumb(it) {
   const b = it.el; if (!b) return;
   b.innerHTML = '';
@@ -4761,7 +4775,7 @@ function paintThumb(it) {
   const add = (cls, txt) => { const s = document.createElement('span'); s.className = cls; s.textContent = txt; b.append(s); return s; };
   if (on('cull') && c.r) add('stars', '').innerHTML = rateHTML(c.r);
   if (on('cull') && c.f) add('flag ' + (c.f === 1 ? 'pick' : 'reject'), c.f === 1 ? 'Pick' : 'Reject');
-  if (EDITS[it.key]) add('ed', 'Edited');
+  { const er = EDITS[it.key]; if (er && hasEdit(er)) { const k = editKind(er); add('ed', k.label).title = k.tip; } }
   { const xf = expoFlag(it); if (xf) add('xp ' + xf, xf === 'over' ? 'Over' : 'Under').title = expoText(it); }
   b.classList.toggle('msel', !!(state.sel && state.sel.has(it.key)));
   if (on('bursts') && it.burst) {
@@ -4769,6 +4783,8 @@ function paintThumb(it) {
     if (it.burst.pos === 1) { const bn = add('bn', ''); bn.title = `Burst of ${it.burst.size}`; const l = document.createElement('span'); l.className = 'bl'; l.textContent = `Burst of ${it.burst.size}`; const sh = document.createElement('span'); sh.className = 'bs'; sh.textContent = `×${it.burst.size}`; bn.append(l, sh); }
   }
   if (on('sharp')) { const p = sharpPct(it); if (p != null) { const band = sharpBand(p, burstAtFocus(it)); add('sp ' + band.cls, band.label).title = sharpTip(it, p); } }
+  /* the sharpness label and Edited share the bottom-left corner: put them side by side instead of on top of each other */
+  { const sp = b.querySelector(':scope > .sp'), ed = b.querySelector(':scope > .ed'); if (sp && ed) { const row = document.createElement('span'); row.className = 'lrow'; row.append(sp, ed); b.append(row); } }
   /* find out whether this Sony file has a focus point, so its burst's labels show the right confidence */
   if (on('sharp') && it.burst && it.af === undefined && it.meta && /sony/i.test(it.meta.Make || '')) sonyFocus(it).then(() => it.burst && it.burst.members.forEach(paintThumb)).catch(() => {});
 }
@@ -8258,8 +8274,18 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.55 beta';
+const VERSION = '0.9.57 beta';
 const RELEASES = [
+  { v: '0.9.57 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'The thumbnail label says what was done: Cropped, Edited (adjustments), or Cropped + edited, and hovering over it lists the specifics, such as Crop 1:1 \u00b7 Straighten +2.0\u00b0 \u00b7 Exposure +20.',
+    ]],
+  ] },
+  { v: '0.9.56 beta', date: 'November 2026', groups: [
+    ['Fixed', [
+      'On an edited burst frame, the sharpness label and the Edited label no longer overlap on the thumbnail; they sit side by side.',
+    ]],
+  ] },
   { v: '0.9.55 beta', date: 'November 2026', groups: [
     ['Improved', [
       'Burst sharpness labels are now comparisons, not verdicts: Best, then the percentage of the sharpest frame (green from 90%), and nothing is labeled Soft. A sharp subject on a soft background is what a wide aperture is for, and those frames shouldn\u2019t be passed over.',
