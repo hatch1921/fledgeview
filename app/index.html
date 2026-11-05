@@ -514,6 +514,7 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;white-space:no
 .screen.compare .cap,.screen.quad .cap{display:block}
 .screen.compare .osd,.screen.quad .osd{display:none}
 .screen.quad .panes{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+.screen.compare .pane.held::before{content:"Held";position:absolute;top:10px;right:12px;z-index:6;font-family:var(--cond);font-size:13px;font-weight:600;letter-spacing:.03em;color:#1b1b1b;background:var(--amber);padding:2px 8px;border-radius:4px;pointer-events:none}
 .screen.quad .pane.active::after,.screen.compare .pane.active::after{content:"";position:absolute;inset:0;border:3px solid var(--amber);pointer-events:none;z-index:5}
 .screen.quad .pane{cursor:pointer}
 .th.inq{border-color:rgba(233,165,59,.5)}
@@ -656,6 +657,8 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;white-space:no
 .th .bbar.b1{background:var(--teal)}
 .th .bn,.th .sp{position:absolute;bottom:7px;font-family:var(--cond);font-size:12px;color:#fff;background:rgba(0,0,0,.65);padding:0 4px;border-radius:3px}
 .th .bn{right:4px}.th .sp{left:4px}
+.th .xp{position:absolute;top:4px;right:4px;font-family:var(--cond);font-size:11px;color:#fff;padding:0 4px;border-radius:3px}
+.th .xp.over{background:#d9822b}.th .xp.under{background:#3a6fd8}
 .th{container-type:inline-size}
 .th .bn .bs{display:none}
 @container (max-width:140px){.th .bn .bl{display:none}.th .bn .bs{display:inline}}
@@ -797,6 +800,9 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
             <option value="e3">Only 3s</option>
             <option value="e4">Only 4s</option>
             <option value="e5">Only 5s</option>
+            <option value="over">Possibly overexposed</option>
+            <option value="under">Possibly underexposed</option>
+            <option value="soft">Soft frames in bursts</option>
           </select>
         </div>
         <label class="mrow" data-f="cull"><input type="checkbox" id="advance"> Advance after rating</label>
@@ -1440,6 +1446,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
       <section data-g="Review tools">
         <h3>Review tools</h3>
         <ul>
+          <li><strong>Hold a reference in Compare:</strong> in Compare (<kbd>C</kbd>), press <kbd>H</kbd> to hold the current frame on the right (marked Held); the arrows then step through the other frames on the left, so you’re always comparing against your favorite. <kbd>H</kbd> on a better frame makes it the new held one; click the held frame and press <kbd>H</kbd> to release it.</li>
           <li><strong>Keep the best of a burst:</strong> on the frame you want, press <kbd>Shift</kbd> + <kbd>P</kbd> (or Cull ▾ → Keep this, reject rest of burst): it’s picked, the rest of the burst is rejected (frames you already picked stay picked), and FledgeView moves on to the next photo. <kbd>Shift</kbd> + <kbd>U</kbd> undoes it.</li>
           <li><strong>Session summary</strong> (Cull ▾): photos reviewed, picks, rejects, time spent and photos per minute. It also appears once when you reach the last photo.</li>
           <li><strong>Blinkies</strong> (<kbd>B</kbd>): blown highlights flash red, and shadows crushed to pure black flash blue.</li>
@@ -1785,6 +1792,10 @@ let SHARP = {};
 try { SHARP = JSON.parse(localStorage.getItem('chimp-sharp2') || '{}') || {}; localStorage.removeItem('chimp-sharp'); } catch {}
 let sharpTimer;
 const saveSharp = () => { clearTimeout(sharpTimer); sharpTimer = setTimeout(() => { try { const k = Object.keys(SHARP); if (k.length > 20000) k.slice(0, k.length - 20000).forEach(x => delete SHARP[x]); localStorage.setItem('chimp-sharp2', JSON.stringify(SHARP)); } catch {} }, 800); };
+/* exposure check, measured in the same pass as sharpness: [percent of the frame blown, average brightness, brightness of the brightest 1%] */
+let EXPO = {}; try { EXPO = JSON.parse(localStorage.getItem('chimp-expo') || '{}') || {}; } catch {}
+let expoTimer = 0;
+const saveExpo = () => { clearTimeout(expoTimer); expoTimer = setTimeout(() => { try { const k = Object.keys(EXPO); if (k.length > 20000) k.slice(0, k.length - 20000).forEach(x => delete EXPO[x]); localStorage.setItem('chimp-expo', JSON.stringify(EXPO)); } catch {} }, 800); };
 let CULL = {};
 try { CULL = JSON.parse(localStorage.getItem('chimp-cull') || '{}') || {}; } catch {}
 let cullTimer;
@@ -1960,6 +1971,8 @@ document.addEventListener('drop', async e => {
 });
 
 $('clearAll').onclick = () => {
+  state.cmpRef = null;
+  if (state.filter === 'over' || state.filter === 'under' || state.filter === 'soft') state.filter = 'all';
   sessReset(); burstUndo = null;
   /* close any open panel first (a crop in progress is saved), so nothing from the last photo stays on screen */
   if (wbPick) setWbPick(false);
@@ -2587,6 +2600,7 @@ function essentialRows(it, m) {
   add('Exposure', 'Aperture', m.FNumber ? 'f/' + m.FNumber : '');
   add('Exposure', 'ISO', iso);
   add('Exposure', 'Exposure comp', typeof m.ExposureCompensation === 'number' ? fmtEv(m.ExposureCompensation) + ' EV' : '');
+  add('Exposure', 'Exposure check', expoText(it));
   add('Exposure', 'Mode', m.ExposureProgram);
   add('Exposure', 'Metering', METER[m.MeteringMode] || m.MeteringMode);
   add('Exposure', 'White balance', m.WhiteBalance);
@@ -2710,10 +2724,11 @@ const PASS = {
   all: () => true, picks: c => c.f === 1, unflagged: c => !c.f, rejects: c => c.f === -1,
   r1: c => c.r >= 1, r2: c => c.r >= 2, r3: c => c.r >= 3, r4: c => c.r >= 4, r5: c => c.r >= 5,
   e1: c => c.r === 1, e2: c => c.r === 2, e3: c => c.r === 3, e4: c => c.r === 4, e5: c => c.r === 5,
+  over: (c, it) => expoFlag(it) === 'over', under: (c, it) => expoFlag(it) === 'under', soft: (c, it) => { const q = sharpPct(it); return q != null && q < 70; },
 };
 function rebuildView(keep) {
   const fn = on('cull') ? PASS[state.filter] : PASS.all;
-  state.view = sortView(state.items.filter(it => fn(cullOf(it)) && passMetaFilters(it)));
+  state.view = sortView(state.items.filter(it => fn(cullOf(it), it) && passMetaFilters(it)));
   buildStrip();
   if (!state.view.length) {
     state.idx = -1; state.token++;
@@ -2752,7 +2767,8 @@ async function show(i) {
   } else await loadPane(panes[0], it, tok);
   if (tok !== state.token) return clearTimeout(slow);
   if (state.show.compare && !state.show.quad) {
-    const nx = state.view[i + 1];
+    const nx = state.cmpRef && state.cmpRef !== it && state.items.includes(state.cmpRef) ? state.cmpRef : state.view[i + 1];
+    $('pane1').classList.toggle('held', !!state.cmpRef && nx === state.cmpRef);
     if (nx) { await getMeta(nx); await loadPane(panes[1], nx, tok); } else clearPane(panes[1]);
     if (tok !== state.token) return clearTimeout(slow);
   }
@@ -2776,7 +2792,7 @@ async function show(i) {
   syncViewEdits();
   preloadNeighbors(tok);
   markActive();
-  if (on('sharp') && it.sharp == null && ok) scoreOnly(it).then(() => { paintThumb(it); if (cur() === it) { refreshOsd(); refreshRows(); } });
+  if (on('sharp') && (it.sharp == null || !EXPO[it.key]) && ok) scoreOnly(it).then(() => { paintThumb(it); if (cur() === it) { refreshOsd(); refreshRows(); } });
 }
 function updateBigWarn(it) {
   const el = $('bigWarn'), src = it && it.cache && it.cache.src;
@@ -3059,6 +3075,7 @@ function paintThumb(it) {
   if (on('cull') && c.r) add('stars', '').innerHTML = rateHTML(c.r);
   if (on('cull') && c.f) add('flag ' + (c.f === 1 ? 'pick' : 'reject'), c.f === 1 ? 'Pick' : 'Reject');
   if (EDITS[it.key]) add('ed', 'Edited');
+  { const xf = expoFlag(it); if (xf) add('xp ' + xf, xf === 'over' ? 'Over' : 'Under').title = expoText(it); }
   b.classList.toggle('msel', !!(state.sel && state.sel.has(it.key)));
   if (on('bursts') && it.burst) {
     add('bbar b' + (it.burst.id % 2), '');
@@ -3223,6 +3240,19 @@ $('filterSel').onchange = e => setFilter(e.target.value);
 function setFilter(v) {
   state.filter = v; $('filterSel').value = v;
   rebuildView(cur()); syncFilterUi();
+  if (v === 'over' || v === 'under' || v === 'soft') checkForFilter(v);
+}
+/* the exposure and Soft filters need every photo checked first; check the ones that aren't, then show the result */
+let checkBusy = false;
+async function checkForFilter(v) {
+  if (checkBusy) return;
+  const need = state.items.filter(it => v === 'soft' ? (it.burst && it.sharp == null) : (!EXPO[it.key] || it.sharp == null));
+  if (!need.length) return;
+  checkBusy = true;
+  await scorePool(need, n => status(`${v === 'soft' ? 'Checking sharpness' : 'Checking exposure'}: ${n} of ${need.length}`), () => state.filter !== v);
+  checkBusy = false; status('');
+  need.forEach(paintThumb);
+  if (state.filter === v) { rebuildView(cur()); syncFilterUi(); }
 }
 function buildFilterIcons() {
   const box = $('rfIcons'); box.innerHTML = '';
@@ -3624,6 +3654,7 @@ $('peakPct').oninput = e => {
   clearTimeout(peakTimer); peakTimer = setTimeout(repaintPanes, 60);
 };
 function setCompare(v) {
+  if (!v) { state.cmpRef = null; $('pane1').classList.remove('held'); }
   if (v && state.editing) setEditing(false, false);
   if (v && state.show.quad) setQuad(false, true);
   state.show.compare = v; setTog('tCompare', v); state.cmpSide = 0;
@@ -3644,9 +3675,10 @@ function setQuad(v, quiet) {
 }
 function markActive() { panes.forEach((p, k) => p.el.classList.toggle('active', state.show.quad ? state.idx - state.quadBase === k : !!state.show.compare && state.cmpSide === k)); }
 /* the photo that ratings, Pick and Reject apply to: in Compare, whichever side you clicked */
-function rateTarget() { if (state.show.compare && state.cmpSide === 1) { const it = state.view[state.idx + 1]; if (it) return it; } return cur(); }
+function rateTarget() { if (state.show.compare && state.cmpSide === 1) { const it = cmpRight(); if (it) return it; } return cur(); }
+function cmpRight() { const c = cur(); return state.cmpRef && state.cmpRef !== c && state.items.includes(state.cmpRef) ? state.cmpRef : state.view[state.idx + 1]; }
 function selectCmp(k) {
-  if (k === 1 && !state.view[state.idx + 1]) return;
+  if (k === 1 && !cmpRight()) return;
   state.cmpSide = k; markActive(); updateReadout(); refreshCullUi();
 }
 function selectPane(k) {
@@ -3662,6 +3694,16 @@ function quadPick() {
   if (next < state.view.length) show(next); else { toast('That was the last set of four'); updateCaptions(); }
 }
 const quadStep = d => show(Math.max(0, state.quadBase + 4 * d));
+/* Compare with a held reference: H holds a frame on the right while the arrows step through the rest on the left */
+function toggleHold() {
+  if (!state.show.compare) { toast('Press C for Compare first, then H to hold a frame'); return; }
+  const c = cur(); if (!c) return;
+  if (state.cmpRef && state.cmpSide === 1) { state.cmpRef = null; state.cmpSide = 0; toast('Released the held frame'); show(state.idx); return; }
+  const promoting = !!state.cmpRef;
+  state.cmpRef = c; state.cmpSide = 0;
+  toast(promoting ? 'This frame is now held. Keep stepping with the arrows.' : 'Held on the right. Step through the others with the arrows; H on the left frame makes it the new held one.');
+  if (state.idx < state.view.length - 1) show(state.idx + 1); else show(state.idx);
+}
 $('tQuad').onclick = () => setQuad(!state.show.quad);
 $('tCompare').onclick = () => setCompare(!state.show.compare);
 
@@ -3941,6 +3983,23 @@ function sharpnessOf(src, sw, sh, focus) {
   const top = vars.slice(0, 3);
   return top.length ? Math.round(top.reduce((a, b) => a + b, 0) / top.length) : null;
 }
+/* conservative on purpose: a wildlife photo on a dark background is often meant to be dark, so Under needs the whole frame dark
+   and nothing bright in it; Over needs a real share of the frame blown, not a catchlight or a white feather edge */
+function expoMeasure(src) {
+  const W = src.naturalWidth || src.width, H = src.naturalHeight || src.height, k = Math.min(1, 400 / Math.max(W, H));
+  const w = Math.max(2, Math.round(W * k)), h = Math.max(2, Math.round(H * k)), t = document.createElement('canvas'); t.width = w; t.height = h;
+  const x = t.getContext('2d', { willReadFrequently: true }); x.drawImage(src, 0, 0, w, h);
+  const d = x.getImageData(0, 0, w, h).data, N = w * h, hist = new Uint32Array(256); let clip = 0, sum = 0;
+  for (let i = 0; i < d.length; i += 4) { const r0 = d[i], g0 = d[i + 1], b0 = d[i + 2]; if (r0 >= 252 || g0 >= 252 || b0 >= 252) clip++; const L = (0.2126 * r0 + 0.7152 * g0 + 0.0722 * b0) | 0; hist[L]++; sum += L; }
+  let acc = 0, p99 = 255; for (let v = 0; v < 256; v++) { acc += hist[v]; if (acc >= N * 0.99) { p99 = v; break; } }
+  return [Math.round(clip / N * 1000) / 10, Math.round(sum / N), p99];
+}
+function expoFlag(it) { const e = EXPO[it.key]; if (!e) return ''; if (e[0] >= 3) return 'over'; if (e[1] < 56 && e[2] < 140) return 'under'; return ''; }
+function expoText(it) {
+  const e = EXPO[it.key]; if (!e) return '';
+  const f = expoFlag(it);
+  return f === 'over' ? `${e[0]}% of the frame is blown: possibly overexposed` : f === 'under' ? 'Dark overall, with nothing bright: possibly underexposed' : 'No obvious problem';
+}
 function pickScoreJpeg(list) {
   const ok = list.filter(c => Math.max(c.w, c.h) >= 1500);
   if (ok.length) return ok.reduce((a, b) => Math.max(b.w, b.h) < Math.max(a.w, a.h) ? b : a);
@@ -3963,15 +4022,17 @@ async function smallPreviewImg(it) {
   return p && p.img;
 }
 async function scoreOnly(it) {
-  if (it.sharp != null) return it.sharp;
-  if (SHARP[it.key] != null) return (it.sharp = SHARP[it.key]);
-  if (!it.meta) { try { await getMeta(it); } catch {} }
+  if (it.sharp == null && SHARP[it.key] != null) it.sharp = SHARP[it.key];
+  if (it.sharp != null && EXPO[it.key]) return it.sharp;
   let focus = null;
-  try { if (await sonyFocus(it)) focus = DIRECT.has(it.ext) ? afFor(it) : it.af; } catch {}
+  if (it.sharp == null) {
+    if (!it.meta) { try { await getMeta(it); } catch {} }
+    try { if (await sonyFocus(it)) focus = DIRECT.has(it.ext) ? afFor(it) : it.af; } catch {}
+  }
   const img = await smallPreviewImg(it);
-  if (!img) return null;
-  it.sharp = sharpnessOf(img, img.naturalWidth, img.naturalHeight, focus);
-  if (it.sharp != null) { SHARP[it.key] = it.sharp; saveSharp(); }
+  if (!img) return it.sharp ?? null;
+  if (it.sharp == null) { it.sharp = sharpnessOf(img, img.naturalWidth, img.naturalHeight, focus); if (it.sharp != null) { SHARP[it.key] = it.sharp; saveSharp(); } }
+  if (!EXPO[it.key]) { try { EXPO[it.key] = expoMeasure(img); saveExpo(); } catch {} }
   return it.sharp;
 }
 async function scorePool(list, onProgress, shouldStop, background = false) {
@@ -6300,7 +6361,7 @@ $('dofUse').onclick = async () => {
 
 /* ---------- help ---------- */
 const KEYS = [
-  ['Shift + P', 'Keep this frame and reject the rest of its burst (your picks stay); Shift + U undoes it'], ['V', 'Photo view: just the photo, filling the screen (Esc returns)'], ['R', 'Crop and straighten panel'], ['← →', 'Previous or next photo'], ['↑ ↓', 'Up or down a row in the grid'], ['Home  End', 'First or last photo'],
+  ['H', 'In Compare: hold this frame on the right while the arrows step through the rest; H on the left frame makes it the new held one, and H on the held frame releases it'], ['Shift + P', 'Keep this frame and reject the rest of its burst (your picks stay); Shift + U undoes it'], ['V', 'Photo view: just the photo, filling the screen (Esc returns)'], ['R', 'Crop and straighten panel'], ['← →', 'Previous or next photo'], ['↑ ↓', 'Up or down a row in the grid'], ['Home  End', 'First or last photo'],
   ['1 – 5', 'Star rating (press again to clear)'], ['0', 'Clear stars'], ['P', 'Pick'], ['X', 'Reject'], ['U', 'Clear flag'],
   ['W', 'In Adjust: pick neutral (click something gray or white to set the white balance)'], ['Z', 'Zoom in or back to fit'], ['+  −', 'Zoom in or out'], ['B', 'Blinkies: blown highlights (red) and crushed blacks (blue)'], ['E', 'Focus peaking'], ['G', 'Composition guides in Frame mode and the export crop: thirds, golden ratio, diagonals, off'], ['J', 'In Adjust: show or hide clipping (red highlights, blue blacks)'], ['\\', 'In Adjust: hold to see the original'],
   ['A', 'Focus point'], ['C', 'Compare with the next frame'], ['Q', '4-up view: click a photo to select it, P picks it and loads the next four, ← → move four at a time'], ['I', 'Change info display'], ['F', 'Full screen'], ['?', 'This list'],
@@ -6377,6 +6438,7 @@ document.addEventListener('keydown', e => {
   else if (on('cull') && it) {
     const t = rateTarget(), adv = !state.show.quad;
     if (/^[0-5]$/.test(k)) { const n = +k; setCull(t, { r: n && cullOf(t).r === n ? 0 : n }, adv); }
+    else if ((k === 'h' || k === 'H') && state.show.compare) toggleHold();
     else if ((k === 'p' || k === 'P') && e.shiftKey) keepBurst(t);
     else if ((k === 'u' || k === 'U') && e.shiftKey) undoKeepBurst();
     else if (k === 'p' || k === 'P') state.show.quad && S.advance ? quadPick() : setCull(t, { f: 1 }, adv);
@@ -6507,8 +6569,14 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.52 beta';
+const VERSION = '0.9.53 beta';
 const RELEASES = [
+  { v: '0.9.53 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Exposure check: frames that are possibly overexposed (at least 3% of the frame blown) or underexposed (dark overall with nothing bright) get a small Over or Under badge, a line in Photo info, and their own filters under Cull \u25be \u2192 Show, along with Soft frames in bursts. It\u2019s cautious on purpose: a lit animal on a dark background isn\u2019t flagged. These are hints; nothing is rejected for you.',
+      'Hold a reference in Compare: press H to hold a frame on the right, then step through the rest of the burst with the arrows on the left, always comparing against your current favorite. H on a better frame makes it the new held one.',
+    ]],
+  ] },
   { v: '0.9.52 beta', date: 'November 2026', groups: [
     ['New', [
       'Keep the best of a burst in one key: on the frame you want, press Shift+P (or Cull \u25be \u2192 Keep this, reject rest of burst). That frame is picked, the rest of the burst is rejected (frames you already picked stay picked), and FledgeView moves to the next photo. Shift+U undoes it.',
@@ -6926,7 +6994,7 @@ async function ensureScored() {
   const mode = S.sort || 'name';
   if (scoringAll || (mode !== 'burst' && mode !== 'sharp')) return;
   if (metaQ.length || metaBusy) { status('Reading photo info before sorting…'); return; }
-  const need = state.items.filter(it => (mode === 'sharp' || it.burst) && it.sharp == null);
+  const need = state.items.filter(it => (mode === 'sharp' || it.burst) && (it.sharp == null || !EXPO[it.key]));
   if (!need.length) return;
   scoringAll = true;
   const t0 = performance.now();
