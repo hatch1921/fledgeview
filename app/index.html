@@ -69,6 +69,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 .cbtns .wide{grid-column:1 / -1}
 .frameview{position:absolute;inset:0;z-index:3}
 .editview{position:absolute;inset:0;z-index:3;background:#000}
+.emptymsg{display:block;max-width:620px}
+.emptynote{display:block;margin-top:12px;font-size:.8em;color:#8d9297;max-width:560px}
+.empty{flex-direction:column}
 /* when the viewer shows a photo's edits, the camera info stays on top */
 .screen.viewedits .osd{z-index:4}
 .drawer{display:flex;align-items:flex-start;align-self:start;gap:8px;margin-left:-8px}
@@ -889,7 +892,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
           <div class="pane" id="pane2" hidden><canvas class="ov detail" hidden></canvas><canvas class="ov blink" hidden></canvas><canvas class="ov peak" hidden></canvas><div class="af" hidden></div><div class="cap"></div></div>
           <div class="pane" id="pane3" hidden><canvas class="ov detail" hidden></canvas><canvas class="ov blink" hidden></canvas><canvas class="ov peak" hidden></canvas><div class="af" hidden></div><div class="cap"></div></div>
         </div>
-        <div class="empty" id="empty">No photo loaded. Use Import to copy a memory card, or Open folder for photos already on your computer. You can also drop photos anywhere on this page.</div>
+        <div class="empty" id="empty"><span class="emptymsg">No photo loaded. Use Import to copy a memory card, or Open folder for photos already on your computer. You can also drop photos anywhere on this page.</span><span class="emptynote">Your browser may say “Upload” when you choose a folder. Nothing is uploaded: FledgeView reads your photos right here, on your computer.</span></div>
         <div class="msg" id="msg" hidden><span id="msgText"></span></div>
         <div class="beyond" id="beyond" hidden></div>
         <div class="frameview" id="frameView" hidden><canvas id="frameCanvas"></canvas></div>
@@ -1538,7 +1541,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
       <section data-g="Good to know">
         <h3>Good to know</h3>
         <ul>
-          <li><strong>Privacy:</strong> photos are read on your computer and never uploaded.</li>
+          <li><strong>Privacy:</strong> photos are read on your computer and never uploaded. Some browsers word their folder dialog as “Upload” or ask to “upload files to this site”; that’s only the browser’s standard wording for letting a page read files.</li>
           <li><strong>Where your ratings live:</strong> in this browser. Clearing your browsing data removes them, so use Move picks and rejects, Write ratings, or Copy list to keep a lasting record.</li>
           <li><strong>On fledgeview.com or downloaded:</strong> both work fully in Chrome or Edge, including moving files, writing sidecars, and saving straight to folders. Safari and Firefox can view, rate, edit, and export. After your first visit, fledgeview.com also works offline, and Chrome or Edge can install it as an app.</li>
           <li><strong>View ▾ → Appearance</strong> switches between <strong>Camera</strong> (the camera-back look) and <strong>Clean</strong> (flat and Mac-inspired, using your system’s font). Everything works the same in both.</li>
@@ -1885,6 +1888,13 @@ $('openFolder').onclick = async () => {
   openFolderInput();
 };
 /* Some browsers label their folder button “Upload.” Say plainly, once, that nothing leaves the computer. */
+/* the start screen's message; when nothing is loaded, a second line answers the browser's “Upload” wording before anyone worries */
+function setEmpty(filtered) {
+  const e = $('empty');
+  if (filtered) { e.textContent = 'No photos match this filter'; return; }
+  e.textContent = ''; const m = document.createElement('span'); m.className = 'emptymsg'; m.textContent = 'No photo loaded. Use Import to copy a memory card, or Open folder for photos already on your computer. You can also drop photos anywhere on this page.'; e.append(m);
+  const n = document.createElement('span'); n.className = 'emptynote'; n.textContent = 'Your browser may say \u201cUpload\u201d when you choose a folder. Nothing is uploaded: FledgeView reads your photos right here, on your computer.'; e.append(n);
+}
 function openFolderInput() {
   if (S.upNoteSeen) { $('dirInput').click(); return; }
   $('upDlg').showModal();
@@ -1942,7 +1952,7 @@ $('clearAll').onclick = () => {
   $('strip').innerHTML = ''; $('gridCount').textContent = ''; $('sidePath').hidden = true; if (state.sel) { state.sel.clear(); refreshSel(); }
   state.lensF = state.camF = state.typeF = ''; refreshFilterOptions();
   panes.forEach(clearPane);
-  $('osd').hidden = true; $('msg').hidden = true; $('empty').hidden = false; $('empty').textContent = 'No photo loaded. Use Import to copy a memory card, or Open folder for photos already on your computer. You can also drop photos anywhere on this page.';
+  $('osd').hidden = true; $('msg').hidden = true; $('empty').hidden = false; setEmpty(false);
   $('screen').classList.add('noimg');
   $('rows').innerHTML = '<p class="none">Select a photo to see its EXIF data. Click any row to copy it.</p>';
   $('copyAll').disabled = true;
@@ -2682,7 +2692,7 @@ function rebuildView(keep) {
   if (!state.view.length) {
     state.idx = -1; state.token++;
     panes.forEach(clearPane); $('osd').hidden = true; $('screen').classList.add('noimg'); setZoomButtons(false);
-    $('empty').hidden = false; $('empty').textContent = state.items.length ? 'No photos match this filter' : 'No photo loaded. Use Import to copy a memory card, or Open folder for photos already on your computer. You can also drop photos anywhere on this page.';
+    $('empty').hidden = false; setEmpty(!!state.items.length);
     $('rows').innerHTML = ''; updateReadout(); refreshCullUi();
     return;
   }
@@ -6412,8 +6422,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.49 beta';
+const VERSION = '0.9.50 beta';
 const RELEASES = [
+  { v: '0.9.50 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'The start screen now says up front that your browser may use the word \u201cUpload\u201d when you choose a folder, and that nothing is uploaded: FledgeView reads your photos on your computer.',
+    ]],
+  ] },
   { v: '0.9.49 beta', date: 'November 2026', groups: [
     ['Improved', [
       'Changed sliders stand out more: their values are shown in the accent color, and the \u21ba reset buttons are brighter.',
