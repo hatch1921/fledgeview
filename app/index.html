@@ -664,8 +664,9 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;white-space:no
 @container (max-width:140px){.th .bn .bl{display:none}.th .bn .bs{display:inline}}
 .th .sp.best{background:var(--amber);color:#000}
 .th .sp.ok{background:rgba(31,122,58,.88);color:#fff}
-.th .sp.mid{background:rgba(176,112,0,.9);color:#fff}
-.th .sp.soft{background:rgba(178,34,34,.9);color:#fff}
+.th .sp.mid{background:rgba(0,0,0,.65);color:#e8e8e8}
+.th .sp.approx{background:rgba(0,0,0,.55);color:#cfcfcf;box-shadow:inset 0 0 0 1px rgba(255,255,255,.28)}
+.th .sp.best.approx{background:rgba(0,0,0,.55);color:var(--amber);box-shadow:inset 0 0 0 1px var(--amber)}
 .upath{flex:1 1 0;display:flex;justify-content:flex-end;align-items:center;gap:6px;min-width:0;font-size:13px;color:var(--lcd-dim)}
 .upath .pi{flex:none}
 .upath .pt{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;direction:rtl;text-align:left}
@@ -802,7 +803,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
             <option value="e5">Only 5s</option>
             <option value="over">Possibly overexposed</option>
             <option value="under">Possibly underexposed</option>
-            <option value="soft">Soft frames in bursts</option>
+            <option value="soft">Under 70% of the sharpest in their burst</option>
           </select>
         </div>
         <label class="mrow" data-f="cull"><input type="checkbox" id="advance"> Advance after rating</label>
@@ -1464,7 +1465,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
           <li><kbd>1</kbd>–<kbd>5</kbd> rates, <kbd>P</kbd> picks, <kbd>X</kbd> rejects, and <kbd>U</kbd> clears the flag. Ratings show as feathers; change them to stars, dots, or diamonds in <strong>View ▾ → Features</strong>. Ratings are saved in this browser.</li>
           <li><strong>Show</strong> in the Rate panel filters to one exact rating or to your picks. <strong>Cull ▾ → Show</strong> adds rejects, unflagged photos, and “3 and up” style filters.</li>
           <li><strong>Filter</strong>, under Sort in the sidebar, shows only one lens, camera, or file type. Teleconverter combinations are listed separately, and filters combine with ratings and picks. <strong>Clear</strong> shows everything again.</li>
-          <li><strong>Bursts:</strong> frames shot within half a second of each other are grouped, shown by a colored bar under the thumbnails. Each frame is labeled compared with the sharpest one in its burst: <strong>Best</strong>, <strong>Sharp</strong> (within 90% of the best, which the eye can’t tell apart), a percentage for slightly softer frames, or <strong>Soft</strong> (below 70%). Hover over a label for the exact figure. On Sony files straight from the camera, sharpness is measured around the focus point (usually the eye), so a soft frame can’t win on a busy background; other files are measured across the whole frame.</li>
+          <li><strong>Bursts:</strong> frames shot within half a second of each other are grouped, shown by a colored bar under the thumbnails. Each frame is labeled compared with the sharpest one in its burst: <strong>Best</strong>, then a percentage (green from 90%, which the eye can’t tell apart from the best). It’s a comparison, not a verdict: a sharp subject on a soft background is exactly what a wide aperture is for. On Sony files straight from the camera, sharpness is measured at the focus point (usually the eye). Other files, including most exports, are measured across the whole frame, so a busy background or foreground can outscore your subject; their labels show <strong>≈</strong> (about) and are dimmer, as a rough guide. <strong>Best</strong> is where to look first; the keeper is always your call.</li>
           <li><strong>Auto-pick sharpest</strong> scores every burst and picks the frames nearly as sharp as the best one. It never rejects anything unless you turn that option on, and it leaves photos you’ve already rated alone.</li>
           <li><strong>Move picks and rejects…</strong> moves picks into a <code>_picks</code> folder and rejects into <code>_rejects</code>, next to your originals. Choose <strong>Picks and rejects</strong>, <strong>Rejects only</strong> (keepers stay where they are), or <strong>Picks only</strong>. Run it again after changing your mind, and photos move back. Nothing is ever deleted: once you’re sure, delete <code>_rejects</code> yourself in File Explorer or Finder, which sends it to the Recycle Bin or Trash.</li>
           <li><strong>Import</strong> (the first button in the toolbar) copies a card into your main photo folder, organized the way you choose: <code>date / lens</code> by default, or year, month, and day, lens first, a shoot name, or your own <strong>Custom</strong> pattern using words like <code>{year}</code>, <code>{date}</code>, <code>{lens}</code>, <code>{camera}</code>, and <code>{shoot}</code>. A live example shows where photos will go. Teleconverter shots can get their own subfolder, and sidecars travel with their photos. Choose the card and your main folder, check the plan, then click Import. Tick <strong>Backup</strong> and choose a second folder (ideally on another drive) to write a verified second copy at the same time. Every copy is checked, photos already imported are skipped, and the card is never changed. Then cull the new folders and import them into Lightroom when you’re ready.</li>
@@ -2355,7 +2356,19 @@ function peakImage(work, pct) {
   return img;
 }
 /* sharpness relative to the best frame in a burst, in bands: small differences are within what the eye can't see */
-function sharpBand(p) { return p === 100 ? { cls: 'best', label: 'Best' } : p >= 90 ? { cls: 'ok', label: 'Sharp' } : p >= 70 ? { cls: 'mid', label: p + '%' } : { cls: 'soft', label: 'Soft' }; }
+/* labels compare a frame with the sharpest in its burst, as a number rather than a verdict: a frame with a sharp subject and a
+   soft background is exactly what a wide aperture is for, so nothing is called "soft". When a burst has no focus point to
+   measure at (exports, most non-Sony files), the score covers the whole frame and is marked as a rough guide (≈) */
+function burstAtFocus(it) { return !!it.burst && it.burst.members.every(m => m.sharp == null || !!m.af); }
+function sharpBand(p, atFocus) {
+  if (p === 100) return { cls: 'best' + (atFocus ? '' : ' approx'), label: 'Best' };
+  return { cls: (p >= 90 ? 'ok' : 'mid') + (atFocus ? '' : ' approx'), label: (atFocus ? '' : '\u2248') + p + '%' };
+}
+function sharpTip(it, p) {
+  const at = burstAtFocus(it);
+  if (p === 100) return at ? 'Sharpest frame in this burst, measured at the focus point' : 'Sharpest frame in this burst, measured across the whole frame (this file has no focus point), so it may have won on a busy background or foreground. Check the frames yourself.';
+  return at ? `${p}% as sharp as the sharpest frame in this burst, measured at the focus point` : `About ${p}% as sharp as the sharpest frame in this burst, measured across the whole frame (this file has no focus point), so a busy background or foreground can outscore your subject. A sharp subject on a soft background can still be the frame you want.`;
+}
 /* where the current photo lives, relative to the folder that was opened (browsers don't reveal full disk paths) */
 async function photoFolder(it) {
   if (it._folder !== undefined) return it._folder;
@@ -2388,7 +2401,8 @@ function sharpText(it) {
   if (!on('sharp') || it.sharp == null) return '';
   const p = sharpPct(it);
   if (p == null) return '';
-  return p === 100 ? 'Sharpest in burst' : p >= 90 ? `Sharp (${p}% of best)` : p < 70 ? `Soft (${p}% of best)` : `Sharpness ${p}% of best`;
+  const at = burstAtFocus(it);
+  return (p === 100 ? 'Sharpest in burst' : `${at ? '' : 'About '}${p}% of the sharpest in burst`) + (at ? '' : ' (whole frame)');
 }
 function drawHist(it) {
   const h = $('hist'), hx = h.getContext('2d');
@@ -2618,7 +2632,7 @@ function essentialRows(it, m) {
   if (it.prev) add('Capture', 'Preview shown', `${it.prev.w} × ${it.prev.h}` + (DIRECT.has(it.ext) || TIF.has(it.ext) ? ' (full image)' : ' (embedded JPEG)'));
   if (on('bursts') && it.burst) add('Capture', 'Burst', `Frame ${it.burst.pos} of ${it.burst.size}`);
   if (on('sharp') && it.sharp != null) {
-    const p = sharpPct(it); if (p != null) add('Capture', 'Sharpness in burst', p === 100 ? 'Sharpest frame' : p + '% of best');
+    const p = sharpPct(it); if (p != null) add('Capture', 'Sharpness in burst', (p === 100 ? 'Sharpest frame' : (burstAtFocus(it) ? '' : 'About ') + p + '% of the sharpest') + (burstAtFocus(it) ? ', at the focus point' : ', across the whole frame'));
   }
   if (on('af')) add('Capture', 'Focus point', it.af ? `${Math.round(it.af.x * 100)}% across, ${Math.round(it.af.y * 100)}% down` : '');
   if (on('cull')) { const c = cullOf(it); add('Capture', 'Rating', c.r ? stars(c.r) : ''); add('Capture', 'Flag', c.f === 1 ? 'Pick' : c.f === -1 ? 'Reject' : ''); }
@@ -3081,7 +3095,9 @@ function paintThumb(it) {
     add('bbar b' + (it.burst.id % 2), '');
     if (it.burst.pos === 1) { const bn = add('bn', ''); bn.title = `Burst of ${it.burst.size}`; const l = document.createElement('span'); l.className = 'bl'; l.textContent = `Burst of ${it.burst.size}`; const sh = document.createElement('span'); sh.className = 'bs'; sh.textContent = `×${it.burst.size}`; bn.append(l, sh); }
   }
-  if (on('sharp')) { const p = sharpPct(it); if (p != null) { const band = sharpBand(p); add('sp ' + band.cls, band.label).title = p === 100 ? 'Sharpest frame in this burst' : `${p}% of the sharpest frame in this burst`; } }
+  if (on('sharp')) { const p = sharpPct(it); if (p != null) { const band = sharpBand(p, burstAtFocus(it)); add('sp ' + band.cls, band.label).title = sharpTip(it, p); } }
+  /* find out whether this Sony file has a focus point, so its burst's labels show the right confidence */
+  if (on('sharp') && it.burst && it.af === undefined && it.meta && /sony/i.test(it.meta.Make || '')) sonyFocus(it).then(() => it.burst && it.burst.members.forEach(paintThumb)).catch(() => {});
 }
 function updateStrip() {
   const qb = state.show.quad ? state.quadBase : -10;
@@ -3242,7 +3258,7 @@ function setFilter(v) {
   rebuildView(cur()); syncFilterUi();
   if (v === 'over' || v === 'under' || v === 'soft') checkForFilter(v);
 }
-/* the exposure and Soft filters need every photo checked first; check the ones that aren't, then show the result */
+/* the exposure and burst-sharpness filters need every photo checked first; check the ones that aren't, then show the result */
 let checkBusy = false;
 async function checkForFilter(v) {
   if (checkBusy) return;
@@ -6569,8 +6585,14 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.54 beta';
+const VERSION = '0.9.55 beta';
 const RELEASES = [
+  { v: '0.9.55 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'Burst sharpness labels are now comparisons, not verdicts: Best, then the percentage of the sharpest frame (green from 90%), and nothing is labeled Soft. A sharp subject on a soft background is what a wide aperture is for, and those frames shouldn\u2019t be passed over.',
+      'When a burst has no focus point to measure at (most exports and non-Sony files), its labels show \u2248 and are dimmer, and their tips explain that the score covers the whole frame, so a busy background or foreground can outscore your subject.',
+    ]],
+  ] },
   { v: '0.9.54 beta', date: 'November 2026', groups: [
     ['Fixed', [
       'Auto-pick sharpest frames and Score burst now run the exposure check on every frame in the bursts, including frames whose sharpness was scored earlier, so the Over and Under badges appear for all of them after the run.',
