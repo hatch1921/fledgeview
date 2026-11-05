@@ -1832,6 +1832,11 @@ html[data-look="clean"] .knob.eopen[aria-expanded="true"]{background:var(--acc)!
 .knob.ebtn.wide{width:100%;margin-top:4px}
 .knob.edone{background:var(--amber);color:#1b1b1b}
 .knob.eexp{background:#b5d4f4;color:#0c447c;font-weight:600}
+.sessdlg{max-width:420px}
+.sesstab{width:100%;border-collapse:collapse;margin:8px 0 12px;font-size:15px}
+.sesstab td{padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sesstab td:last-child{text-align:right;font-weight:600}
+.mi kbd{float:right;margin-left:12px;opacity:.6;font:inherit;font-size:.9em}
 .wout{display:flex;gap:6px;align-items:center;min-width:0}
 .wout select{min-width:0;flex:1}
 .aboutdlg{max-width:640px}
@@ -2469,12 +2474,15 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         </div>
         <label class="mrow" data-f="cull"><input type="checkbox" id="advance"> Advance after rating</label>
         <div class="msep"></div>
+        <button class="mi" id="keepBurst" data-f="bursts">Keep this, reject rest of burst <kbd>⇧P</kbd></button>
         <button class="mi" id="scoreBurst" data-f="sharp">Score burst</button>
         <button class="mi" id="autoBtn" data-f="sharp">Auto-pick sharpest…</button>
         <button class="mi" id="writeXmp" data-f="cull">Write ratings</button>
         <button class="mi" id="moveRej" data-f="cull">Move picks and rejects…</button>
         <button class="mi" id="orgBtn" data-f="cull">Organize into lens folders…</button>
         <button class="mi" id="copyList" data-f="cull">Copy list</button>
+        <div class="msep"></div>
+        <button class="mi" id="sessBtn" data-f="cull">Session summary</button>
       </div>
     </div>
     <div class="menu">
@@ -2807,6 +2815,13 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
   <div class="end"><button class="btn primary" data-close>Close</button></div>
 </dialog>
 
+<dialog id="sessDlg" class="sessdlg" aria-labelledby="sessTitle">
+  <h2 id="sessTitle">This session</h2>
+  <p class="sub" id="sessSub"></p>
+  <table class="sesstab" id="sessTab"></table>
+  <label class="chk"><input type="checkbox" id="sessAuto"> Show this when I reach the last photo</label>
+  <div class="end"><button class="btn" id="sessReset" title="Start counting again from now">Start a new session</button><span class="grow"></span><button class="btn" id="sessCopy">Copy summary</button><button class="btn go" data-close>Close</button></div>
+</dialog>
 <dialog id="aboutDlg" class="aboutdlg">
   <h2>About FledgeView</h2>
   <p class="sub" style="margin-top:-2px">Light Image Viewer &amp; Exporter, by HatchApps · <span id="aboutVer"></span> · <a href="#" id="aboutNews">What’s new</a></p>
@@ -3098,6 +3113,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
       <section data-g="Review tools">
         <h3>Review tools</h3>
         <ul>
+          <li><strong>Keep the best of a burst:</strong> on the frame you want, press <kbd>Shift</kbd> + <kbd>P</kbd> (or Cull ▾ → Keep this, reject rest of burst): it’s picked, the rest of the burst is rejected (frames you already picked stay picked), and FledgeView moves on to the next photo. <kbd>Shift</kbd> + <kbd>U</kbd> undoes it.</li>
+          <li><strong>Session summary</strong> (Cull ▾): photos reviewed, picks, rejects, time spent and photos per minute. It also appears once when you reach the last photo.</li>
           <li><strong>Blinkies</strong> (<kbd>B</kbd>): blown highlights flash red, and shadows crushed to pure black flash blue.</li>
           <li><strong>Peaking</strong> (<kbd>E</kbd>): paints the sharpest edges yellow. The slider under the screen sets how much is highlighted.</li>
           <li><strong>Focus pt</strong> (<kbd>A</kbd>): a green box shows where the camera focused. Sony files only, and only straight-from-camera files; edited exports usually lose this information.</li>
@@ -3616,6 +3633,7 @@ document.addEventListener('drop', async e => {
 });
 
 $('clearAll').onclick = () => {
+  sessReset(); burstUndo = null;
   /* close any open panel first (a crop in progress is saved), so nothing from the last photo stays on screen */
   if (wbPick) setWbPick(false);
   if (cropMode) setCropMode(false);
@@ -4386,6 +4404,8 @@ async function show(i) {
   if (cropMode) setCropMode(false);
   i = Math.max(0, Math.min(n - 1, i));
   state.idx = i; state.cmpSide = 0; const tok = ++state.token; const it = state.view[i];
+  if (it) { sess.seen.add(it.key); sessTick(); }
+  if (i === n - 1 && n >= 20 && !sess.shownAtEnd && S.sessAuto !== false && sess.seen.size >= 20 && sess.touched.size) { sess.shownAtEnd = true; setTimeout(() => { if (!document.querySelector('dialog[open]') && !state.pview) openSess(); }, 900); }
   if (state.show.quad && (i < state.quadBase || i > state.quadBase + 3)) state.quadBase = i;
   updateStrip(); updateReadout(); refreshCullUi(); markActive(); updateSidePath(); if (state.pview) pvSyncEdit(); $('bigWarn').hidden = true;
   $('empty').hidden = true;
@@ -4809,7 +4829,62 @@ function refreshCullUi() {
   $('fPick').setAttribute('aria-pressed', c.f === 1);
   $('fRej').setAttribute('aria-pressed', c.f === -1);
 }
+/* ---------- session summary: what you got through, and how fast; idle gaps over two minutes don't count ---------- */
+const sess = { start: 0, active: 0, last: 0, seen: new Set(), touched: new Set(), kept: 0, shownAtEnd: false };
+function sessTick() { const t = Date.now(); if (!sess.start) sess.start = t; if (sess.last) sess.active += Math.min(t - sess.last, 120000); sess.last = t; }
+function sessReset() { Object.assign(sess, { start: 0, active: 0, last: 0, kept: 0, shownAtEnd: false }); sess.seen.clear(); sess.touched.clear(); }
+function sessStats() {
+  let picks = 0, rejects = 0, rated = 0;
+  for (const k of sess.touched) { const c = CULL[k]; if (!c) continue; if (c.f === 1) picks++; if (c.f === -1) rejects++; if (c.r) rated++; }
+  const min = sess.active / 60000;
+  return { seen: sess.seen.size, picks, rejects, rated, kept: sess.kept, min, pace: min >= 0.5 ? sess.seen.size / min : 0 };
+}
+const fmtDur = m => { const t = Math.round(m * 60); const h = Math.floor(t / 3600), mm = Math.floor(t % 3600 / 60), ss = t % 60; return h ? `${h} h ${mm} min` : mm ? `${mm} min ${ss} s` : `${ss} s`; };
+function openSess() {
+  const st = sessStats();
+  const rows = [['Photos reviewed', st.seen.toLocaleString()], ['Picks', st.picks.toLocaleString()], ['Rejects', st.rejects.toLocaleString()], ['Rated with stars', st.rated.toLocaleString()],
+    ['Bursts kept with one key', st.kept.toLocaleString()], ['Time spent', st.min ? fmtDur(st.min) : '\u2014'], ['Pace', st.pace ? `${st.pace.toFixed(1)} photos a minute` : '\u2014']];
+  $('sessTab').innerHTML = ''; for (const [a, b] of rows) { const tr = document.createElement('tr'); const t1 = document.createElement('td'), t2 = document.createElement('td'); t1.textContent = a; t2.textContent = b; tr.append(t1, t2); $('sessTab').append(tr); }
+  $('sessSub').textContent = st.seen ? `Since you started${state.items.length ? ', in ' + state.items.length.toLocaleString() + ' photos loaded' : ''}. Time counts only while you\u2019re working: pauses over two minutes are left out.` : 'Nothing reviewed yet in this session. Look through some photos, rate, pick or reject, and the summary fills in.';
+  $('sessAuto').checked = S.sessAuto !== false;
+  $('sessDlg').showModal();
+}
+$('sessBtn').onclick = openSess;
+$('sessAuto').onchange = e => { S.sessAuto = e.target.checked; saveS(); };
+$('sessReset').onclick = () => { sessReset(); openSess(); };
+$('sessCopy').onclick = () => {
+  const st = sessStats();
+  const t = `FledgeView session: ${st.seen} photos reviewed, ${st.picks} picks, ${st.rejects} rejects` + (st.min ? `, in ${fmtDur(st.min)} (${st.pace.toFixed(1)} photos a minute)` : '') + '.';
+  navigator.clipboard.writeText(t).then(() => toast('Summary copied'), () => toast(t));
+};
+/* ---------- keep this frame, reject the rest of its burst (Shift+P); Shift+U undoes it ---------- */
+let burstUndo = null;
+function keepBurst(it) {
+  if (!it) return;
+  if (!on('bursts') || !it.burst || it.burst.size < 2) { toast('This photo isn\u2019t part of a burst'); return; }
+  const mem = it.burst.members, before = mem.map(m => [m, CULL[m.key] ? { ...CULL[m.key] } : null]);
+  let rejected = 0;
+  for (const m of mem) {
+    const c = { ...cullOf(m) };
+    if (m === it) c.f = 1; else if (c.f !== 1) { c.f = -1; rejected++; } else continue;
+    if (!c.r && !c.f) delete CULL[m.key]; else CULL[m.key] = c;
+    sess.touched.add(m.key);
+  }
+  burstUndo = before; sess.kept++; sessTick();
+  saveCull(); mem.forEach(paintThumb); refreshCullUi(); refreshOsd(); refreshRows();
+  const kept = mem.filter(m => m !== it && cullOf(m).f === 1).length;
+  toast(`Picked this frame and rejected ${rejected} other${rejected === 1 ? '' : 's'} in the burst` + (kept ? ` (your ${kept} other pick${kept === 1 ? '' : 's'} kept)` : '') + '. Shift+U undoes it.');
+  const lastAt = Math.max(...mem.map(m => state.view.indexOf(m)));
+  if (lastAt >= 0 && lastAt < state.view.length - 1) setTimeout(() => show(lastAt + 1), 160);
+}
+function undoKeepBurst() {
+  if (!burstUndo) { toast('Nothing to undo'); return; }
+  for (const [m, c] of burstUndo) { if (c) CULL[m.key] = c; else delete CULL[m.key]; paintThumb(m); }
+  burstUndo = null; sess.kept = Math.max(0, sess.kept - 1); saveCull(); refreshCullUi(); refreshOsd(); refreshRows(); toast('Burst restored');
+}
+$('keepBurst').onclick = () => keepBurst(rateTarget() || cur());
 function setCull(it, patch, advance = true) {
+  sess.touched.add(it.key); sessTick();
   const c = { ...cullOf(it), ...patch };
   if (!c.r && !c.f) delete CULL[it.key]; else CULL[it.key] = c;
   saveCull(); paintThumb(it); refreshCullUi(); refreshOsd(); refreshRows();
@@ -7898,7 +7973,7 @@ $('dofUse').onclick = async () => {
 
 /* ---------- help ---------- */
 const KEYS = [
-  ['V', 'Photo view: just the photo, filling the screen (Esc returns)'], ['R', 'Crop and straighten panel'], ['← →', 'Previous or next photo'], ['↑ ↓', 'Up or down a row in the grid'], ['Home  End', 'First or last photo'],
+  ['Shift + P', 'Keep this frame and reject the rest of its burst (your picks stay); Shift + U undoes it'], ['V', 'Photo view: just the photo, filling the screen (Esc returns)'], ['R', 'Crop and straighten panel'], ['← →', 'Previous or next photo'], ['↑ ↓', 'Up or down a row in the grid'], ['Home  End', 'First or last photo'],
   ['1 – 5', 'Star rating (press again to clear)'], ['0', 'Clear stars'], ['P', 'Pick'], ['X', 'Reject'], ['U', 'Clear flag'],
   ['W', 'In Adjust: pick neutral (click something gray or white to set the white balance)'], ['Z', 'Zoom in or back to fit'], ['+  −', 'Zoom in or out'], ['B', 'Blinkies: blown highlights (red) and crushed blacks (blue)'], ['E', 'Focus peaking'], ['G', 'Composition guides in Frame mode and the export crop: thirds, golden ratio, diagonals, off'], ['J', 'In Adjust: show or hide clipping (red highlights, blue blacks)'], ['\\', 'In Adjust: hold to see the original'],
   ['A', 'Focus point'], ['C', 'Compare with the next frame'], ['Q', '4-up view: click a photo to select it, P picks it and loads the next four, ← → move four at a time'], ['I', 'Change info display'], ['F', 'Full screen'], ['?', 'This list'],
@@ -7975,6 +8050,8 @@ document.addEventListener('keydown', e => {
   else if (on('cull') && it) {
     const t = rateTarget(), adv = !state.show.quad;
     if (/^[0-5]$/.test(k)) { const n = +k; setCull(t, { r: n && cullOf(t).r === n ? 0 : n }, adv); }
+    else if ((k === 'p' || k === 'P') && e.shiftKey) keepBurst(t);
+    else if ((k === 'u' || k === 'U') && e.shiftKey) undoKeepBurst();
     else if (k === 'p' || k === 'P') state.show.quad && S.advance ? quadPick() : setCull(t, { f: 1 }, adv);
     else if (k === 'x' || k === 'X') setCull(t, { f: -1 }, adv);
     else if (k === 'u' || k === 'U') setCull(t, { f: 0 }, false);
@@ -8103,8 +8180,14 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.51 beta';
+const VERSION = '0.9.52 beta';
 const RELEASES = [
+  { v: '0.9.52 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Keep the best of a burst in one key: on the frame you want, press Shift+P (or Cull \u25be \u2192 Keep this, reject rest of burst). That frame is picked, the rest of the burst is rejected (frames you already picked stay picked), and FledgeView moves to the next photo. Shift+U undoes it.',
+      'Session summary (Cull \u25be): photos reviewed, picks, rejects, time spent and photos per minute, with Copy summary to share it. It also appears once when you reach the last photo of a folder you\u2019ve worked through, which you can turn off.',
+    ]],
+  ] },
   { v: '0.9.51 beta', date: 'November 2026', groups: [
     ['Fixed', [
       'Clear all now always clears the screen. If the Crop, Adjust or Lens tools panel was open, or the photo had edits, the last photo could stay on screen until you refreshed the page. Clear all now closes the panel (saving a crop in progress) and returns to the No photo loaded message. Thanks to soundbyte for the report.',
