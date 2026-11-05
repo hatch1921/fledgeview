@@ -1030,6 +1030,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <label>Mat <select id="fMat"><option value="none">None</option><option value="white">White</option><option value="offwhite">Off-white</option><option value="polar">Polar white</option><option value="polar8">Polar white 8-ply</option><option value="black">Black</option><option value="smoke">Smoke gray</option><option value="oxford">Oxford gray</option><option value="zucchini">Zucchini green</option><option value="steel">Steel blue</option><option value="softblue">Soft blue</option><option value="chocolate">Chocolate brown</option><option value="tumbleweed">Tumbleweed brown</option></select></label>
         <label>Mat width <select id="fMw"><option value="narrow">Narrow</option><option value="std">Standard</option><option value="wide">Wide</option></select></label>
         <label class="fchk"><input type="checkbox" id="fWeighted"> Weighted bottom</label>
+        <label title="Fit shows the whole photo, with the opening matching its shape. Fill the print crops the photo to the print size’s shape, and you drag it to choose what’s kept.">Photo <select id="fFit"><option value="fit">Fit: whole photo</option><option value="fill">Fill the print: drag to position</option></select></label>
         <label>Size <select id="fSize"><option value="8x10">8 × 10</option><option value="11x14">11 × 14</option><option value="16x20">16 × 20</option><option value="20x30">20 × 30</option><option value="24x36">24 × 36</option></select></label>
         <label>Wall <select id="fWall"><option value="warm">Warm white</option><option value="gray">Light gray</option><option value="sage">Sage</option><option value="charcoal">Charcoal</option></select></label>
         <label>Guides <select id="fGuides" title="Composition guides on the preview only (G)"><option value="off">Off</option><option value="thirds">Rule of thirds</option><option value="golden">Golden ratio</option><option value="diag">Diagonals</option></select></label>
@@ -1483,6 +1484,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
         <p>Click <strong>Frame</strong> on the camera body to see the current photo framed and hanging on a wall.</p>
         <ul>
           <li>Choose the frame, Flat or Box profile, frame width, mat color and width, print size, and wall color.</li>
+          <li><strong>Photo</strong>: <strong>Fit</strong> shows the whole photo, with the opening matching its shape. <strong>Fill the print</strong> gives the opening the print size’s shape (4:5 for 8 × 10 and 16 × 20, 2:3 for 20 × 30) and crops the photo to it; drag the photo to choose what’s kept. With a mat, the photo fills the mat’s opening; with no mat, it fills the whole print.</li>
           <li>Zoom and drag the photo inside the frame to try a tighter crop. The frame stays put.</li>
           <li>The line under the options shows the image size and whether the file has enough resolution for that print size.</li>
           <li><strong>Guides</strong> (<kbd>G</kbd>) shows rule of thirds, golden ratio, or diagonal lines over the photo while you frame it. They never appear in saved images.</li>
@@ -3740,7 +3742,7 @@ $('tQuad').onclick = () => setQuad(!state.show.quad);
 $('tCompare').onclick = () => setCompare(!state.show.compare);
 
 /* ---------- frame preview ---------- */
-const F_DEF = { frame: 'black', profile: 'flat', fw: 'med', mat: 'white', mw: 'std', weighted: true, size: '16x20', wall: 'warm' };
+const F_DEF = { frame: 'black', profile: 'flat', fw: 'med', mat: 'white', mw: 'std', weighted: true, size: '16x20', wall: 'warm', fit: 'fit' };
 S.frame = { ...F_DEF, ...(S.frame || {}) };
 const FR_LIB = {
   black: { c: '#211e20', grain: 0.10, name: 'Black' }, walnut: { c: '#7a3b25', grain: 0.18, name: 'Walnut' },
@@ -3765,16 +3767,19 @@ function frameLayout(imgW, imgH) {
   const portrait = imgH > imgW, ar = imgW / imgH;
   let W = portrait ? a : b, H = portrait ? b : a, ow, oh, top;
   const fw = Math.min(W, H) * F_FW[f.fw];
+  const fill = f.fit === 'fill';
   if (f.mat === 'none') {
-    if (W / H > ar) { oh = H; ow = H * ar; } else { ow = W; oh = W / ar; }
-    W = ow; H = oh; top = 0;
+    if (fill) { ow = W; oh = H; }   // Fill: the print's own shape; the photo is cropped to it
+    else { if (W / H > ar) { oh = H; ow = H * ar; } else { ow = W; oh = W / ar; } W = ow; H = oh; }
+    top = 0;
   } else {
     const m = Math.min(W, H) * F_MW[f.mw], extra = f.weighted ? m * 0.3 : 0;
     const bw = W - 2 * m, bh = H - 2 * m - extra;
-    if (bw / bh > ar) { oh = bh; ow = bh * ar; } else { ow = bw; oh = bw / ar; }
+    if (fill) { ow = bw; oh = bh; }
+    else if (bw / bh > ar) { oh = bh; ow = bh * ar; } else { ow = bw; oh = bw / ar; }
     top = (H - oh - extra) / 2;
   }
-  return { W, H, ow, oh, top, fw };
+  return { W, H, ow, oh, top, fw, fill };
 }
 function shadeQuad(ctx, pts, col) { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) ctx.lineTo(pts[i], pts[i + 1]); ctx.closePath(); ctx.fill(); }
 function drawFramed(ctx, cw, ch, img, L, crop) {
@@ -3830,14 +3835,16 @@ function drawFramed(ctx, cw, ch, img, L, crop) {
   }
   ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
   {
-    const z = crop ? Math.max(1, Math.min(4, crop.z || 1)) : 1;
-    const sw = img.width / z, sh = img.height / z;
+    const z = crop ? Math.max(1, Math.min(4, crop.z || 1)) : 1, oar = opw / oph, iar = img.width / img.height;
+    const bw0 = iar > oar ? img.height * oar : img.width, bh0 = iar > oar ? img.height : img.width / oar;
+    const sw = bw0 / z, sh = bh0 / z;
     let sx = (crop ? crop.cx : 0.5) * img.width - sw / 2, sy = (crop ? crop.cy : 0.5) * img.height - sh / 2;
     sx = Math.max(0, Math.min(img.width - sw, sx)); sy = Math.max(0, Math.min(img.height - sh, sy));
     if (crop) { crop.cx = (sx + sw / 2) / img.width; crop.cy = (sy + sh / 2) / img.height; }
     ctx.drawImage(img, sx, sy, sw, sh, ox, oy, opw, oph);
+    drawFramed.fx = sw / img.width; drawFramed.fy = sh / img.height;   // the share of the photo shown, for dragging and print resolution
   }
-  drawFramed.last = { ox, oy, opw, oph };
+  drawFramed.last = { ox, oy, opw, oph, fx: drawFramed.fx, fy: drawFramed.fy };
   const gl = ctx.createLinearGradient(ix, iy, ix + iw, iy + ih);
   gl.addColorStop(0, 'rgba(255,255,255,.06)'); gl.addColorStop(0.45, 'rgba(255,255,255,0)'); gl.addColorStop(1, 'rgba(255,255,255,.03)');
   ctx.fillStyle = gl; ctx.fillRect(ix, iy, iw, ih);
@@ -3893,21 +3900,22 @@ function renderFrame() {
   const fsrc = editedSrc(it, img, 2400), L = frameLayout(fsrc.width, fsrc.height);
   drawFramed(ctx, cw, ch, fsrc, L, fcrop());
   { const fl0 = drawFramed.last; if (fl0) drawGuides(ctx, fl0.ox, fl0.oy, fl0.opw, fl0.oph); }
-  const zz = (fcrop() || {}).z || 1;
-  const fl = fullPixelsLong(it), lin = Math.max(L.ow, L.oh), ppi = fl ? Math.round(fl / zz / lin) : 0;
+  const land = fsrc.width >= fsrc.height, dl = drawFramed.last || {}, frac = (land ? dl.fx : dl.fy) || 1 / ((fcrop() || {}).z || 1);
+  const fl = fullPixelsLong(it), ppi = fl ? Math.round(fl * frac / (land ? L.ow : L.oh)) : 0;
   frameZoomUi();
   const [a, b] = F_SIZES[S.frame.size];
   $('frameInfo').textContent = (S.frame.mat === 'none' ? `Print ${L.ow.toFixed(1)} × ${L.oh.toFixed(1)} in, no mat` : `${a} × ${b} in mat, image area ${L.ow.toFixed(1)} × ${L.oh.toFixed(1)} in`)
+    + (L.fill ? ', photo filled and cropped to the print\u2019s shape (drag to position it)' : '')
     + (ppi ? `, about ${ppi} ppi at full resolution` + (ppi < 200 ? ' (may look soft at this size)' : ppi >= 300 ? ' (plenty for a sharp print)' : '') : '') + '. Preview only; not a color-accurate proof.';
 }
 function fillFrameOpts() {
   const f = S.frame;
   $('fFrame').value = f.frame; $('fProfile').value = f.profile || 'flat'; $('fFw').value = f.fw; $('fMat').value = f.mat; $('fMw').value = f.mw;
-  $('fWeighted').checked = f.weighted; $('fSize').value = f.size; $('fWall').value = f.wall;
+  $('fWeighted').checked = f.weighted; $('fSize').value = f.size; $('fWall').value = f.wall; $('fFit').value = f.fit || 'fit';
   $('fMw').disabled = $('fWeighted').disabled = f.mat === 'none';
 }
 $('frameOpts').addEventListener('change', () => {
-  Object.assign(S.frame, { frame: $('fFrame').value, profile: $('fProfile').value, fw: $('fFw').value, mat: $('fMat').value, mw: $('fMw').value, weighted: $('fWeighted').checked, size: $('fSize').value, wall: $('fWall').value });
+  Object.assign(S.frame, { fit: $('fFit').value, frame: $('fFrame').value, profile: $('fProfile').value, fw: $('fFw').value, mat: $('fMat').value, mw: $('fMw').value, weighted: $('fWeighted').checked, size: $('fSize').value, wall: $('fWall').value });
   saveS(); fillFrameOpts(); renderFrame();
 });
 const FCROPS = new Map();
@@ -3921,6 +3929,7 @@ function frameZoomUi() {
 function frameZoom(f) { const st = fcrop(); if (!st) return; st.z = Math.max(1, Math.min(4, st.z * f)); renderFrame(); }
 function frameReset() { const st = fcrop(); if (!st) return; st.z = 1; st.cx = st.cy = 0.5; renderFrame(); }
 let fRaf = 0, fDrag = null;
+const framePannable = (L, st) => st.z > 1.001 || (L.fx < 0.999 || L.fy < 0.999);
 const frameSoon = () => { if (!fRaf) fRaf = requestAnimationFrame(() => { fRaf = 0; renderFrame(); }); };
 const fv = $('frameView');
 fv.addEventListener('wheel', e => {
@@ -3931,11 +3940,11 @@ fv.addEventListener('wheel', e => {
 }, { passive: false });
 fv.addEventListener('dblclick', () => toggleZoom());
 fv.addEventListener('pointerdown', e => {
-  const st = fcrop(), L = drawFramed.last; if (!st || !L || st.z <= 1.001 || e.button !== 0) return;
+  const st = fcrop(), L = drawFramed.last; if (!st || !L || !framePannable(L, st) || e.button !== 0) return;
   const r = fv.getBoundingClientRect(), dpr = $('frameCanvas').width / r.width;
   const px = (e.clientX - r.left) * dpr, py = (e.clientY - r.top) * dpr;
   if (px < L.ox || px > L.ox + L.opw || py < L.oy || py > L.oy + L.oph) return;
-  fDrag = { id: e.pointerId, x: e.clientX, y: e.clientY, cx: st.cx, cy: st.cy, st, kx: dpr / L.opw / st.z, ky: dpr / L.oph / st.z };
+  fDrag = { id: e.pointerId, x: e.clientX, y: e.clientY, cx: st.cx, cy: st.cy, st, kx: dpr / L.opw * L.fx, ky: dpr / L.oph * L.fy };
   fv.setPointerCapture(e.pointerId); fv.classList.add('panning');
 });
 fv.addEventListener('pointermove', e => {
@@ -3943,7 +3952,7 @@ fv.addEventListener('pointermove', e => {
   if (!fDrag) {
     const r = fv.getBoundingClientRect(), dpr = $('frameCanvas').width / r.width;
     const px = (e.clientX - r.left) * dpr, py = (e.clientY - r.top) * dpr;
-    const inside = L && st && st.z > 1.001 && px >= L.ox && px <= L.ox + L.opw && py >= L.oy && py <= L.oy + L.oph;
+    const inside = L && st && framePannable(L, st) && px >= L.ox && px <= L.ox + L.opw && py >= L.oy && py <= L.oy + L.oph;
     fv.classList.toggle('canpan', !!inside);
     return;
   }
@@ -6601,8 +6610,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.57 beta';
+const VERSION = '0.9.58 beta';
 const RELEASES = [
+  { v: '0.9.58 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Frame mode can fill the print: choose Photo \u2192 Fill the print, and the opening takes the print size\u2019s shape (4:5 for 8 \u00d7 10 and 16 \u00d7 20, 2:3 for 20 \u00d7 30), the photo fills it, and you drag it at fit to choose what\u2019s kept. The print resolution note accounts for the crop. Fit, the whole photo, is still the default.',
+    ]],
+  ] },
   { v: '0.9.57 beta', date: 'November 2026', groups: [
     ['Improved', [
       'The thumbnail label says what was done: Cropped, Edited (adjustments), or Cropped + edited, and hovering over it lists the specifics, such as Crop 1:1 \u00b7 Straighten +2.0\u00b0 \u00b7 Exposure +20.',
