@@ -1727,6 +1727,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 .bar{padding:14px 16px 6px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
 .bar .spacer{flex:1}
 .menu{position:relative}
+.lrdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber);margin-right:6px;vertical-align:1px}
+.mnote{margin:6px 10px 4px;max-width:230px;font-size:12px;line-height:1.4;color:var(--lcd-dim)}
+.mpanel .mi:disabled{opacity:.45;cursor:default}
 .mpanel{position:absolute;top:calc(100% + 6px);left:0;z-index:20;min-width:240px;background:var(--panel);border:1px solid var(--panel-line);border-radius:8px;box-shadow:0 10px 28px rgba(0,0,0,.28);padding:6px;display:flex;flex-direction:column;gap:2px}
 .mi{display:block;width:100%;text-align:left;background:none;border:0;border-radius:5px;padding:7px 10px}
 .mi:hover:not(:disabled){background:var(--row-hover)}
@@ -1832,7 +1835,18 @@ html[data-look="clean"] .knob.eopen[aria-expanded="true"]{background:var(--acc)!
 .knob.ebtn.wide{width:100%;margin-top:4px}
 .knob.edone{background:var(--amber);color:#1b1b1b}
 .knob.eexp{background:#b5d4f4;color:#0c447c;font-weight:600}
+.lrbar{margin:6px 0 10px;display:flex;flex-direction:column;gap:6px}
+.lrbar .btn{width:100%}
 .sessdlg{max-width:420px}
+.recipedlg{max-width:820px}
+.rgrid{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;margin:10px 0}
+.rgrid input,.rgrid select,.rgrid textarea{font:inherit;padding:5px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.25);color:inherit}
+#recipeDlg .rgrid textarea{height:58px;min-height:40px;resize:vertical;font:inherit;line-height:1.4}
+.rhelp{margin:6px 0 4px;font-size:13px;line-height:1.5}
+.rhelp summary{cursor:pointer;font-weight:600}
+.rhelp ul{margin:6px 0 4px 18px;padding:0}
+.rhelp li{margin:3px 0}
+.rprev{display:block;max-width:100%;margin:6px auto 10px;border-radius:6px;box-shadow:0 2px 12px rgba(0,0,0,.4)}
 .sesstab{width:100%;border-collapse:collapse;margin:8px 0 12px;font-size:15px}
 .sesstab td{padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.08)}
 .sesstab td:last-child{text-align:right;font-weight:600}
@@ -1919,6 +1933,9 @@ html[data-look="clean"] .knob.eexp{background:var(--acc)!important;color:#fff!im
 .btn.out{background:#b5d4f4;color:#0c447c;border-color:#85b7eb;font-weight:600}
 .btn.out:hover:not(:disabled){background:#c6def7}
 @media (max-width:1760px){#fullBtn .lbl,#pvBtn .lbl{display:none}#fullBtn .ic,#pvBtn .ic{margin-right:0}}
+@media (max-width:1440px){#presetMenuBtn .lbl{display:none}#presetMenuBtn .ic{margin-right:2px}}
+/* laptops: a few toolbar buttons show just their icons (their tooltips still name them), so the toolbar stays on one row */
+@media (max-width:1400px){#openFolder .lbl,#addFiles .lbl,#editBtn .lbl,#dofBtn .lbl{display:none}#openFolder .ic,#addFiles .ic,#editBtn .ic,#dofBtn .ic{margin-right:0}}
 @media (max-width:1500px){
   .bar{column-gap:8px}
   .actions{gap:5px}
@@ -2509,6 +2526,15 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
     <button class="btn" id="editBtn" aria-pressed="false" title="Adjust: simple edits applied when you export"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h8M16 6h4M4 12h2M10 12h10M4 18h11M19 18h1"/><circle cx="14" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg>Edit</button>
     <span class="tgap" aria-hidden="true"></span>
     <button class="btn out" id="webBtn" data-f="web" title="Export resized copies for the web and social media"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>Export</button>
+    <div class="menu">
+      <button class="btn mbtn" id="presetMenuBtn" aria-haspopup="true" aria-expanded="false" title="Lightroom presets and recipe cards from the current photo"><span class="lrdot" id="lrDot" hidden></span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="13" height="15" rx="2"/><path d="M4 7v12a2 2 0 0 0 2 2h10"/></svg><span class="lbl">Presets</span> ▾</button>
+      <div class="mpanel" hidden>
+        <button class="mi" id="pmCard">Make recipe card…</button>
+        <button class="mi" id="pmPreset">Save as Lightroom preset</button>
+        <button class="mi" id="pmShow">Show Lightroom settings</button>
+        <p class="mnote" id="pmNote" hidden></p>
+      </div>
+    </div>
     <button class="btn" id="dofBtn" title="Lens tools: depth of field and field of view calculators"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3l3.5 6.5M21 12h-7.5M16.5 19.8L12.5 13M7.5 19.8l3.8-6.6M3 12h7.5M7.5 4.2l4 6.8"/></svg>Lens tools</button>
     <span class="tgap" aria-hidden="true"></span>
     <div class="menu">
@@ -2521,6 +2547,8 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <div class="mlabel">Appearance</div>
         <button class="mi check" id="lookCamera" aria-pressed="true">Camera</button>
         <button class="mi check" id="lookClean" aria-pressed="false">Clean</button>
+        <div class="msep"></div>
+        <button class="mi check" id="pairBtn" role="menuitemcheckbox" title="Show a raw file and a JPEG with the same name as one photo, viewed from the full-size JPEG">Pair RAW + JPEG</button>
         <button class="mi" id="featBtn">Features</button>
       </div>
     </div>
@@ -2827,6 +2855,29 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
   <div class="end"><button class="btn primary" data-close>Close</button></div>
 </dialog>
 
+<dialog id="recipeDlg" class="recipedlg" aria-labelledby="recipeH">
+  <h2 id="recipeH">Recipe card</h2>
+  <p class="sub">The photo beside the Lightroom settings that made it, saved as a JPEG, with the matching preset (.xmp) under the same name.</p>
+  <div class="rgrid">
+    <label for="rTitle">Title</label><input id="rTitle" type="text" maxlength="60" placeholder="Retro #22322">
+    <label for="rBy">Byline</label><input id="rBy" type="text" maxlength="80" placeholder="Your name or website (optional)">
+    <label for="rTheme">Panel</label><select id="rTheme"><option value="light">Light</option><option value="dark">Dark</option></select>
+    <label for="rOther">Other steps</label><textarea id="rOther" rows="2" maxlength="300" placeholder="Anything done outside Lightroom, for example Topaz Photo AI: denoise, low; Nik Color Efex: Detail Extractor 30%"></textarea>
+  </div>
+  <canvas id="rPrev" class="rprev" width="760" height="460"></canvas>
+  <label class="chk"><input type="checkbox" id="rPreset" checked> Save the Lightroom preset too (.xmp, same name)</label>
+  <label class="chk"><input type="checkbox" id="rHowTo" checked> Add how to load the preset to the card</label>
+  <details class="rhelp"><summary>How to use the .xmp preset</summary>
+   <ul>
+    <li><strong>Lightroom Classic:</strong> in the Develop module, open the <strong>Presets</strong> panel on the left, click <strong>+</strong>, choose <strong>Import Presets…</strong>, and select the .xmp file. It appears in a group named <strong>FledgeView</strong>; click it to apply it to a photo.</li>
+    <li><strong>Lightroom</strong> (the cloud-based desktop app): choose <strong>File → Import Profiles &amp; Presets…</strong> and select the .xmp file. Find it under <strong>Presets</strong> in the Edit panel.</li>
+    <li><strong>Lightroom mobile:</strong> presets imported into Lightroom on your computer sync to your phone or tablet when you’re signed in to the same Adobe account.</li>
+    <li><strong>Photoshop’s Camera Raw:</strong> open the <strong>Presets</strong> panel, click the <strong>…</strong> menu, and choose <strong>Import Profiles &amp; Presets…</strong>.</li>
+   </ul>
+   <p>Keep the card and the .xmp together in one folder: the card shows what the preset does, and lists every setting, so the look can be rebuilt by hand if the preset is ever lost.</p>
+  </details>
+  <div class="end"><span class="tl grow" id="rStatus" role="status"></span><button class="btn" data-close>Close</button><button class="btn go" id="rSave">Save card</button></div>
+</dialog>
 <dialog id="sessDlg" class="sessdlg" aria-labelledby="sessTitle">
   <h2 id="sessTitle">This session</h2>
   <p class="sub" id="sessSub"></p>
@@ -3102,6 +3153,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
           <li>Works with JPEG, PNG, WebP, and RAW files from most cameras: Sony ARW, Nikon NEF, Canon CR2 and CR3, DNG, Olympus ORF, Panasonic RW2, Fuji RAF, and more.</li>
           <li><strong>RAW files show the JPEG preview the camera stores inside the file.</strong> It’s great for culling, but it isn’t the full raw data, so judge critical sharpness in your raw editor when it matters.</li>
           <li>The slider above the thumbnails changes their size. The <kbd>‹</kbd> button hides the sidebar for a bigger screen, and <strong>Photo info</strong> at the bottom expands the full EXIF details.</li>
+          <li><strong>Presets ▾</strong> (top toolbar) lights up with a dot when the photo you’re on carries Lightroom adjustments: make a recipe card, save a Lightroom preset, or show the settings.</li>
+          <li><strong>Lightroom edits:</strong> for a JPEG or TIFF exported from Lightroom with full metadata (in Lightroom Classic’s Export window, Metadata → Include: All Metadata), Photo info lists the adjustments that were made, and <strong>Save as Lightroom preset</strong> turns them into a preset to import in Lightroom (Develop → Presets → + → Import Presets). The crop, masks and spot removal belong to that one photo and are left out.</li>
         </ul>
         <div class="tip">Moving files and saving to folders need <strong>Chrome or Edge</strong>. Safari and Firefox can view, rate, and export, but not organize. On a Mac, the downloaded copy opens in Safari by default: right-click it and choose <strong>Open With → Google Chrome</strong>.</div>
       </section>
@@ -3126,6 +3179,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
         <h3>Review tools</h3>
         <ul>
           <li><strong>Hold a reference in Compare:</strong> in Compare (<kbd>C</kbd>), press <kbd>H</kbd> to hold the current frame on the right (marked Held); the arrows then step through the other frames on the left, so you’re always comparing against your favorite. <kbd>H</kbd> on a better frame makes it the new held one; click the held frame and press <kbd>H</kbd> to release it.</li>
+          <li><strong>RAW + JPEG pairs:</strong> when a folder has a raw file and a JPEG with the same name (DSC01234.ARW and DSC01234.JPG), FledgeView shows them as one photo, labeled RAW+JPG, and checks focus and sharpness on the full-size JPEG. That matters for cameras whose raw files embed only a small preview. Ratings, picks and rejects cover both files, Move picks and rejects moves both, and Write ratings writes the raw file’s sidecar, which Lightroom reads for the pair. Turn it off under View ▾ → Pair RAW + JPEG.</li>
           <li><strong>Keep the best of a burst:</strong> on the frame you want, press <kbd>Shift</kbd> + <kbd>P</kbd> (or Cull ▾ → Keep this, reject rest of burst): it’s picked, the rest of the burst is rejected (frames you already picked stay picked), and FledgeView moves on to the next photo. <kbd>Shift</kbd> + <kbd>U</kbd> undoes it.</li>
           <li><strong>Session summary</strong> (Cull ▾): photos reviewed, picks, rejects, time spent and photos per minute. It also appears once when you reach the last photo.</li>
           <li><strong>Blinkies</strong> (<kbd>B</kbd>): blown highlights flash red, and shadows crushed to pure black flash blue.</li>
@@ -3502,7 +3556,7 @@ const cur = () => state.view[state.idx];
 /* ---------- loading files ---------- */
 function addFiles(list, focusNew = false) {
   const seen = new Set(state.items.map(i => i.key));
-  const fresh = [], sidecars = new Map();
+  let fresh = []; const sidecars = new Map();
   for (const en of list) {
     const f = en.file || en;
     if (en.xmp || (extOf(f.name) === 'xmp' && !f.name.startsWith('._'))) { sidecars.set(sideKey(en, f.name), f); continue; }
@@ -3517,6 +3571,21 @@ function addFiles(list, focusNew = false) {
     /* note which photos have a sidecar now, so a sidecar's rating takes priority over one stored inside the photo */
     const byFile = new Map(list.map(en => [en.file || en, en]));
     for (const it of fresh) { const en = byFile.get(it.file) || it, base = it.name.replace(/\.[^.]+$/, ''); it._side = sidecars.get(sideKey(en, base + '.xmp')) || sidecars.get(sideKey(en, it.name + '.xmp')) || null; }
+  }
+  /* RAW + JPEG pairs: a raw file and a JPEG with the same name in the same folder become one photo. FledgeView views, checks
+     focus and scores sharpness on the full-size JPEG (many raws embed only a small preview), and ratings, moves and Lightroom
+     sidecars cover both files */
+  if (S.pairs !== false) {
+    const byFile = new Map(list.map(en => [en.file || en, en])), groups = new Map();
+    for (const it of fresh) { const en = byFile.get(it.file) || it, k = dirKeyOf(en) + '|' + baseOf(it.name).toLowerCase(); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(it); }
+    let paired = 0;
+    for (const g of groups.values()) {
+      const jp = g.find(i => i.ext === 'jpg' || i.ext === 'jpeg'), rw = g.find(i => RAW.has(i.ext));
+      if (!jp || !rw) continue;
+      jp.raw = rw; rw.pairedTo = jp; paired++;
+      if (untouched(jp) && CULL[rw.key]) CULL[jp.key] = CULL[rw.key];   // a rating made before pairing carries over
+    }
+    if (paired) { fresh = fresh.filter(i => !i.pairedTo); setTimeout(() => toast(`Paired ${paired} RAW + JPEG photo${paired === 1 ? '' : 's'}: you\u2019ll see one of each, shown from the full-size JPEG`), 900); }
   }
   for (const it of fresh) if (it.zone) { const c = cullOf(it), f = it.zone === 'picks' ? 1 : -1; if (c.f !== f) CULL[it.key] = { ...c, f }; }
   saveCull();
@@ -3651,6 +3720,7 @@ document.addEventListener('drop', async e => {
 });
 
 $('clearAll').onclick = () => {
+  setTimeout(syncPresetMenu, 0);
   state.cmpRef = null;
   if (state.filter === 'over' || state.filter === 'under' || state.filter === 'soft') state.filter = 'all';
   sessReset(); burstUndo = null;
@@ -4221,7 +4291,7 @@ function renderOsd(it, m) {
   const n = state.view.length;
   $('oMode').textContent = MODE[m.ExposureProgram] || (m.ExposureProgram ? 'Auto' : '');
   $('oModel').textContent = m.Model ? camKeyOf({ meta: m }) : '';
-  $('oFormat').textContent = RAW.has(it.ext) ? 'RAW' : ['hif', 'heic', 'heif'].includes(it.ext) ? 'HEIF' : it.ext.toUpperCase();
+  $('oFormat').textContent = it.raw ? 'RAW+JPG' : RAW.has(it.ext) ? 'RAW' : ['hif', 'heic', 'heif'].includes(it.ext) ? 'HEIF' : it.ext.toUpperCase();
   const c = cullOf(it);
   $('oRate').innerHTML = on('cull') ? rateHTML(c.r) : '';
   $('oFlag').textContent = on('cull') && c.f ? (c.f === 1 ? 'Pick' : 'Reject') : '';
@@ -4318,10 +4388,252 @@ function essentialRows(it, m) {
   add('Location', 'Latitude', typeof m.latitude === 'number' ? m.latitude.toFixed(6) : '');
   add('Location', 'Longitude', typeof m.longitude === 'number' ? m.longitude.toFixed(6) : '');
   add('Location', 'Altitude', typeof m.GPSAltitude === 'number' ? Math.round(m.GPSAltitude) + ' m' : '');
+  if (it.lr) { const lr = lrRows(it.lr); if (lr.length) rows.push(...lr); else rows.push({ g: 'Lightroom edits', k: 'Adjustments', v: 'None in this file (all at Lightroom\u2019s defaults)' }); }
   add('File', 'File name', f.name);
+  if (it.raw) add('File', 'Paired raw', `${it.raw.name} (${(it.raw.file.size / 1048576).toFixed(1)} MB)`);
   if (it.zone) add('File', 'Folder', '_' + it.zone);
   add('File', 'File size', (f.size / 1048576).toFixed(1) + ' MB');
   return rows;
+}
+/* ---------- Lightroom edits: JPEGs and TIFFs exported from Lightroom with full metadata carry their Develop settings ---------- */
+const LR_EXT = new Set(['jpg', 'jpeg', 'tif', 'tiff', 'dng']);
+async function lrSettings(it) {
+  if (it.lr !== undefined) return it.lr;
+  if (!LR_EXT.has(it.ext)) return (it.lr = null);
+  try {
+    const m = await exifr.parse(it.file, { xmp: true, tiff: false, exif: false, gps: false, iptc: false, icc: false, jfif: false, ihdr: false, mergeOutput: false });
+    it.lr = m && m.crs && m.crs.HasSettings !== false ? m.crs : null;
+    const h = m && m.xmpMM && m.xmpMM.History, agents = (Array.isArray(h) ? h : h ? [h] : []).map(e => e && e.softwareAgent).filter(Boolean);
+    it.lrHist = agents.map(a => a.replace(/^Adobe\s+/, '').replace(/^Photoshop Lightroom/, 'Lightroom').replace(/\s*\(.*\)\s*$/, '').replace(/\s+[\d.]+$/, '')).filter((a, i, arr) => i === 0 || a !== arr[i - 1]);
+  } catch { it.lr = null; }
+  return it.lr;
+}
+const sgn = v => (v > 0 ? '+' : '') + v;
+/* Lightroom shows a creative or B&W profile (a "Look", such as Adobe Monochrome) by its own name, over the base camera profile */
+function lrLookName(c) { const d = c && c.Look && (c.Look.Description || c.Look), nm = d && d.Name; return typeof nm === 'string' ? nm : nm && nm.value ? nm.value : ''; }
+/* a creative profile's Amount slider (0 to 200 in Lightroom, stored as 0 to 2) is part of the look, so it's shown when it isn't 100 */
+function lrProfile(c) {
+  const l = lrLookName(c); if (!l) return c.CameraProfile && c.CameraProfile !== 'Embedded' ? c.CameraProfile : '';
+  const d = c.Look && (c.Look.Description || c.Look), amt = d && d.Amount != null ? Math.round(parseFloat(d.Amount) * 100) : 100;
+  return amt !== 100 && Number.isFinite(amt) ? `${l} (amount ${amt})` : l;
+}
+const GRAY = ['Red', 'Orange', 'Yellow', 'Green', 'Aqua', 'Blue', 'Purple', 'Magenta'];
+function lrBW(c) { return c.ConvertToGrayscale === true || c.ConvertToGrayscale === 'True' || /monochrome|b&w|black\s*&?\s*white/i.test(lrLookName(c)) || GRAY.some(col => (parseFloat(c['GrayMixer' + col]) || 0) !== 0); }
+/* Lightroom's Color Grading keeps shadows and highlights under its older split-toning names, and midtones and global under ColorGrade */
+function lrGrade(c, n) {
+  const one = (h, sa, lu) => { const parts = []; if (n(h) || n(sa)) parts.push(`hue ${n(h)}, saturation ${n(sa)}`); if (n(lu)) parts.push('luminance ' + (n(lu) > 0 ? '+' : '\u2212') + Math.abs(n(lu))); return parts.join(', '); };
+  return [['Shadows', one('SplitToningShadowHue', 'SplitToningShadowSaturation', 'ColorGradeShadowLum')], ['Midtones', one('ColorGradeMidtoneHue', 'ColorGradeMidtoneSat', 'ColorGradeMidtoneLum')],
+    ['Highlights', one('SplitToningHighlightHue', 'SplitToningHighlightSaturation', 'ColorGradeHighlightLum')], ['Global', one('ColorGradeGlobalHue', 'ColorGradeGlobalSat', 'ColorGradeGlobalLum')]].filter(x => x[1]);
+}
+const curveChanged = c => Array.isArray(c) && !(c.length === 2 && /^0,\s*0$/.test(c[0]) && /^255,\s*255$/.test(c[1]));
+/* the adjustments that were actually changed, grouped like Lightroom's panels; defaults are left out */
+function lrRows(c) {
+  const out = [], add = (g, k, v) => { if (v !== '' && v != null) out.push({ g: 'Lightroom: ' + g, k, v: String(v) }); };
+  const n = k => (typeof c[k] === 'number' ? c[k] : parseFloat(c[k])) || 0;
+  if (lrProfile(c)) add('Profile', 'Profile', lrProfile(c));
+  if (lrBW(c)) add('Profile', 'Treatment', 'Black & white');
+  { const gm = GRAY.filter(col => n('GrayMixer' + col)).map(col => `${col} ${sgn(n('GrayMixer' + col))}`); if (gm.length) add('Color', 'B&W mix', gm.join(', ')); }
+  if (c.WhiteBalance && c.WhiteBalance !== 'As Shot') add('Color', 'White balance', c.WhiteBalance + (c.Temperature ? `, ${c.Temperature} K` : '') + (n('Tint') ? `, tint ${sgn(n('Tint'))}` : ''));
+  if (n('IncrementalTemperature')) add('Color', 'Temperature', sgn(n('IncrementalTemperature')));
+  if (n('IncrementalTint')) add('Color', 'Tint', sgn(n('IncrementalTint')));
+  for (const [k, l] of [['Vibrance', 'Vibrance'], ['Saturation', 'Saturation']]) if (n(k)) add('Color', l, sgn(n(k)));
+  if (n('Exposure2012')) add('Light', 'Exposure', sgn(n('Exposure2012').toFixed(2)) + ' EV');
+  for (const [k, l] of [['Contrast2012', 'Contrast'], ['Highlights2012', 'Highlights'], ['Shadows2012', 'Shadows'], ['Whites2012', 'Whites'], ['Blacks2012', 'Blacks']]) if (n(k)) add('Light', l, sgn(n(k)));
+  const curve = (c.ToneCurveName2012 && c.ToneCurveName2012 !== 'Linear') || ['ToneCurvePV2012', 'ToneCurvePV2012Red', 'ToneCurvePV2012Green', 'ToneCurvePV2012Blue'].some(k => curveChanged(c[k])) || ['ParametricShadows', 'ParametricDarks', 'ParametricLights', 'ParametricHighlights'].some(k => n(k));
+  if (curve) add('Light', 'Tone curve', 'Adjusted');
+  const mix = ['Hue', 'Saturation', 'Luminance'].flatMap(t => ['Red', 'Orange', 'Yellow', 'Green', 'Aqua', 'Blue', 'Purple', 'Magenta'].filter(col => n(`${t}Adjustment${col}`)).map(col => `${col} ${t.toLowerCase()} ${sgn(n(`${t}Adjustment${col}`))}`));
+  if (mix.length && !lrBW(c)) add('Color', 'Color mixer', mix.join(', '));
+  const grade = Object.keys(c).some(k => /^(ColorGrade|SplitToning)/.test(k) && k !== 'ColorGradeBlending' && k !== 'SplitToningBalance' && n(k));
+  if (grade) add('Color', 'Color grading', 'Adjusted');
+  for (const [k, l] of [['Texture', 'Texture'], ['Clarity2012', 'Clarity'], ['Dehaze', 'Dehaze'], ['PostCropVignetteAmount', 'Vignette'], ['GrainAmount', 'Grain']]) if (n(k)) add('Effects', l, sgn(n(k)));
+  if (n('Sharpness')) add('Detail', 'Sharpening', n('Sharpness') + (c.SharpenRadius ? `, radius ${c.SharpenRadius}` : '') + (n('SharpenDetail') ? `, detail ${n('SharpenDetail')}` : '') + (n('SharpenEdgeMasking') ? `, masking ${n('SharpenEdgeMasking')}` : ''));
+  if (n('LuminanceSmoothing')) add('Detail', 'Noise reduction', n('LuminanceSmoothing'));
+  if (n('ColorNoiseReduction')) add('Detail', 'Color noise reduction', n('ColorNoiseReduction'));
+  if (n('LensProfileEnable')) add('Optics', 'Lens corrections', 'Profile corrections on');
+  if (n('AutoLateralCA')) add('Optics', 'Chromatic aberration', 'Removed');
+  if (c.HasCrop === true || c.HasCrop === 'True') add('This photo only', 'Crop', 'Yes' + (n('CropAngle') ? `, straightened ${sgn(n('CropAngle'))}\u00b0` : ''));
+  const masks = Array.isArray(c.MaskGroupBasedCorrections) ? c.MaskGroupBasedCorrections.length : c.MaskGroupBasedCorrections ? 1 : 0;
+  if (masks) add('This photo only', 'Masks', masks + (masks === 1 ? ' mask' : ' masks'));
+  if (c.RetouchAreas || c.RetouchInfo) add('This photo only', 'Spot removal', 'Yes');
+  /* in Lightroom's own panel order */
+  const ORDER = ['Profile', 'Light', 'Color', 'Effects', 'Detail', 'Optics', 'This photo only'].map(g => 'Lightroom: ' + g);
+  return out.map((r, i) => [r, i]).sort((x, y) => ORDER.indexOf(x[0].g) - ORDER.indexOf(y[0].g) || x[1] - y[1]).map(x => x[0]);
+}
+/* a Lightroom preset from the photo's own XMP: Lightroom's exact values, minus what belongs to this one photo */
+async function lrPresetXmp(it, title) {
+  const buf = new Uint8Array(await it.file.slice(0, Math.min(it.file.size, 24 * 1048576)).arrayBuffer());
+  const txt = new TextDecoder('utf-8').decode(buf), a = txt.indexOf('<x:xmpmeta'), b = txt.indexOf('</x:xmpmeta>', a);
+  if (a < 0 || b < 0) return null;
+  const doc = new DOMParser().parseFromString(txt.slice(a, b + 12), 'application/xml'); if (doc.querySelector('parsererror')) return null;
+  const CRS = 'http://ns.adobe.com/camera-raw-settings/1.0/', RDF = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
+  const DROP = /^(RawFileName|AlreadyApplied|HasCrop|Crop[A-Z]\w*|CameraProfileDigest|MaskGroupBasedCorrections|GradientBasedCorrections|CircularGradientBasedCorrections|PaintBasedCorrections|RetouchAreas|RetouchInfo|RedEyeInfo|UprightFocalLength35mm|UprightPreview|UprightCenterMode|UprightCenterNormX|UprightCenterNormY|UprightFourSegmentsCount|Name|ShortName|SortName|Group|Description|PresetType|UUID|Cluster)$/;
+  const attrs = new Map(), kids = [], ser = new XMLSerializer();
+  /* only the top-level descriptions: a profile such as Adobe Monochrome sits nested inside crs:Look, with its own internal values,
+     and must travel as that one element, not be mixed into the main settings */
+  for (const d of [...doc.getElementsByTagNameNS(RDF, 'Description')].filter(e => e.parentNode && e.parentNode.namespaceURI === RDF && e.parentNode.localName === 'RDF')) {
+    for (const at of d.attributes) if (at.namespaceURI === CRS && !DROP.test(at.localName)) attrs.set(at.localName, at.value);
+    for (const ch of d.children) if (ch.namespaceURI === CRS && !DROP.test(ch.localName)) kids.push(ser.serializeToString(ch).replace(/ xmlns:(crs|rdf)="[^"]*"/g, ''));
+  }
+  if (!attrs.size) return null;
+  if (attrs.get('CameraProfile') === 'Embedded') attrs.delete('CameraProfile');   // a JPEG's own profile; leave the profile to the photo the preset is used on
+  const esc = v => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  const name = title || it.name.replace(/\.[^.]+$/, '') + ' (FledgeView)', uuid = [...crypto.getRandomValues(new Uint8Array(16))].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+  const alt = (tag, v) => `   <crs:${tag}><rdf:Alt><rdf:li xml:lang="x-default">${esc(v)}</rdf:li></rdf:Alt></crs:${tag}>`;
+  const fixed = { PresetType: 'Normal', Cluster: '', UUID: uuid, SupportsAmount: 'False', SupportsColor: 'True', SupportsMonochrome: 'True', SupportsHighDynamicRange: 'True', SupportsNormalDynamicRange: 'True', SupportsSceneReferred: 'True', SupportsOutputReferred: 'True', CameraModelRestriction: '', Copyright: '', ContactInfo: '' };
+  const all = [...Object.entries(fixed), ...[...attrs].filter(([k]) => !(k in fixed))];
+  return `<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="FledgeView">\n <rdf:RDF xmlns:rdf="${RDF}">\n  <rdf:Description rdf:about=""\n    xmlns:crs="${CRS}"\n` + all.map(([k, v]) => `   crs:${k}="${esc(v)}"`).join('\n') + '>\n'
+    + [alt('Name', name), alt('ShortName', name), alt('SortName', name), alt('Group', 'FledgeView'), alt('Description', 'Made by FledgeView from ' + it.name)].join('\n') + '\n'
+    + kids.map(k => '   ' + k).join('\n') + '\n  </rdf:Description>\n </rdf:RDF>\n</x:xmpmeta>\n';
+}
+/* ---------- recipe card: the photo beside the full list of Lightroom settings that made it, saved with a matching preset ---------- */
+const mn = v => (v > 0 ? '+' : v < 0 ? '\u2212' : '') + Math.abs(v);
+function recipeGroups(c) {
+  const n = k => (typeof c[k] === 'number' ? c[k] : parseFloat(c[k])) || 0, has = k => c[k] !== undefined && c[k] !== '';
+  const G = [], grp = (title, lines) => { lines = lines.filter(Boolean); if (lines.length) G.push({ title, lines }); };
+  const parts = (...xs) => xs.filter(Boolean).join(', ');
+  grp('Profile and white balance', [
+    lrProfile(c) ? 'Profile: ' + lrProfile(c) : '',
+    lrBW(c) ? 'Treatment: black & white' : '',
+    c.WhiteBalance && c.WhiteBalance !== 'As Shot' && has('Temperature') ? `Temperature: ${c.Temperature} K` : n('IncrementalTemperature') ? 'Temperature: ' + mn(n('IncrementalTemperature')) : '',
+    (c.WhiteBalance && c.WhiteBalance !== 'As Shot' && n('Tint')) ? 'Tint: ' + mn(n('Tint')) : n('IncrementalTint') ? 'Tint: ' + mn(n('IncrementalTint')) : '']);
+  grp('Light', [['Exposure2012', 'Exposure'], ['Contrast2012', 'Contrast'], ['Highlights2012', 'Highlights'], ['Shadows2012', 'Shadows'], ['Whites2012', 'Whites'], ['Blacks2012', 'Blacks']]
+    .map(([k, l]) => n(k) ? `${l}: ${k === 'Exposure2012' ? (n(k) > 0 ? '+' : '\u2212') + Math.abs(n(k)).toFixed(2) : mn(n(k))}` : ''));
+  const curveLines = [];
+  for (const [k, l] of [['ToneCurvePV2012', 'Point curve (RGB)'], ['ToneCurvePV2012Red', 'Red curve'], ['ToneCurvePV2012Green', 'Green curve'], ['ToneCurvePV2012Blue', 'Blue curve']])
+    if (curveChanged(c[k])) curveLines.push(`${l}: ` + c[k].map(pt => pt.replace(/\s+/g, ' ')).join(' \u00b7 '));
+  for (const [k, l] of [['ParametricHighlights', 'Highlights'], ['ParametricLights', 'Lights'], ['ParametricDarks', 'Darks'], ['ParametricShadows', 'Shadows']]) if (n(k)) curveLines.push(`Region ${l.toLowerCase()}: ${mn(n(k))}`);
+  grp('Tone curve', curveLines);
+  grp('Presence', [['Texture', 'Texture'], ['Clarity2012', 'Clarity'], ['Dehaze', 'Dehaze'], ['Vibrance', 'Vibrance'], ['Saturation', 'Saturation']].map(([k, l]) => n(k) ? `${l}: ${mn(n(k))}` : ''));
+  /* in black and white, Lightroom replaces the color mixer with the B&W mix */
+  if (lrBW(c)) grp('B&W mix', GRAY.map(col => n('GrayMixer' + col) ? `${col}: ${mn(n('GrayMixer' + col))}` : ''));
+  else grp('Color mixer (HSL)', ['Red', 'Orange', 'Yellow', 'Green', 'Aqua', 'Blue', 'Purple', 'Magenta'].map(col => {
+    const x = parts(n('HueAdjustment' + col) ? 'hue ' + mn(n('HueAdjustment' + col)) : '', n('SaturationAdjustment' + col) ? 'saturation ' + mn(n('SaturationAdjustment' + col)) : '', n('LuminanceAdjustment' + col) ? 'luminance ' + mn(n('LuminanceAdjustment' + col)) : '');
+    return x ? `${col}: ${x}` : ''; }));
+  grp('Color grading', [...lrGrade(c, n).map(([w, t]) => `${w}: ${t}`), ...(lrGrade(c, n).length ? [has('ColorGradeBlending') && n('ColorGradeBlending') !== 50 ? 'Blending: ' + n('ColorGradeBlending') : '', n('SplitToningBalance') ? 'Balance: ' + mn(n('SplitToningBalance')) : ''] : [])]);
+  grp('Effects', [n('PostCropVignetteAmount') ? 'Vignette: ' + parts(mn(n('PostCropVignetteAmount')), has('PostCropVignetteMidpoint') && n('PostCropVignetteMidpoint') !== 50 ? 'midpoint ' + n('PostCropVignetteMidpoint') : '', has('PostCropVignetteFeather') && n('PostCropVignetteFeather') !== 50 ? 'feather ' + n('PostCropVignetteFeather') : '', has('PostCropVignetteRoundness') && n('PostCropVignetteRoundness') ? 'roundness ' + mn(n('PostCropVignetteRoundness')) : '') : '',
+    n('GrainAmount') ? 'Grain: ' + parts('amount ' + n('GrainAmount'), has('GrainSize') && n('GrainSize') !== 25 ? 'size ' + n('GrainSize') : '', has('GrainFrequency') && n('GrainFrequency') !== 50 ? 'roughness ' + n('GrainFrequency') : '') : '']);
+  const prim = col => parts(n(col + 'Hue') ? 'hue ' + mn(n(col + 'Hue')) : '', n(col + 'Saturation') ? 'saturation ' + mn(n(col + 'Saturation')) : '');
+  grp('Calibration', [n('ShadowTint') ? 'Shadows tint: ' + mn(n('ShadowTint')) : '', prim('Red') && 'Red primary: ' + prim('Red'), prim('Green') && 'Green primary: ' + prim('Green'), prim('Blue') && 'Blue primary: ' + prim('Blue')]);
+  grp('Detail', [n('Sharpness') ? 'Sharpening: ' + parts(String(n('Sharpness')), c.SharpenRadius ? 'radius ' + n('SharpenRadius') : '', n('SharpenDetail') ? 'detail ' + n('SharpenDetail') : '', n('SharpenEdgeMasking') ? 'masking ' + n('SharpenEdgeMasking') : '') : '',
+    n('LuminanceSmoothing') ? 'Noise reduction: ' + n('LuminanceSmoothing') : '', n('ColorNoiseReduction') ? 'Color noise reduction: ' + n('ColorNoiseReduction') : '']);
+  grp('Optics', [n('LensProfileEnable') ? 'Lens profile corrections: on' : '', n('AutoLateralCA') ? 'Remove chromatic aberration: on' : '']);
+  return G;
+}
+function wrapLines(ctx, text, maxW) {
+  const out = []; let line = '';
+  for (const w of text.split(/\s+/)) { const t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > maxW && line) { out.push(line); line = '  ' + w; } else line = t; }
+  if (line) out.push(line); return out;
+}
+async function drawRecipeCard(it, o) {
+  const cc = await ensureCanvas(it), src = cc && cc.canvas; if (!src || !it.lr) return null;
+  const pw = src.width, ph = src.height, side = pw >= ph, dark = o.theme === 'dark';
+  const imgH = side ? Math.min(2000, ph) : Math.round(Math.min(1600, pw) * ph / pw), imgW = Math.round(imgH * pw / ph);
+  const panelW = side ? Math.round(imgH * 0.5) : imgW, panelH = side ? imgH : Math.round(imgW * 1.0);
+  const W = side ? panelW + imgW : imgW, H = side ? imgH : imgH + panelH;
+  const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+  try { await Promise.all(['600 20px "Barlow Condensed"', '500 20px "Barlow Condensed"', '400 20px "Barlow Condensed"'].map(f => document.fonts.load(f))); } catch {}
+  const bg = dark ? '#141517' : '#ffffff', ink = dark ? '#e6e6e6' : '#222222', soft = dark ? '#9a9da2' : '#6a6a6a', rule = dark ? 'rgba(255,255,255,.14)' : 'rgba(0,0,0,.12)';
+  x.fillStyle = bg; x.fillRect(0, 0, W, H);
+  x.imageSmoothingQuality = 'high'; x.drawImage(src, side ? panelW : 0, 0, imgW, imgH);
+  const px0 = side ? 0 : 0, py0 = side ? 0 : imgH, pad = Math.round(Math.min(panelW, panelH) * (side ? 0.09 : 0.05));
+  const groups = recipeGroups(it.lr), F = (wt, sz) => `${wt} ${Math.round(sz)}px "Barlow Condensed", "Arial Narrow", sans-serif`;
+  /* header */
+  let y = py0 + pad, hs = Math.round((side ? panelW : panelH) * (side ? 0.042 : 0.06));
+  x.fillStyle = soft; x.font = F(600, hs * 0.55); x.textBaseline = 'top'; x.letterSpacing = Math.round(hs * 0.12) + 'px'; x.fillText('LIGHTROOM PRESET', px0 + pad, y); x.letterSpacing = '0px';
+  y += hs * 0.85; x.fillStyle = ink; x.font = F(600, hs * 1.25);
+  for (const l of wrapLines(x, (o.title || 'Untitled').toUpperCase(), panelW - 2 * pad)) { x.fillText(l, px0 + pad, y); y += hs * 1.35; }
+  if (o.by) { x.fillStyle = soft; x.font = F(500, hs * 0.6); x.fillText(o.by, px0 + pad, y); y += hs * 0.9; }
+  y += hs * 0.4; x.fillStyle = rule; x.fillRect(px0 + pad, y, panelW - 2 * pad, Math.max(1, Math.round(hs * 0.05))); y += hs * 0.6;
+  /* footer lines: workflow, other steps, credit */
+  const hist = it.lrHist || [], outside = hist.some(a => !/^Lightroom/.test(a));
+  const foot = []; if (hist.length > 1 && outside) foot.push('Workflow: ' + hist.join(' \u2192 ') + '. Edits made outside Lightroom are part of the image and aren\u2019t in the preset.');
+  if (o.other) foot.push('Other steps: ' + o.other);
+  if (o.howto) { const fname = ((o.title || it.name.replace(/\.[^.]+$/, '')).replace(/[\\/:*?"<>|]+/g, '-').trim() || 'Recipe') + '.xmp'; foot.push(`Preset file: ${fname} \u00b7 To load it in Lightroom Classic: Develop \u2192 Presets \u2192 + \u2192 Import Presets (it appears in the FledgeView group).`); }
+  /* body: fit the text to the space, in one or two columns */
+  const top = y, bottom = py0 + panelH - pad, colsMax = 2;
+  let fs = side ? hs * 0.62 : hs * 0.45, cols = side ? 1 : 2, layout = null;
+  const plan = (fsz, ncol) => {
+    const cw = (panelW - 2 * pad - (ncol - 1) * pad * 0.8) / ncol, items = [];
+    x.font = F(500, fsz);
+    for (const g of groups) { items.push({ t: g.title.toUpperCase(), h: true }); for (const l of g.lines) for (const wl of wrapLines(x, l.toUpperCase(), cw)) items.push({ t: wl }); items.push({ gap: true }); }
+    x.font = F(400, fsz * 0.9); const footL = []; for (const f of foot) footL.push(...wrapLines(x, f, panelW - 2 * pad)); footL.push('Card made with FledgeView \u00b7 fledgeview.com');
+    const lh = fsz * 1.38, footH = footL.length * fsz * 1.25 + fsz * 0.8, avail = bottom - top - footH;
+    const colsArr = [[]]; let hh = 0;
+    for (const it2 of items) {
+      const ih = it2.gap ? lh * 0.55 : lh, need = it2.h ? lh * 2 : ih;   // a heading moves on together with its first line
+      if (hh + need > avail && colsArr.length < ncol && colsArr[colsArr.length - 1].length) { colsArr.push([]); hh = 0; if (it2.gap) continue; }
+      colsArr[colsArr.length - 1].push(it2); hh += ih;
+    }
+    const used = Math.max(...colsArr.map(cl => cl.reduce((a, b) => a + (b.gap ? lh * 0.55 : lh), 0)));
+    return { cw, colsArr, lh, footL, footH, ok: used <= avail + 0.5, fsz };
+  };
+  for (let tries = 0; tries < 40; tries++) { layout = plan(fs, cols); if (layout.ok) break; if (cols < colsMax && fs < hs * 0.5) { cols++; fs = hs * 0.62; } else fs *= 0.94; }
+  const { cw, colsArr, lh, footL, fsz } = layout;
+  colsArr.forEach((cl, ci) => { let yy = top; const xx = px0 + pad + ci * (cw + pad * 0.8);
+    for (const it2 of cl) { if (it2.gap) { yy += lh * 0.55; continue; } x.fillStyle = it2.h ? ink : (dark ? '#c9c9c9' : '#3a3a3a'); x.font = F(it2.h ? 600 : 400, it2.h ? fsz * 1.02 : fsz); if (it2.h) x.letterSpacing = Math.round(fsz * 0.08) + 'px'; x.fillText(it2.t, xx, yy); x.letterSpacing = '0px'; yy += lh; } });
+  let fy = bottom - footL.length * fsz * 1.25; x.font = F(400, fsz * 0.9); x.fillStyle = soft;
+  for (const l of footL) { x.fillText(l, px0 + pad, fy); fy += fsz * 1.25; }
+  return c;
+}
+/* wrap the words of a few toolbar buttons, so narrow screens can show just their icons */
+for (const id of ['openFolder', 'addFiles', 'editBtn', 'dofBtn']) { const b = $(id); if (!b) continue; for (const n of [...b.childNodes]) if (n.nodeType === 3 && n.textContent.trim()) { const sp = document.createElement('span'); sp.className = 'lbl'; sp.textContent = n.textContent; n.replaceWith(sp); } if (!b.title) b.title = b.textContent.trim(); }
+function syncPairBtn() { const on2 = S.pairs !== false; $('pairBtn').setAttribute('aria-pressed', String(on2)); $('pairBtn').setAttribute('aria-checked', String(on2)); }
+syncPairBtn();
+$('pairBtn').onclick = () => { S.pairs = S.pairs === false; saveS(); syncPairBtn(); toast(S.pairs ? 'RAW + JPEG pairs will show as one photo the next time you open a folder' : 'RAW and JPEG files will show separately the next time you open a folder'); };
+/* the Presets menu: lit when the current photo carries Lightroom adjustments, dimmed with a reason when it doesn't */
+function lrAdjusted(it) { return !!(it && it.lr && lrRows(it.lr).length); }
+function syncPresetMenu() {
+  const it = cur(), ok = lrAdjusted(it);
+  $('lrDot').hidden = !ok;
+  for (const id of ['pmCard', 'pmPreset', 'pmShow']) $(id).disabled = !ok;
+  const note = !it ? 'Open a photo first.' : it.lr === undefined && LR_EXT.has(it.ext) ? 'Checking this photo\u2026' : !it.lr ? 'No Lightroom settings in this photo. Export from Lightroom with Metadata \u2192 Include: All Metadata, or try a JPEG or TIFF.' : !ok ? 'This photo\u2019s Lightroom settings are all at their defaults, so there\u2019s nothing to save.' : '';
+  $('pmNote').textContent = note; $('pmNote').hidden = !note;
+  $('presetMenuBtn').title = ok ? 'This photo has Lightroom adjustments: make a recipe card or save a preset' : 'Lightroom presets and recipe cards from the current photo';
+  if (it && it.lr === undefined && LR_EXT.has(it.ext)) lrSettings(it).then(() => { if (cur() === it) syncPresetMenu(); });
+}
+$('pmCard').onclick = () => openRecipe(cur());
+$('pmPreset').onclick = () => saveLrPreset(cur());
+$('pmShow').onclick = () => {
+  const b = $('infoToggle'); if (b.getAttribute('aria-expanded') !== 'true') b.click();
+  refreshRows(); setTimeout(() => { const h = [...$('rows').querySelectorAll('h3')].find(x => x.textContent.startsWith('Lightroom')); if (h) h.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 150);
+};
+function openRecipe(it) {
+  if (!it || !it.lr) return;
+  const o = S.recipe = { theme: 'light', by: '', other: '', preset: true, ...(S.recipe || {}) };
+  $('rTitle').value = it.name.replace(/\.[^.]+$/, ''); $('rBy').value = o.by; $('rOther').value = o.other; $('rTheme').value = o.theme; $('rPreset').checked = o.preset !== false; $('rHowTo').checked = o.howto !== false; $('rHowTo').disabled = !$('rPreset').checked;
+  $('recipeDlg').dataset.key = it.key; $('rStatus').textContent = '';
+  $('recipeDlg').showModal(); recipePreview();
+}
+let recipeTimer = 0;
+function recipeOpts() { return { title: $('rTitle').value.trim(), by: $('rBy').value.trim(), other: $('rOther').value.trim(), theme: $('rTheme').value, howto: $('rPreset').checked && $('rHowTo').checked }; }
+async function recipePreview() {
+  const it = cur(); if (!it || $('recipeDlg').dataset.key !== it.key) return;
+  const c = await drawRecipeCard(it, recipeOpts()); if (!c) return;
+  const pv = $('rPrev'), k = Math.min(1, 760 / c.width, 460 / c.height); pv.width = Math.round(c.width * k); pv.height = Math.round(c.height * k);
+  const px = pv.getContext('2d'); px.imageSmoothingQuality = 'high'; px.drawImage(c, 0, 0, pv.width, pv.height);
+}
+$('recipeDlg').addEventListener('input', e => {
+  if (e.target.id === 'rPreset' || e.target.id === 'rHowTo') return;
+  Object.assign(S.recipe, { by: $('rBy').value.trim(), other: $('rOther').value.trim(), theme: $('rTheme').value }); saveS();
+  clearTimeout(recipeTimer); recipeTimer = setTimeout(recipePreview, 250);
+});
+$('rPreset').onchange = e => { S.recipe.preset = e.target.checked; $('rHowTo').disabled = !e.target.checked; saveS(); recipePreview(); };
+$('rHowTo').onchange = e => { S.recipe.howto = e.target.checked; saveS(); recipePreview(); };
+$('rSave').onclick = async () => {
+  const it = cur(); if (!it) return;
+  const o = recipeOpts(), base = (o.title || it.name.replace(/\.[^.]+$/, '')).replace(/[\\/:*?"<>|]+/g, '-').trim() || 'Recipe';
+  $('rStatus').textContent = 'Making the card\u2026';
+  const c = await drawRecipeCard(it, o); if (!c) { $('rStatus').textContent = 'This photo has no Lightroom settings.'; return; }
+  const blob = await new Promise(res => c.toBlob(res, 'image/jpeg', 0.92));
+  const r1 = await saveFile(base + '.jpg', blob); let r2 = 'skipped';
+  if ($('rPreset').checked) { const xm = await lrPresetXmp(it, o.title || base).catch(() => null); r2 = xm ? await saveFile(base + '.xmp', new Blob([xm], { type: 'application/rdf+xml' })) : 'none'; }
+  $('rStatus').textContent = r1 === 'saved' ? `Saved ${base}.jpg` + (r2 === 'saved' ? ` and ${base}.xmp. To use the preset, see How to use the .xmp preset below.` : '.') : 'The card wasn\u2019t saved.';
+};
+async function saveLrPreset(it) {
+  const x = await lrPresetXmp(it).catch(() => null);
+  if (!x) { toast('This photo has no Lightroom settings to save'); return; }
+  const out = await saveFile(it.name.replace(/\.[^.]+$/, '') + ' (FledgeView preset).xmp', new Blob([x], { type: 'application/rdf+xml' }));
+  if (out === 'saved') toast('Preset saved. In Lightroom Classic: Develop \u2192 Presets \u2192 + \u2192 Import Presets; it appears in the FledgeView group.');
 }
 function buildRows(it, m) {
   if (!state.allTags) return essentialRows(it, m);
@@ -4341,6 +4653,7 @@ function buildRows(it, m) {
     if (used.has(k) || SKIP.test(k)) continue;
     const v = fmtVal(k, m[k]); if (v) rows.push({ g: 'Other', k: labelOf(k), v });
   }
+  if (it.lr) rows.push(...lrRows(it.lr));
   return rows;
 }
 function renderRows() {
@@ -4359,8 +4672,22 @@ function renderRows() {
     box.append(b); shown++;
   }
   if (!shown && q) { const p = document.createElement('p'); p.className = 'none'; p.textContent = 'No tags match that filter.'; box.append(p); }
+  if (it.lr && lrRows(it.lr).length) {
+    const lastLr = [...box.querySelectorAll('h3')].filter(h => h.textContent.startsWith('Lightroom')).pop();
+    const bar = document.createElement('div'); bar.className = 'lrbar';
+    const btn = document.createElement('button'); btn.className = 'btn'; btn.textContent = 'Save as Lightroom preset';
+    btn.title = 'Save these adjustments as a Lightroom preset (.xmp). The crop, masks and spot removal belong to this photo and are left out.'; btn.onclick = () => saveLrPreset(it);
+    const rc = document.createElement('button'); rc.className = 'btn'; rc.textContent = 'Make recipe card'; rc.title = 'The photo beside its Lightroom settings, saved as an image, with the matching preset'; rc.onclick = () => openRecipe(it);
+    bar.append(btn, rc);
+    let at = lastLr; while (at && at.nextElementSibling && at.nextElementSibling.tagName !== 'H3') at = at.nextElementSibling;
+    if (at) at.after(bar); else box.append(bar);
+  }
 }
-function refreshRows() { const it = cur(); if (it && it.meta) { state.rows = buildRows(it, it.meta); renderRows(); } }
+function refreshRows() {
+  const it = cur(); if (!it || !it.meta) return;
+  state.rows = buildRows(it, it.meta); renderRows();
+  if (it.lr === undefined && LR_EXT.has(it.ext)) lrSettings(it).then(lr => { if (lr && cur() === it) { state.rows = buildRows(it, it.meta); renderRows(); } });
+}
 $('filter').oninput = renderRows;
 $('allTags').onclick = () => {
   state.allTags = !state.allTags;
@@ -4482,7 +4809,7 @@ async function show(i) {
   else if (S.editOpen && !state.pview && !state.framing && !state.show.quad && !state.show.compare) setEditing(true, false);
   if (state.editing && drawerMode === 'crop' && !cropMode && !state.pview) setCropMode(true);
   if (lensOpen()) lensFollow();
-  syncViewEdits();
+  syncViewEdits(); syncPresetMenu();
   preloadNeighbors(tok);
   markActive();
   if (on('sharp') && (it.sharp == null || !EXPO[it.key]) && ok) scoreOnly(it).then(() => { paintThumb(it); if (cur() === it) { refreshOsd(); refreshRows(); } });
@@ -5045,7 +5372,7 @@ async function writeSidecar(it) {
 $('writeXmp').onclick = async () => {
   if (!state.items.some(i => i.dir)) return toast(whyNoWrite());
   const touched = state.items.filter(i => CULL[i.key] || i.sidecarWritten);
-  const targets = touched.filter(i => i.dir && SIDECAR.has(i.ext));
+  const targets = touched.filter(i => i.dir && (SIDECAR.has(i.ext) || (i.raw && SIDECAR.has(i.raw.ext))));
   const skipped = touched.length - targets.length;
   if (!targets.length) return toast('No rated or flagged RAW files to write');
   if (!await ensureWrite()) return toast('Write permission wasn’t granted, so nothing was written');
@@ -5176,6 +5503,7 @@ $('moveRej').onclick = async () => {
       const from = it.dir;
       it.handle = await moveHandle(it.handle, from, dest, it.name);
       await moveCompanions(from, dest, it.name);
+      if (it.raw && it.raw.handle) { try { it.raw.handle = await moveHandle(it.raw.handle, from, dest, it.raw.name); await moveCompanions(from, dest, it.raw.name); it.raw.dir = dest; it.raw.file = await it.raw.handle.getFile(); } catch {} }
       it.dir = dest; it.zone = target; it.home = target ? home : null;
       try {
         const nf = await it.handle.getFile(), nk = keyOf(nf);
@@ -5298,6 +5626,7 @@ $('orgGo').onclick = async () => {
         const movedSc = await moveCompanions(from, dest, it.name);
         it.dir = dest;
         log.moves.push({ name: it.name, from: fromRel, to: g.parts, sidecars: movedSc });
+        if (it.raw && it.raw.handle) { try { it.raw.handle = await moveHandle(it.raw.handle, from, dest, it.raw.name); const rsc = await moveCompanions(from, dest, it.raw.name); it.raw.dir = dest; it.raw.file = await it.raw.handle.getFile(); log.moves.push({ name: it.raw.name, from: fromRel, to: g.parts, sidecars: rsc }); } catch {} }
         if (log.moves.length % 25 === 0) await saveOrgLog(it.root, log);
         try {
           const nf = await it.handle.getFile(), nk = keyOf(nf);
@@ -8283,8 +8612,29 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.58 beta';
+const VERSION = '0.9.61 beta';
 const RELEASES = [
+  { v: '0.9.61 beta', date: 'November 2026', groups: [
+    ['New', [
+      'RAW + JPEG pairs: a raw file and a JPEG with the same name in the same folder now show as one photo, labeled RAW+JPG. Viewing at 100%, Peaking, Focus pt and sharpness scoring use the full-size JPEG, which fixes focus checking for cameras whose raw files embed only a small preview (such as 1616 \u00d7 1080 on the Sony A7R VI). Ratings, picks and rejects cover both files, Move picks and rejects and Organize move both (and Undo brings both back), and Write ratings writes the raw file\u2019s sidecar for Lightroom. View \u25be \u2192 Pair RAW + JPEG turns it off. Thanks to Peter for the report.',
+    ]],
+  ] },
+  { v: '0.9.60 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Recipe cards explain the preset: the Recipe card window has How to use the .xmp preset (Lightroom Classic, Lightroom, Lightroom mobile and Camera Raw), and the card can carry a line naming the preset file and how to load it.',
+      'Presets \u25be in the top toolbar: make a recipe card, save a Lightroom preset, or show the Lightroom settings. A dot on the button shows when the photo you\u2019re on carries Lightroom adjustments.',
+      'Recipe cards: for a photo with Lightroom adjustments, Presets \u25be \u2192 Make recipe card (in the top toolbar, also in Photo info) saves the photo beside the full list of settings that made it (profile, white balance, light, tone curve, presence, color mixer, color grading, effects, calibration and detail), with your title and byline, as a JPEG, plus the matching Lightroom preset under the same name. A folder of cards and presets becomes a visual preset library. The card notes other programs used on the photo (from its history) and any other steps you add.',
+    ]],
+    ['Improved', [
+      'The toolbar stays on one row on laptop screens (1280 pixels wide and up): below 1400 pixels, Open folder, Open file, Edit, Lens tools and Presets show as icons, with their names in the tooltips.',
+    ]],
+  ] },
+  { v: '0.9.59 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Lightroom edits in Photo info: for JPEGs and TIFFs exported from Lightroom with full metadata, Photo info lists the adjustments that were made (profile, white balance, light, tone curve, color mixer, color grading, effects, detail and lens corrections), leaving out everything at its default.',
+      'Save as Lightroom preset: turn those adjustments into a preset file to import in Lightroom (Develop \u2192 Presets \u2192 + \u2192 Import Presets). The crop, masks and spot removal belong to that one photo and are left out.',
+    ]],
+  ] },
   { v: '0.9.58 beta', date: 'November 2026', groups: [
     ['New', [
       'Frame mode can fill the print: choose Photo \u2192 Fill the print, and the opening takes the print size\u2019s shape (4:5 for 8 \u00d7 10 and 16 \u00d7 20, 2:3 for 20 \u00d7 30), the photo fills it, and you drag it at fit to choose what\u2019s kept. The print resolution note accounts for the crop. Fit, the whole photo, is still the default.',
@@ -8770,7 +9120,7 @@ function camKeyOf(it) {
   if (sonyM) { const roman = ['', '', 'II', 'III', 'IV', 'V', 'VI'][+sonyM[3] || 0] || ''; return `Sony ${model.startsWith('ILME') ? 'FX' : 'A'}${sonyM[1]}${sonyM[2]}${roman ? ' ' + roman : ''}`; }
   return make && !model.toLowerCase().startsWith(make.split(' ')[0].toLowerCase()) && !/^(ILCE|DSC|ILME|NIKON|Canon)/i.test(model) ? `${make.split(' ')[0]} ${model}` : model;
 }
-const typeKeyOf = it => RAW.has(it.ext) ? 'RAW' : (it.ext === 'jpg' || it.ext === 'jpeg') ? 'JPEG' : ['heic', 'heif', 'hif'].includes(it.ext) ? 'HEIF' : it.ext.toUpperCase();
+const typeKeyOf = it => it.raw ? 'RAW+JPEG' : RAW.has(it.ext) ? 'RAW' : (it.ext === 'jpg' || it.ext === 'jpeg') ? 'JPEG' : ['heic', 'heif', 'hif'].includes(it.ext) ? 'HEIF' : it.ext.toUpperCase();
 function passMetaFilters(it) {
   if (state.typeF && typeKeyOf(it) !== state.typeF) return false;
   if (state.lensF && lensKeyOf(it) !== state.lensF) return false;
