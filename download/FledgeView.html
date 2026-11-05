@@ -3616,6 +3616,10 @@ document.addEventListener('drop', async e => {
 });
 
 $('clearAll').onclick = () => {
+  /* close any open panel first (a crop in progress is saved), so nothing from the last photo stays on screen */
+  if (wbPick) setWbPick(false);
+  if (cropMode) setCropMode(false);
+  if (state.editing) setEditing(false, false);
   state.items.forEach(i => { if (i.thumb) URL.revokeObjectURL(i.thumb); if (i.thumbHi) URL.revokeObjectURL(i.thumbHi); if (i._galUrl) URL.revokeObjectURL(i._galUrl); });
   farObs.disconnect(); hiObs.disconnect();
   state.items = []; state.view = []; state.idx = -1; state.token++; state.bursts = []; state.roots.clear();
@@ -3625,6 +3629,10 @@ $('clearAll').onclick = () => {
   $('strip').innerHTML = ''; $('gridCount').textContent = ''; $('sidePath').hidden = true; if (state.sel) { state.sel.clear(); refreshSel(); }
   state.lensF = state.camF = state.typeF = ''; refreshFilterOptions();
   panes.forEach(clearPane);
+  /* the edit and Lens tools layers sit over the photo; hide and empty them too */
+  state.viewEdits = false; editBase = null; editGeo = null;
+  $('screen').classList.remove('viewedits', 'lensing'); $('editView').hidden = true; $('lensView').hidden = true;
+  { const ec = $('editCanvas'); ec.getContext('2d').clearRect(0, 0, ec.width, ec.height); }
   $('osd').hidden = true; $('msg').hidden = true; $('empty').hidden = false; setEmpty(false);
   $('screen').classList.add('noimg');
   $('rows').innerHTML = '<p class="none">Select a photo to see its EXIF data. Click any row to copy it.</p>';
@@ -8095,8 +8103,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.50 beta';
+const VERSION = '0.9.51 beta';
 const RELEASES = [
+  { v: '0.9.51 beta', date: 'November 2026', groups: [
+    ['Fixed', [
+      'Clear all now always clears the screen. If the Crop, Adjust or Lens tools panel was open, or the photo had edits, the last photo could stay on screen until you refreshed the page. Clear all now closes the panel (saving a crop in progress) and returns to the No photo loaded message. Thanks to soundbyte for the report.',
+    ]],
+  ] },
   { v: '0.9.50 beta', date: 'November 2026', groups: [
     ['Improved', [
       'The start screen now says up front that your browser may use the word \u201cUpload\u201d when you choose a folder, and that nothing is uploaded: FledgeView reads your photos on your computer.',
