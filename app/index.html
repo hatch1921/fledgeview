@@ -4052,7 +4052,7 @@ $('scoreBurst').onclick = async () => {
   if (!it) return;
   if (!on('bursts') || !it.burst) return toast('This photo isn’t part of a burst');
   const mem = it.burst.members;
-  await scorePool(mem.filter(m => m.sharp == null), n => status(`Scoring burst ${n} of ${mem.length}`), () => false);
+  await scorePool(mem.filter(m => m.sharp == null || !EXPO[m.key]), n => status(`Scoring burst ${n} of ${mem.length}`), () => false);
   status('');
   mem.forEach(paintThumb); refreshOsd(); refreshRows();
   const best = mem.reduce((a, b) => (b.sharp ?? 0) > (a.sharp ?? 0) ? b : a);
@@ -4083,7 +4083,7 @@ $('aRun').onclick = async () => {
   if (metaQ.length || metaBusy) return aStatus('Still reading photo info. Try again in a moment.');
   if (!state.bursts.length) return aStatus('No bursts found in these photos.');
   autoBusy = true; autoStop = false; $('aRun').disabled = true; $('aStop').hidden = false;
-  const todo = state.bursts.flat().filter(i => i.sharp == null);
+  const todo = state.bursts.flat().filter(i => i.sharp == null || !EXPO[i.key]);   // frames scored earlier still get their exposure check
   const t0 = performance.now();
   await scorePool(todo, n => {
     if (n % 3 && n !== todo.length) return;
@@ -6569,8 +6569,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.53 beta';
+const VERSION = '0.9.54 beta';
 const RELEASES = [
+  { v: '0.9.54 beta', date: 'November 2026', groups: [
+    ['Fixed', [
+      'Auto-pick sharpest frames and Score burst now run the exposure check on every frame in the bursts, including frames whose sharpness was scored earlier, so the Over and Under badges appear for all of them after the run.',
+    ]],
+  ] },
   { v: '0.9.53 beta', date: 'November 2026', groups: [
     ['New', [
       'Exposure check: frames that are possibly overexposed (at least 3% of the frame blown) or underexposed (dark overall with nothing bright) get a small Over or Under badge, a line in Photo info, and their own filters under Cull \u25be \u2192 Show, along with Soft frames in bursts. It\u2019s cautious on purpose: a lit animal on a dark background isn\u2019t flagged. These are hints; nothing is rejected for you.',
