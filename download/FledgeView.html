@@ -3229,7 +3229,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
         <ul>
           <li><strong>Hold a reference in Compare:</strong> in Compare (<kbd>C</kbd>), press <kbd>H</kbd> to hold the current frame on the right (marked Held); the arrows then step through the other frames on the left, so you’re always comparing against your favorite. <kbd>H</kbd> on a better frame makes it the new held one; click the held frame and press <kbd>H</kbd> to release it.</li>
           <li><strong>RAW + JPEG pairs:</strong> when a folder has a raw file and a JPEG with the same name (DSC01234.ARW and DSC01234.JPG), FledgeView shows them as one photo, labeled RAW+JPG, and checks focus and sharpness on the full-size JPEG. That matters for cameras whose raw files embed only a small preview. Ratings, picks and rejects cover both files, Move picks and rejects moves both, and Write ratings writes the raw file’s sidecar, which Lightroom reads for the pair. Turn it off under View ▾ → Pair RAW + JPEG.</li>
-          <li><strong>Organize a big folder quickly:</strong> in Cull ▾ → Organize into lens folders, <strong>Choose folder…</strong> organizes a folder and its subfolders without opening the photos. FledgeView reads only each photo’s lens data and keeps a small index file (_fledgeview-index.json) in the folder, so later runs read only new photos and move just those into your lens folders. Photos you’ve moved by hand are left where you put them. Import records what it copies in the same index, and its <strong>Lens only</strong> folder choice puts new photos straight into the same lens folders.</li>
+          <li><strong>Organize a big folder quickly:</strong> in Cull ▾ → Organize into lens folders, <strong>Choose folder…</strong> organizes a folder and its subfolders without opening the photos. FledgeView reads only each photo’s lens data and keeps a small index file (_fledgeview-index.json) in the folder, so later runs read only new photos and move just those into your lens folders. The top level works as an inbox: drop new photos there (or move one back from a lens folder) and click <strong>Scan again</strong> to sort them. Photos you’ve moved from one lens folder to another are left where you put them. Import records what it copies in the same index, and its <strong>Lens only</strong> folder choice puts new photos straight into the same lens folders.</li>
           <li><strong>Opening a folder with subfolders:</strong> FledgeView asks whether to open the folder’s own photos, only new photos (ones Organize hasn’t placed yet), or everything, since reading thousands of photos takes time. You can have it remember your choice; View ▾ → Ask again about subfolders resets it.</li>
           <li><strong>Keep the best of a burst:</strong> on the frame you want, press <kbd>Shift</kbd> + <kbd>P</kbd> (or Cull ▾ → Keep this, reject rest of burst): it’s picked, the rest of the burst is rejected (frames you already picked stay picked), and FledgeView moves on to the next photo. <kbd>Shift</kbd> + <kbd>U</kbd> undoes it.</li>
           <li><strong>Session summary</strong> (Cull ▾): photos reviewed, picks, rejects, time spent and photos per minute. It also appears once when you reach the last photo.</li>
@@ -3755,7 +3755,7 @@ async function walkHandle(dir, out, zone = null, home = null, root = dir) {
 async function chooseScope(dir, out) {
   const photos = out.filter(e => !e.xmp), own = e => e.dir === dir || (e.zone && e.home === dir), top = photos.filter(own);
   if (top.length === photos.length) return out;
-  const idx = await readIndex(dir), fresh2 = idx ? photos.filter(e => { const x = idx.files[idOf(e.file)]; return !(x && x.s); }) : null;
+  const idx = await readIndex(dir), fresh2 = idx ? photos.filter(e => { const x = idx.files[idOf(e.file)]; return own(e) || !(x && x.s); }) : null;   // the top level is the inbox: its photos always count as new
   const keep = list => { const dirs = new Set(list.map(e => e.dir)); return [...list, ...out.filter(e => e.xmp && dirs.has(e.dir))]; };
   const pickFor = c => c === 'top' ? keep(top) : c === 'new' && fresh2 ? keep(fresh2) : out;
   const countFor = c => c === 'top' ? top.length : c === 'new' ? (fresh2 ? fresh2.length : 0) : photos.length;
@@ -5750,7 +5750,10 @@ async function scanForOrganize(root) {
   for (const en of photos) {
     const id = idOf(en.file), rel = await relOf(root, en.dir, cache), e = idx.files[id]; seen.add(id);
     if (e && e.m) {
-      if (e.d !== rel) { e.d = rel; if (e.s) { userMoved++; continue; } }   // moved by hand after it was settled: leave it there
+      /* the top level is the inbox: an organized photo found there was put back by hand, so it's organized again.
+         (Organize never leaves a photo at the top level; one with no lens data goes to Unknown lens) */
+      if (!rel && e.s) { e.d = rel; e.s = 0; pending.push(stubItem(en, e.m)); continue; }
+      if (e.d !== rel) { e.d = rel; if (e.s) { userMoved++; continue; } }   // moved by hand between subfolders: leave it there
       if (e.s) { settled++; continue; }
       pending.push(stubItem(en, e.m));
     } else toRead.push({ en, id, rel });
@@ -8877,8 +8880,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.69 beta';
+const VERSION = '0.9.70 beta';
 const RELEASES = [
+  { v: '0.9.70 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'The top level of an organized folder is now an inbox. Drop photos there, click Scan again, and Organize sorts them into their lens folders, including photos you move back to the top level from a lens folder. Photos you move from one lens folder to another still stay where you put them. Open folder\u2019s New photos only choice also includes everything at the top level.',
+    ]],
+  ] },
   { v: '0.9.69 beta', date: 'November 2026', groups: [
     ['New', [
       'Opening a large folder (500 files or more) shows a small progress panel. While FledgeView looks through the folder and its lens subfolders, it shows how many files it has found and which subfolder it\u2019s in, with a Stop button in case you chose the wrong folder. Then, while it reads each photo\u2019s camera details, it shows a progress bar, the count, the percentage and the time left. You can keep browsing, or click Hide.',
