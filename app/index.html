@@ -1983,9 +1983,12 @@ async function readSidecarRatings(fresh) {
 function setLoadedButtons(v) {
   $('clearAll').disabled = $('statsBtn').disabled = $('csvBtn').disabled = $('csvDlBtn').disabled = $('keepBtn').disabled = !v;
 }
+let walkCount = 0;
 async function walkHandle(dir, out, zone = null, home = null, root = dir) {
+  if (dir === root) walkCount = 0;
   for await (const entry of dir.values()) {
     if (entry.kind === 'file') {
+      if (++walkCount % 500 === 0) status(`Reading folder\u2026 ${walkCount.toLocaleString()} files`);
       if (SUPPORTED.has(extOf(entry.name)) && !entry.name.startsWith('._')) out.push({ file: await entry.getFile(), handle: entry, dir, zone, home, root });
       else if (extOf(entry.name) === 'xmp' && !entry.name.startsWith('._')) out.push({ file: await entry.getFile(), dir, xmp: true });
     }
@@ -2004,11 +2007,14 @@ async function chooseScope(dir, out) {
   const idx = await readIndex(dir), fresh2 = idx ? photos.filter(e => { const x = idx.files[idOf(e.file)]; return !(x && x.s); }) : null;
   const keep = list => { const dirs = new Set(list.map(e => e.dir)); return [...list, ...out.filter(e => e.xmp && dirs.has(e.dir))]; };
   const pickFor = c => c === 'top' ? keep(top) : c === 'new' && fresh2 ? keep(fresh2) : out;
-  if (S.openScope && (S.openScope !== 'new' || fresh2)) return pickFor(S.openScope);
+  const countFor = c => c === 'top' ? top.length : c === 'new' ? (fresh2 ? fresh2.length : 0) : photos.length;
+  let why = '';
+  if (S.openScope) { if (countFor(S.openScope) > 0) return pickFor(S.openScope); why = `Your saved choice, ${S.openScope === 'top' ? 'This folder only' : 'New photos only'}, finds no photos here. `; }
   const subs = new Set(photos.filter(e => !own(e)).map(e => e.dir)).size;
-  $('scopeSub').textContent = `${dir.name} has ${photos.length.toLocaleString()} photos: ${top.length.toLocaleString()} in the folder itself and ${(photos.length - top.length).toLocaleString()} in ${subs.toLocaleString()} subfolder${subs === 1 ? '' : 's'}. Reading photos takes time, so open only what you need.`;
-  $('scTop').textContent = `${top.length.toLocaleString()} photo${top.length === 1 ? '' : 's'}, not the subfolders`;
-  $('scNewBtn').disabled = !fresh2; $('scNew').textContent = fresh2 ? `${fresh2.length.toLocaleString()} photo${fresh2.length === 1 ? '' : 's'} that Organize hasn\u2019t placed yet` : 'Available after this folder has been organized once';
+  $('scopeSub').textContent = why + `${dir.name} has ${photos.length.toLocaleString()} photos: ${top.length.toLocaleString()} in the folder itself and ${(photos.length - top.length).toLocaleString()} in ${subs.toLocaleString()} subfolder${subs === 1 ? '' : 's'}. Reading photos takes time, so open only what you need.`;
+  $('scTop').textContent = top.length ? `${top.length.toLocaleString()} photo${top.length === 1 ? '' : 's'}, not the subfolders` : 'None here: every photo is in a subfolder';
+  document.querySelector('#scopeDlg [data-scope="top"]').disabled = !top.length;
+  $('scNewBtn').disabled = !fresh2 || !fresh2.length; $('scNew').textContent = !fresh2 ? 'Available after this folder has been organized once' : fresh2.length ? `${fresh2.length.toLocaleString()} photo${fresh2.length === 1 ? '' : 's'} that Organize hasn\u2019t placed yet` : 'None here: everything is organized';
   $('scAll').textContent = `All ${photos.length.toLocaleString()} photos, including the subfolders`;
   $('scopeRemember').checked = false;
   const choice = await new Promise(res => {
@@ -2036,7 +2042,8 @@ $('openFolder').onclick = async () => {
     } catch (e) {
       status('');
       if (e.name === 'AbortError') return;
-      toast(`Couldn’t get folder access (${e.message || e.name}). Opening read-only instead, so sorting won’t be available.`);
+      toast(`Couldn\u2019t read that folder (${e.message || e.name}). You can open it read-only instead, without sorting.`);
+      $('upDlg').showModal(); return;   // the browser's own folder chooser needs a fresh click, so ask with a button rather than opening it here
     }
   }
   openFolderInput();
@@ -3946,7 +3953,7 @@ function stubItem(en, meta) {
   if (meta) { it.meta = meta; it.metaP = Promise.resolve(meta); }
   return it;
 }
-let orgScanStop = false;
+let orgScanStop = false, orgMoving = false;
 async function scanForOrganize(root) {
   orgScanStop = false;
   const out = []; $('orgStatus').textContent = 'Listing the folder\u2026';
@@ -4044,7 +4051,8 @@ $('orgFolderBtn').onclick = async () => {
   let root; try { root = await window.showDirectoryPicker({ mode: 'readwrite', id: 'chimp-org' }); } catch { return; }
   await useOrgFolder(root);
 };
-$('orgDlg').addEventListener('close', () => { orgScanStop = true; state.orgSource = null; $('orgSrcText').textContent = 'Organizing the photos you have open.'; });
+$('orgDlg').addEventListener('cancel', e => { if (orgMoving) { e.preventDefault(); toast('Photos are still moving: FledgeView will finish, then you can close this window'); } });
+$('orgDlg').addEventListener('close', () => { if (orgMoving) return; orgScanStop = true; state.orgSource = null; $('orgSrcText').textContent = 'Organizing the photos you have open.'; });
 async function saveOrgLog(root, log) {
   try { const fh = await root.getFileHandle(ORG_LOG, { create: true }); const w = await fh.createWritable(); await w.write(JSON.stringify(log, null, 1)); await w.close(); $('orgUndo').hidden = false; } catch {}
 }
@@ -4067,6 +4075,8 @@ $('orgGo').onclick = async () => {
   if (!confirm(`Move ${total.toLocaleString()} photo${total === 1 ? '' : 's'} into lens folders? Sidecars move with them, nothing is deleted, and you can undo this.`)) return;
   if (!await ensureWrite()) return $('orgStatus').textContent = 'Write permission wasn’t granted, so nothing was moved.';
   $('orgGo').disabled = true;
+  const runRoot = (state.orgSource && state.orgSource.root) || (orgCandidates()[0] || {}).root;   // kept for the whole run, even if the window is closed
+  const lockIds = ['orgUndo', 'orgFolderBtn', 'orgAgainBtn', 'orgNames', 'orgTc'], closeBtn = document.querySelector('#orgDlg [data-close]'); lockIds.forEach(id => { $(id).disabled = true; }); closeBtn.disabled = true; orgMoving = true;
   const log = { when: new Date().toISOString(), moves: [] }, settledNow = [];
   let ok = 0, fail = 0, skip = 0, done = 0, firstErr = '';
   for (const g of plan.values()) {
@@ -4094,12 +4104,13 @@ $('orgGo').onclick = async () => {
     }
   }
   saveCull(); saveSharp(); saveSeen();
-  const root = orgCandidates()[0] && orgCandidates()[0].root;
+  const root = runRoot;
   if (root && log.moves.length) await saveOrgLog(root, log);
   if (root && settledNow.length) { for (const x of settledNow) { try { x.it.file = await x.it.handle.getFile(); } catch {} if (x.it.raw) settledNow.push({ it: x.it.raw, parts: x.parts }); } await indexSettle(root, settledNow); }
   if (state.orgSource) state.orgSource.items = state.orgSource.items.filter(it => !settledNow.some(x => x.it === it));
   const doneMsg = `Moved ${ok.toLocaleString()} photo${ok === 1 ? '' : 's'}.` + (skip ? ` ${skip} skipped (a file with the same name was already there).` : '') + (fail ? ` ${fail} couldn’t be moved (${firstErr}).` : '') + (ok ? ' If these were already in Lightroom, see How to relink below the plan.' : '');
   if (ok) tipNudge();
+  orgMoving = false; lockIds.forEach(id => { $(id).disabled = false; }); closeBtn.disabled = false;
   $('orgGo').disabled = false;
   refreshRows(); await renderOrgPlan();
   $('orgStatus').textContent = doneMsg;
@@ -7079,8 +7090,18 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.62 beta';
+const VERSION = '0.9.64 beta';
 const RELEASES = [
+  { v: '0.9.64 beta', date: 'November 2026', groups: [
+    ['Fixed', [
+      'Open folder no longer silently opens nothing. A remembered subfolder choice that finds no photos (for example This folder only, once everything is organized into lens folders) is set aside and FledgeView asks instead, explaining why; choices with no photos are dimmed. If a folder can\u2019t be read, FledgeView offers to open it read-only with a button, since browsers block their folder chooser without a fresh click. Big folders show progress while they\u2019re listed. Thanks to Frank for the report.',
+    ]],
+  ] },
+  { v: '0.9.63 beta', date: 'November 2026', groups: [
+    ['Fixed', [
+      'While Organize is moving photos, the other buttons wait and the window stays open until it finishes, so the undo log and the index are always saved.',
+    ]],
+  ] },
   { v: '0.9.62 beta', date: 'November 2026', groups: [
     ['New', [
       'Organize a folder without opening it: Cull \u25be \u2192 Organize into lens folders \u2192 Choose folder\u2026 reads only each photo\u2019s lens data (no thumbnails) and keeps a small index in the folder, so later runs read only new photos and move just those. Photos you\u2019ve moved by hand stay where you put them, Undo marks what it moves back as new again, and Scan again repeats it for the same folder in one click.',
