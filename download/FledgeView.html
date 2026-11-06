@@ -5153,6 +5153,23 @@ function editKind(r) {
   const label = geo.length && tone.length ? 'Cropped + edited' : geo.length ? (r.crop ? 'Cropped' : 'Straightened') : 'Edited';
   return { label, tip: [...geo, ...tone].join(' \u00b7 ') };
 }
+/* finding out whether a Sony file has a focus point reads up to 8 MB of it, so those checks wait in a queue, one file at a
+   time, for frames whose sharpness labels are showing. Firing them all at once (705 raws in long bursts) flooded the drive and
+   left the photo on screen stuck on "Reading". Until a check finishes, the label shows its dimmer approximate form */
+const afQueue = []; let afBusy = false;
+function queueAf(it) {
+  if (it._afq) return; it._afq = true; afQueue.push(it);
+  if (afBusy) return; afBusy = true;
+  (async () => {
+    while (afQueue.length) {
+      const x = afQueue.shift();
+      if (x.af === undefined && state.items.includes(x)) { try { await sonyFocus(x); } catch {} }
+      if (x.burst && x.burst.members.every(m => m.af !== undefined || m.sharp == null)) x.burst.members.forEach(paintThumb);
+      await new Promise(res => setTimeout(res, 0));   // let the photo on screen, thumbnails and typing go first
+    }
+    afBusy = false;
+  })();
+}
 function paintThumb(it) {
   const b = it.el; if (!b) return;
   b.innerHTML = '';
@@ -5174,7 +5191,7 @@ function paintThumb(it) {
   /* the sharpness label and Edited share the bottom-left corner: put them side by side instead of on top of each other */
   { const sp = b.querySelector(':scope > .sp'), ed = b.querySelector(':scope > .ed'); if (sp && ed) { const row = document.createElement('span'); row.className = 'lrow'; row.append(sp, ed); b.append(row); } }
   /* find out whether this Sony file has a focus point, so its burst's labels show the right confidence */
-  if (on('sharp') && it.burst && it.af === undefined && it.meta && /sony/i.test(it.meta.Make || '')) sonyFocus(it).then(() => it.burst && it.burst.members.forEach(paintThumb)).catch(() => {});
+  if (on('sharp') && it.burst && it.sharp != null && it.af === undefined && it.meta && /sony/i.test(it.meta.Make || '')) queueAf(it);
 }
 function updateStrip() {
   const qb = state.show.quad ? state.quadBase : -10;
@@ -8763,8 +8780,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.64 beta';
+const VERSION = '0.9.65 beta';
 const RELEASES = [
+  { v: '0.9.65 beta', date: 'November 2026', groups: [
+    ['Fixed', [
+      'Opening a folder with long bursts of Sony raw files no longer hangs on \u201cReading\u201d. Checking each burst frame for a focus point read 8 MB of every file at once; those checks now run one file at a time, only for frames with sharpness labels, behind the photo you\u2019re viewing.',
+    ]],
+  ] },
   { v: '0.9.64 beta', date: 'November 2026', groups: [
     ['Fixed', [
       'Open folder no longer silently opens nothing. A remembered subfolder choice that finds no photos (for example This folder only, once everything is organized into lens folders) is set aside and FledgeView asks instead, explaining why; choices with no photos are dimmed. If a folder can\u2019t be read, FledgeView offers to open it read-only with a button, since browsers block their folder chooser without a fresh click. Big folders show progress while they\u2019re listed. Thanks to Frank for the report.',
