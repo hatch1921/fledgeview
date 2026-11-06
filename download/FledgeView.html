@@ -3656,20 +3656,30 @@ async function readSidecarRatings(fresh) {
 function setLoadedButtons(v) {
   $('clearAll').disabled = $('statsBtn').disabled = $('csvBtn').disabled = $('csvDlBtn').disabled = $('keepBtn').disabled = !v;
 }
-let walkCount = 0;
+/* listing a folder: file sizes and dates are read 32 at a time rather than one by one, a file that can't be read (in use by
+   another program, or an online-only cloud file) is skipped and counted instead of stopping everything, and progress shows in
+   the middle of the screen while nothing is loaded */
+let walkCount = 0, walkSkipped = 0, walkName = '';
+function walkMsg() {
+  const t = `Reading ${walkName}\u2026 ${walkCount.toLocaleString()} file${walkCount === 1 ? '' : 's'}`; status(t);
+  if (!state.items.length) $('empty').textContent = t;
+}
 async function walkHandle(dir, out, zone = null, home = null, root = dir) {
-  if (dir === root) walkCount = 0;
-  for await (const entry of dir.values()) {
-    if (entry.kind === 'file') {
-      if (++walkCount % 500 === 0) status(`Reading folder\u2026 ${walkCount.toLocaleString()} files`);
-      if (SUPPORTED.has(extOf(entry.name)) && !entry.name.startsWith('._')) out.push({ file: await entry.getFile(), handle: entry, dir, zone, home, root });
-      else if (extOf(entry.name) === 'xmp' && !entry.name.startsWith('._')) out.push({ file: await entry.getFile(), dir, xmp: true });
-    }
-    else if (entry.kind === 'directory') {
-      const z = entry.name === '_picks' ? 'picks' : entry.name === '_rejects' ? 'rejects' : null;
-      if (z) { if (!zone) await walkHandle(entry, out, z, dir, root); }
-      else await walkHandle(entry, out, zone, home, root);
-    }
+  if (dir === root) { walkCount = 0; walkSkipped = 0; walkName = dir.name; walkMsg(); }
+  const files = [], dirs = [];
+  for await (const entry of dir.values()) (entry.kind === 'file' ? files : dirs).push(entry);
+  const want = files.filter(e => !e.name.startsWith('._') && (SUPPORTED.has(extOf(e.name)) || extOf(e.name) === 'xmp'));
+  for (let i = 0; i < want.length; i += 32) {
+    const batch = want.slice(i, i + 32), got = await Promise.all(batch.map(e => e.getFile().catch(() => null)));
+    batch.forEach((entry, k) => {
+      const file = got[k]; if (!file) { walkSkipped++; return; }
+      if (extOf(entry.name) === 'xmp') out.push({ file, dir, xmp: true }); else out.push({ file, handle: entry, dir, zone, home, root });
+    });
+    walkCount += batch.length; walkMsg();
+  }
+  for (const entry of dirs) {
+    const z = entry.name === '_picks' ? 'picks' : entry.name === '_rejects' ? 'rejects' : null;
+    try { if (z) { if (!zone) await walkHandle(entry, out, z, dir, root); } else await walkHandle(entry, out, zone, home, root); } catch { walkSkipped++; }
   }
 }
 /* a folder with subfolders: open just its own photos, only what isn't organized yet, or everything. Listing names is quick;
@@ -3705,8 +3715,12 @@ $('openFolder').onclick = async () => {
   if (window.showDirectoryPicker && !framed) {
     try {
       const dir = await window.showDirectoryPicker({ mode: 'read', id: 'chimp' });
-      let out = []; status('Reading folder…'); await walkHandle(dir, out); status('');
-      out = await chooseScope(dir, out); if (!out) return;
+      let out = []; await walkHandle(dir, out); status('');
+      const skippedNote = walkSkipped ? ` ${walkSkipped.toLocaleString()} file${walkSkipped === 1 ? '' : 's'} couldn\u2019t be read (in use by another program, or online-only) and ${walkSkipped === 1 ? 'was' : 'were'} skipped.` : '';
+      if (!state.items.length) setEmpty();
+      if (!out.some(e => !e.xmp)) { toast(`No photos FledgeView can open were found in ${dir.name} or its subfolders.${skippedNote}`); return; }
+      out = await chooseScope(dir, out); if (!out) { if (!state.items.length) setEmpty(); return; }
+      if (skippedNote) setTimeout(() => toast(skippedNote.trim()), 2500);
       if (state.items.length && out.length) $('clearAll').click();
       state.roots.add(dir);
       addFiles(out);
@@ -8780,8 +8794,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.65 beta';
+const VERSION = '0.9.66 beta';
 const RELEASES = [
+  { v: '0.9.66 beta', date: 'November 2026', groups: [
+    ['Fixed', [
+      'Open folder shows its progress in the middle of the screen (Reading RAW\u2026 4,500 files) instead of a small note in the corner, lists files about twice as fast, skips any file that can\u2019t be read (in use by another program, or an online-only cloud file) instead of stopping, and says so plainly when a folder has no photos it can open.',
+    ]],
+  ] },
   { v: '0.9.65 beta', date: 'November 2026', groups: [
     ['Fixed', [
       'Opening a folder with long bursts of Sony raw files no longer hangs on \u201cReading\u201d. Checking each burst frame for a focus point read 8 MB of every file at once; those checks now run one file at a time, only for frames with sharpness labels, behind the photo you\u2019re viewing.',
