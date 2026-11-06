@@ -718,6 +718,23 @@ body.pview .editnote{display:none!important}
 body.pvidle .pvnav,body.pvidle .pvclose{opacity:0}
 body.pvidle .screen{cursor:none}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--page);padding:8px 14px;border-radius:6px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:min(560px,90vw);text-align:center;z-index:70}
+/* loading card: shown while a large folder opens (finding photos, then reading photo info) */
+.loadcard{position:fixed;left:50%;bottom:calc(64px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;width:min(380px,92vw);background:var(--panel);color:var(--ink);border:1px solid var(--panel-line);border-radius:10px;padding:12px 14px 11px;box-shadow:0 6px 24px rgba(0,0,0,.35);font-size:13px}
+.loadcard.busy{top:50%;bottom:auto;transform:translate(-50%,-50%)}
+.loadcard.lcside{left:calc(16px + env(safe-area-inset-left,0px));transform:none;width:min(300px,92vw);bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+.loadcard .lctop{display:flex;align-items:center;gap:10px;margin-bottom:3px}
+.loadcard .lctop b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+.loadcard .lcphase{color:var(--ink);margin-bottom:7px}
+.loadcard .lcbar{height:6px;border-radius:3px;background:var(--panel-line);overflow:hidden;position:relative}
+.loadcard .lcbar i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:3px;background:var(--acc,var(--amber));transition:width .25s}
+.loadcard.busy .lcbar i{width:30%;animation:lcslide 1.3s ease-in-out infinite;transition:none}
+html[data-look="clean"] .loadcard{background:#2c2c2e;color:#ececf0;border-color:rgba(255,255,255,.1);border-radius:12px;font-family:var(--sys)}
+html[data-look="clean"] .loadcard .lcphase{color:#ececf0}
+html[data-look="clean"] .loadcard .lcd{color:#a1a1a6}
+html[data-look="clean"] .loadcard .lcbar{background:rgba(255,255,255,.12)}
+@keyframes lcslide{0%{left:-30%}100%{left:100%}}
+.loadcard .lcd{color:var(--ink-soft);margin-top:6px;font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.loadcard.busy .lcbar i{animation:none;left:0;width:100%;opacity:.45}}
 .toast.show{opacity:1}
 dialog{background:var(--panel);color:var(--ink);border:1px solid var(--panel-line);border-radius:10px;width:min(640px,92vw);padding:18px 20px}
 dialog::backdrop{background:rgba(0,0,0,.45)}
@@ -1082,6 +1099,12 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
 
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="loadcard" id="loadCard" hidden role="status" aria-live="polite">
+  <div class="lctop"><b id="lcTitle"></b><button class="btn" id="lcBtn" type="button">Stop</button></div>
+  <div class="lcphase" id="lcPhase"></div>
+  <div class="lcbar"><i id="lcFill"></i></div>
+  <div class="lcd" id="lcDetail"></div>
+</div>
 
 <dialog id="copyDlg">
   <p>Copying is blocked here. The text is selected, so press Ctrl+C (⌘C on a Mac).</p>
@@ -1191,8 +1214,9 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
 
 <dialog id="pickFailDlg" class="scopedlg" aria-labelledby="pickFailH">
   <h2 id="pickFailH">No folder was opened</h2>
-  <p class="sub">If you chose a folder and nothing happened, Chrome didn’t hand it over, which can happen when its file-access permission is blocked for this site. You can open the folder read-only instead: you can view, cull and export, but moving picks, writing ratings and organizing need Chrome’s permission.</p>
-  <p class="sub">To allow it again, click the icon at the left of the address bar, open Site settings, and set File editing to Ask or Allow.</p>
+  <p class="sub">If you chose a folder and nothing happened, <span data-bname>Chrome</span> didn’t hand it over. This can happen after a browser update even when nothing is blocked, and it can’t be fixed from this page.</p>
+  <p class="sub"><b>Open read-only instead</b> works right away: you can view, cull and export. Moving picks, writing ratings and organizing need full folder access; for those, try <span data-balt>Microsoft Edge</span>.</p>
+  <p class="sub">If it only happens on this site, check its setting: click the icon at the left of the address bar, open Site settings, and set File editing to Ask or Allow.</p>
   <div class="end"><button class="btn" data-close>Cancel</button><button class="btn go" id="pickFailGo">Open read-only instead</button></div>
 </dialog>
 <dialog id="scopeDlg" class="scopedlg" aria-labelledby="scopeH">
@@ -1500,6 +1524,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
         <h3>Opening photos</h3>
         <ul>
           <li><strong>Open folder</strong> loads a folder, including its subfolders, and replaces what’s loaded. <strong>Open file</strong> adds one or more photos. You can also drag photos or folders onto the page.</li>
+          <li>Large folders (500 files or more) show a small progress panel: first the files found so far and the subfolder being read, with <strong>Stop</strong> if you chose the wrong folder, then a progress bar while each photo’s camera details are read. You can browse while it finishes, or click <strong>Hide</strong>.</li>
           <li>For folders of 10 or more photos, FledgeView asks how to sort them: by file name, capture time, sharpness, or rating. Change it anytime with <strong>Sort</strong> above the thumbnails.</li>
           <li>Works with JPEG, PNG, WebP, and RAW files from most cameras: Sony ARW, Nikon NEF, Canon CR2 and CR3, DNG, Olympus ORF, Panasonic RW2, Fuji RAF, and more.</li>
           <li><strong>RAW files show the JPEG preview the camera stores inside the file.</strong> It’s great for culling, but it isn’t the full raw data, so judge critical sharpness in your raw editor when it matters.</li>
@@ -1992,17 +2017,52 @@ function setLoadedButtons(v) {
 /* listing a folder: file sizes and dates are read 32 at a time rather than one by one, a file that can't be read (in use by
    another program, or an online-only cloud file) is skipped and counted instead of stopping everything, and progress shows in
    the middle of the screen while nothing is loaded */
-let walkCount = 0, walkSkipped = 0, walkName = '';
+let walkCount = 0, walkSkipped = 0, walkName = '', walkStop = false, walkT0 = 0;
+const walkStack = [];
 function walkMsg() {
   const t = `Reading ${walkName}\u2026 ${walkCount.toLocaleString()} file${walkCount === 1 ? '' : 's'}`; status(t);
   if (!state.items.length) $('empty').textContent = t;
+  if (walkCount >= LC_MIN || performance.now() - walkT0 > 1500) lcFinding();
 }
+/* the loading card: a small panel, not a window, so photos can be browsed while photo info is still being read.
+   It appears for folders of LC_MIN files or more (or a slow listing), and goes away by itself when everything is read */
+const LC_MIN = 500;
+let lcMode = '', lcHidden = false, lcT0 = 0, lcName = '';
+function lcShow() { if (!lcHidden) $('loadCard').hidden = false; }
+function lcHide() { $('loadCard').hidden = true; lcMode = ''; }
+function lcFinding() {
+  if (lcMode !== 'find') { lcMode = 'find'; lcHidden = false; $('loadCard').classList.remove('lcside'); $('loadCard').classList.add('busy'); $('lcBtn').textContent = 'Stop'; $('lcBtn').disabled = false;
+    $('lcBtn').title = 'Stop looking and open nothing'; $('lcTitle').textContent = 'Opening ' + walkName; }
+  $('lcPhase').textContent = `Finding photos\u2026 ${walkCount.toLocaleString()} file${walkCount === 1 ? '' : 's'} so far`;
+  $('lcDetail').textContent = walkStack.length ? 'In ' + walkStack.join(' / ') : 'In ' + walkName;
+  lcShow();
+}
+function lcReading() {
+  if (metaTotal < LC_MIN) return;
+  if (lcMode !== 'read') { lcMode = 'read'; $('loadCard').classList.remove('busy'); $('loadCard').classList.add('lcside'); $('lcBtn').textContent = 'Hide'; $('lcBtn').disabled = false;
+    $('lcBtn').title = 'Hide this panel; reading continues'; $('lcTitle').textContent = lcName ? 'Opening ' + lcName : 'Opening photos'; lcT0 = performance.now(); }
+  const pct = Math.min(100, Math.floor(metaDone / metaTotal * 100)), secs = (performance.now() - lcT0) / 1000;
+  let left = '';
+  if (secs > 3 && metaDone > 0) { const r = (metaTotal - metaDone) / (metaDone / secs); left = r < 60 ? ' \u00b7 less than a minute left' : ` \u00b7 about ${Math.round(r / 60)} min left`; }
+  $('lcPhase').textContent = 'Reading photo info. You can browse while this finishes.';
+  $('lcFill').style.width = pct + '%';
+  $('lcDetail').textContent = `${metaDone.toLocaleString()} of ${metaTotal.toLocaleString()} \u00b7 ${pct}%${left}`;
+  lcShow();
+}
+$('lcBtn').onclick = () => {
+  if (lcMode === 'find') { walkStop = true; $('lcBtn').disabled = true; $('lcPhase').textContent = 'Stopping\u2026'; }
+  else { lcHidden = true; $('loadCard').hidden = true; }
+};
 async function walkHandle(dir, out, zone = null, home = null, root = dir) {
-  if (dir === root) { walkCount = 0; walkSkipped = 0; walkName = dir.name; walkMsg(); }
+  if (dir === root) { walkCount = 0; walkSkipped = 0; walkName = dir.name; walkStop = false; walkT0 = performance.now(); walkStack.length = 0; walkMsg(); }
+  else walkStack.push(dir.name);
+  try {
+  if (walkStop) return;
   const files = [], dirs = [];
-  for await (const entry of dir.values()) (entry.kind === 'file' ? files : dirs).push(entry);
+  for await (const entry of dir.values()) { if (walkStop) return; (entry.kind === 'file' ? files : dirs).push(entry); }
   const want = files.filter(e => !e.name.startsWith('._') && (SUPPORTED.has(extOf(e.name)) || extOf(e.name) === 'xmp'));
   for (let i = 0; i < want.length; i += 32) {
+    if (walkStop) return;
     const batch = want.slice(i, i + 32), got = await Promise.all(batch.map(e => e.getFile().catch(() => null)));
     batch.forEach((entry, k) => {
       const file = got[k]; if (!file) { walkSkipped++; return; }
@@ -2012,8 +2072,10 @@ async function walkHandle(dir, out, zone = null, home = null, root = dir) {
   }
   for (const entry of dirs) {
     const z = entry.name === '_picks' ? 'picks' : entry.name === '_rejects' ? 'rejects' : null;
+    if (walkStop) return;
     try { if (z) { if (!zone) await walkHandle(entry, out, z, dir, root); } else await walkHandle(entry, out, zone, home, root); } catch { walkSkipped++; }
   }
+  } finally { if (dir !== root) walkStack.pop(); }
 }
 /* a folder with subfolders: open just its own photos, only what isn't organized yet, or everything. Listing names is quick;
    reading photos is the slow part, so this is asked before anything loads */
@@ -2052,7 +2114,8 @@ $('openFolder').onclick = async () => {
          refuses view-only access silently, cancelling the request after a folder is chosen */
       pickT0 = performance.now();
       const dir = await window.showDirectoryPicker({ mode: 'readwrite', id: 'chimp' });
-      let out = []; await walkHandle(dir, out); status('');
+      let out = []; await walkHandle(dir, out); status(''); lcHide();
+      if (walkStop) { walkStop = false; if (!state.items.length) setEmpty(); toast(`Stopped. Nothing was opened from ${dir.name}.`); return; }
       const skippedNote = walkSkipped ? ` ${walkSkipped.toLocaleString()} file${walkSkipped === 1 ? '' : 's'} couldn\u2019t be read (in use by another program, or online-only) and ${walkSkipped === 1 ? 'was' : 'were'} skipped.` : '';
       if (!state.items.length) setEmpty();
       if (!out.some(e => !e.xmp)) { toast(`No photos FledgeView can open were found in ${dir.name} or its subfolders.${skippedNote}`); return; }
@@ -2064,10 +2127,10 @@ $('openFolder').onclick = async () => {
       if (out.length) setTimeout(() => toast(`Opened ${out.length} photo${out.length === 1 ? '' : 's'} with folder access. Move picks and rejects and Write ratings are available.`), 50);
       return;
     } catch (e) {
-      status('');
+      status(''); lcHide();
       /* a cancel that comes after the folder window has been open a while is usually Chrome refusing access after a folder was
          chosen, not the person changing their mind: offer the browser's own folder chooser, which works without that access */
-      if (e.name === 'AbortError') { if (performance.now() - pickT0 > 1500) $('pickFailDlg').showModal(); return; }
+      if (e.name === 'AbortError') { if (performance.now() - pickT0 > 1500) showPickFail(); return; }
       toast(`Couldn\u2019t read that folder (${e.message || e.name}). You can open it read-only instead, without sorting.`);
       $('upDlg').showModal(); return;   // the browser's own folder chooser needs a fresh click, so ask with a button rather than opening it here
     }
@@ -2086,11 +2149,17 @@ function openFolderInput() {
   if (S.upNoteSeen) { $('dirInput').click(); return; }
   $('upDlg').showModal();
 }
+function showPickFail() {
+  const edge = /\bEdg\//.test(navigator.userAgent);
+  document.querySelectorAll('#pickFailDlg [data-bname]').forEach(el => { el.textContent = edge ? 'Edge' : 'Chrome'; });
+  document.querySelectorAll('#pickFailDlg [data-balt]').forEach(el => { el.textContent = edge ? 'Google Chrome' : 'Microsoft Edge'; });
+  $('pickFailDlg').showModal();
+}
 $('pickFailGo').onclick = () => { $('pickFailDlg').close(); $('dirInput').click(); };
 $('upGo').onclick = () => { if ($('upNever').checked) { S.upNoteSeen = true; saveS(); } $('upDlg').close(); $('dirInput').click(); };
 $('addFiles').onclick = () => $('fileInput').click();
 $('fileInput').onchange = e => { addFiles([...e.target.files], true); e.target.value = ''; };
-$('dirInput').onchange = e => { if (state.items.length && e.target.files.length) $('clearAll').click(); addFiles([...e.target.files].map(f => { const p = f.webkitRelativePath || ''; return { file: f, zone: /(^|\/)_picks\//.test(p) ? 'picks' : /(^|\/)_rejects\//.test(p) ? 'rejects' : null }; })); e.target.value = ''; };
+$('dirInput').onchange = e => { if (state.items.length && e.target.files.length) $('clearAll').click(); { const f0 = e.target.files[0], rp = f0 && f0.webkitRelativePath || ''; walkName = rp ? rp.split('/')[0] : 'photos'; } addFiles([...e.target.files].map(f => { const p = f.webkitRelativePath || ''; return { file: f, zone: /(^|\/)_picks\//.test(p) ? 'picks' : /(^|\/)_rejects\//.test(p) ? 'rejects' : null }; })); e.target.value = ''; };
 
 function readEntry(entry, out) {
   return new Promise(res => {
@@ -2143,7 +2212,7 @@ $('clearAll').onclick = () => {
   farObs.disconnect(); hiObs.disconnect();
   state.items = []; state.view = []; state.idx = -1; state.token++; state.bursts = []; state.roots.clear();
   state.items.forEach(i => { i.cache = null; i.metaP = null; });
-  metaQ.length = 0; thumbQueue.length = 0; hiQ.length = 0; lru.length = 0;
+  metaQ.length = 0; thumbQueue.length = 0; hiQ.length = 0; lru.length = 0; lcHide();
   releaseCaches();
   $('strip').innerHTML = ''; $('gridCount').textContent = ''; $('sidePath').hidden = true; if (state.sel) { state.sel.clear(); refreshSel(); }
   state.lensF = state.camF = state.typeF = ''; refreshFilterOptions();
@@ -2194,7 +2263,7 @@ function getMeta(it) {
   return it.metaP;
 }
 const metaQ = []; let metaBusy = 0, metaDone = 0, metaTotal = 0;
-function queueMeta(list) { metaQ.push(...list); metaTotal += list.length; for (let k = 0; k < 4; k++) pumpMeta(); }
+function queueMeta(list) { if (!metaTotal) { lcHidden = false; lcName = walkName; walkName = ''; } metaQ.push(...list); metaTotal += list.length; lcReading(); for (let k = 0; k < 4; k++) pumpMeta(); }
 async function pumpMeta() {
   if (metaBusy >= 4 || !metaQ.length) return;
   metaBusy++;
@@ -2203,8 +2272,9 @@ async function pumpMeta() {
   if (state.items.includes(it)) await getMeta(it);
   metaDone++;
   if (metaTotal > 20 && metaDone % 10 === 0) status(`Reading photo info ${metaDone} of ${metaTotal}`);
+  if (metaDone % 10 === 0) lcReading();
   metaBusy--;
-  if (!metaQ.length && !metaBusy) { metaDone = metaTotal = 0; status(''); computeBursts(); }
+  if (!metaQ.length && !metaBusy) { metaDone = metaTotal = 0; status(''); if (lcMode === 'read') lcHide(); computeBursts(); }
   else pumpMeta();
 }
 
@@ -7134,8 +7204,18 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.67 beta';
+const VERSION = '0.9.69 beta';
 const RELEASES = [
+  { v: '0.9.69 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Opening a large folder (500 files or more) shows a small progress panel. While FledgeView looks through the folder and its lens subfolders, it shows how many files it has found and which subfolder it\u2019s in, with a Stop button in case you chose the wrong folder. Then, while it reads each photo\u2019s camera details, it shows a progress bar, the count, the percentage and the time left. You can keep browsing, or click Hide.',
+    ]],
+  ] },
+  { v: '0.9.68 beta', date: 'November 2026', groups: [
+    ['Improved', [
+      'Clearer help when Chrome doesn\u2019t hand over a chosen folder. Since a recent Chrome update this can happen on some computers even when nothing is blocked, so the message no longer blames a setting: it offers Open read-only instead (view, cull and export) and suggests Microsoft Edge for moving picks, writing ratings and organizing.',
+    ]],
+  ] },
   { v: '0.9.67 beta', date: 'November 2026', groups: [
     ['Fixed', [
       'Open folder works in Chrome setups that refuse view-only folder access: it now asks for edit access, as Organize and Import do (Move picks, Write ratings and Organize need it anyway). If Chrome still cancels after a folder is chosen, FledgeView explains and offers to open it read-only instead of doing nothing. Thanks to Frank for the diagnostic log.',
