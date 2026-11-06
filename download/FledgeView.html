@@ -1838,6 +1838,12 @@ html[data-look="clean"] .knob.eopen[aria-expanded="true"]{background:var(--acc)!
 .lrbar{margin:6px 0 10px;display:flex;flex-direction:column;gap:6px}
 .lrbar .btn{width:100%}
 .sessdlg{max-width:420px}
+.orgsrc{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 2px;padding:8px 10px;border:1px solid var(--panel-line);border-radius:8px}
+.orgsrc .tl{flex:1;min-width:200px}
+.scopedlg{max-width:460px}
+.scopedlg .scopebtns{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.scopedlg .scopebtns .btn{text-align:left;padding:9px 12px}
+.scopedlg .scopebtns .btn small{display:block;opacity:.75;font-weight:400}
 .recipedlg{max-width:820px}
 .rgrid{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;margin:10px 0}
 .rgrid input,.rgrid select,.rgrid textarea{font:inherit;padding:5px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.25);color:inherit}
@@ -2548,6 +2554,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <button class="mi check" id="lookCamera" aria-pressed="true">Camera</button>
         <button class="mi check" id="lookClean" aria-pressed="false">Clean</button>
         <div class="msep"></div>
+        <button class="mi" id="scopeReset" hidden title="Ask again which photos to open when a folder has subfolders">Ask again about subfolders</button>
         <button class="mi check" id="pairBtn" role="menuitemcheckbox" title="Show a raw file and a JPEG with the same name as one photo, viewed from the full-size JPEG">Pair RAW + JPEG</button>
         <button class="mi" id="featBtn">Features</button>
       </div>
@@ -2855,6 +2862,17 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
   <div class="end"><button class="btn primary" data-close>Close</button></div>
 </dialog>
 
+<dialog id="scopeDlg" class="scopedlg" aria-labelledby="scopeH">
+  <h2 id="scopeH">This folder has subfolders</h2>
+  <p class="sub" id="scopeSub"></p>
+  <div class="scopebtns">
+    <button class="btn" data-scope="top">This folder only<small id="scTop"></small></button>
+    <button class="btn" data-scope="new" id="scNewBtn">New photos only<small id="scNew"></small></button>
+    <button class="btn" data-scope="all">Everything<small id="scAll"></small></button>
+  </div>
+  <label class="chk"><input type="checkbox" id="scopeRemember"> Remember my choice (you can reset it under View ▾)</label>
+  <div class="end"><button class="btn" data-close>Cancel</button></div>
+</dialog>
 <dialog id="recipeDlg" class="recipedlg" aria-labelledby="recipeH">
   <h2 id="recipeH">Recipe card</h2>
   <p class="sub">The photo beside the Lightroom settings that made it, saved as a JPEG, with the matching preset (.xmp) under the same name.</p>
@@ -3180,6 +3198,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
         <ul>
           <li><strong>Hold a reference in Compare:</strong> in Compare (<kbd>C</kbd>), press <kbd>H</kbd> to hold the current frame on the right (marked Held); the arrows then step through the other frames on the left, so you’re always comparing against your favorite. <kbd>H</kbd> on a better frame makes it the new held one; click the held frame and press <kbd>H</kbd> to release it.</li>
           <li><strong>RAW + JPEG pairs:</strong> when a folder has a raw file and a JPEG with the same name (DSC01234.ARW and DSC01234.JPG), FledgeView shows them as one photo, labeled RAW+JPG, and checks focus and sharpness on the full-size JPEG. That matters for cameras whose raw files embed only a small preview. Ratings, picks and rejects cover both files, Move picks and rejects moves both, and Write ratings writes the raw file’s sidecar, which Lightroom reads for the pair. Turn it off under View ▾ → Pair RAW + JPEG.</li>
+          <li><strong>Organize a big folder quickly:</strong> in Cull ▾ → Organize into lens folders, <strong>Choose folder…</strong> organizes a folder and its subfolders without opening the photos. FledgeView reads only each photo’s lens data and keeps a small index file (_fledgeview-index.json) in the folder, so later runs read only new photos and move just those into your lens folders. Photos you’ve moved by hand are left where you put them. Import records what it copies in the same index, and its <strong>Lens only</strong> folder choice puts new photos straight into the same lens folders.</li>
+          <li><strong>Opening a folder with subfolders:</strong> FledgeView asks whether to open the folder’s own photos, only new photos (ones Organize hasn’t placed yet), or everything, since reading thousands of photos takes time. You can have it remember your choice; View ▾ → Ask again about subfolders resets it.</li>
           <li><strong>Keep the best of a burst:</strong> on the frame you want, press <kbd>Shift</kbd> + <kbd>P</kbd> (or Cull ▾ → Keep this, reject rest of burst): it’s picked, the rest of the burst is rejected (frames you already picked stay picked), and FledgeView moves on to the next photo. <kbd>Shift</kbd> + <kbd>U</kbd> undoes it.</li>
           <li><strong>Session summary</strong> (Cull ▾): photos reviewed, picks, rejects, time spent and photos per minute. It also appears once when you reach the last photo.</li>
           <li><strong>Blinkies</strong> (<kbd>B</kbd>): blown highlights flash red, and shadows crushed to pure black flash blue.</li>
@@ -3362,7 +3382,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
   <div class="improw" style="margin-top:12px"><span class="implab">Card</span><span class="impval" id="impSrcName">Not chosen</span><button class="btn" id="impSrcBtn">Choose card…</button></div>
   <div class="improw"><span class="implab">Main folder</span><span class="impval" id="impDstName">Not chosen</span><button class="btn" id="impDstBtn">Choose folder…</button></div>
   <div class="improw"><label class="implab impbk" title="Also copy every photo to a second place, ideally another drive, and check each copy"><input type="checkbox" id="impBkOn"> Backup</label><span class="impval" id="impBkName">Off</span><button class="btn" id="impBkBtn">Choose backup…</button></div>
-  <div class="wrow" style="margin-top:10px"><label for="impPreset">Folders</label><select id="impPreset"><option value="{date}/{lens}">Date / Lens (2026-11-02 / Sony 600mm F6.3)</option><option value="{year}/{date}/{lens}">Year / Date / Lens (2026 / 2026-11-02 / Sony 600mm F6.3)</option><option value="{year}/{month}/{day}">Year / Month / Day (2026 / 11 / 02)</option><option value="{lens}/{date}">Lens / Date (Sony 600mm F6.3 / 2026-11-02)</option><option value="{shoot}/{lens}">Shoot name / Lens (Bosque Dec 2026 / Sony 600mm F6.3)</option><option value="custom">Custom…</option></select></div>
+  <div class="wrow" style="margin-top:10px"><label for="impPreset">Folders</label><select id="impPreset"><option value="{lens}">Lens only (Sony 600mm F6.3), the same folders as Organize into lens folders</option><option value="{date}/{lens}">Date / Lens (2026-11-02 / Sony 600mm F6.3)</option><option value="{year}/{date}/{lens}">Year / Date / Lens (2026 / 2026-11-02 / Sony 600mm F6.3)</option><option value="{year}/{month}/{day}">Year / Month / Day (2026 / 11 / 02)</option><option value="{lens}/{date}">Lens / Date (Sony 600mm F6.3 / 2026-11-02)</option><option value="{shoot}/{lens}">Shoot name / Lens (Bosque Dec 2026 / Sony 600mm F6.3)</option><option value="custom">Custom…</option></select></div>
   <div id="impCustomBox" hidden>
     <div class="wrow"><label for="impCustom">Pattern</label><input id="impCustom" type="text" spellcheck="false" autocomplete="off" placeholder="{year}/{date} {shoot}/{lens}"></div>
     <div class="imptok" id="impTokens" aria-label="Insert a word"></div>
@@ -3383,6 +3403,9 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
 <dialog id="orgDlg">
   <h2>Organize into lens folders</h2>
   <p class="sub">Moves each photo, and its sidecar files (.xmp, .dop, .pp3), into a folder named for the lens it was shot with. Nothing is copied or deleted, and you can undo it.</p>
+  <div class="orgsrc"><span class="tl" id="orgSrcText">Organizing the photos you have open.</span>
+    <button class="btn" id="orgFolderBtn" title="Organize a folder and its subfolders without opening the photos: FledgeView reads only lens data, and remembers what it has organized">Choose folder…</button>
+    <button class="btn" id="orgAgainBtn" hidden></button></div>
   <div class="wrow" style="margin-top:12px"><label for="orgNames">Folder names</label><select id="orgNames"><option value="short">Short (Sony 600mm F6.3)</option><option value="full">Full lens name (Sony FE 600mm F6.3 GM OSS)</option></select></div>
   <label class="chk" style="margin-top:8px"><input type="checkbox" id="orgTc"> Put teleconverter shots in a subfolder (With 1.4x TC, With 2x TC)</label>
   <h3 style="font-size:14px;margin:14px 0 6px">The plan</h3>
@@ -3646,11 +3669,38 @@ async function walkHandle(dir, out, zone = null, home = null, root = dir) {
     }
   }
 }
+/* a folder with subfolders: open just its own photos, only what isn't organized yet, or everything. Listing names is quick;
+   reading photos is the slow part, so this is asked before anything loads */
+async function chooseScope(dir, out) {
+  const photos = out.filter(e => !e.xmp), own = e => e.dir === dir || (e.zone && e.home === dir), top = photos.filter(own);
+  if (top.length === photos.length) return out;
+  const idx = await readIndex(dir), fresh2 = idx ? photos.filter(e => { const x = idx.files[idOf(e.file)]; return !(x && x.s); }) : null;
+  const keep = list => { const dirs = new Set(list.map(e => e.dir)); return [...list, ...out.filter(e => e.xmp && dirs.has(e.dir))]; };
+  const pickFor = c => c === 'top' ? keep(top) : c === 'new' && fresh2 ? keep(fresh2) : out;
+  if (S.openScope && (S.openScope !== 'new' || fresh2)) return pickFor(S.openScope);
+  const subs = new Set(photos.filter(e => !own(e)).map(e => e.dir)).size;
+  $('scopeSub').textContent = `${dir.name} has ${photos.length.toLocaleString()} photos: ${top.length.toLocaleString()} in the folder itself and ${(photos.length - top.length).toLocaleString()} in ${subs.toLocaleString()} subfolder${subs === 1 ? '' : 's'}. Reading photos takes time, so open only what you need.`;
+  $('scTop').textContent = `${top.length.toLocaleString()} photo${top.length === 1 ? '' : 's'}, not the subfolders`;
+  $('scNewBtn').disabled = !fresh2; $('scNew').textContent = fresh2 ? `${fresh2.length.toLocaleString()} photo${fresh2.length === 1 ? '' : 's'} that Organize hasn\u2019t placed yet` : 'Available after this folder has been organized once';
+  $('scAll').textContent = `All ${photos.length.toLocaleString()} photos, including the subfolders`;
+  $('scopeRemember').checked = false;
+  const choice = await new Promise(res => {
+    const d = $('scopeDlg'), done = c => { d.removeEventListener('close', onClose); res(c); if (d.open) d.close(); };
+    const onClose = () => res(null); d.addEventListener('close', onClose, { once: true });
+    d.querySelectorAll('[data-scope]').forEach(b => { b.onclick = () => done(b.dataset.scope); });
+    d.showModal();
+  });
+  if (!choice) return null;
+  if ($('scopeRemember').checked) { S.openScope = choice; saveS(); syncScopeReset(); }
+  return pickFor(choice);
+}
+function syncScopeReset() { const b = $('scopeReset'); if (b) b.hidden = !S.openScope; }
 $('openFolder').onclick = async () => {
   if (window.showDirectoryPicker && !framed) {
     try {
       const dir = await window.showDirectoryPicker({ mode: 'read', id: 'chimp' });
-      const out = []; status('Reading folder…'); await walkHandle(dir, out); status('');
+      let out = []; status('Reading folder…'); await walkHandle(dir, out); status('');
+      out = await chooseScope(dir, out); if (!out) return;
       if (state.items.length && out.length) $('clearAll').click();
       state.roots.add(dir);
       addFiles(out);
@@ -4577,6 +4627,8 @@ async function drawRecipeCard(it, o) {
 }
 /* wrap the words of a few toolbar buttons, so narrow screens can show just their icons */
 for (const id of ['openFolder', 'addFiles', 'editBtn', 'dofBtn']) { const b = $(id); if (!b) continue; for (const n of [...b.childNodes]) if (n.nodeType === 3 && n.textContent.trim()) { const sp = document.createElement('span'); sp.className = 'lbl'; sp.textContent = n.textContent; n.replaceWith(sp); } if (!b.title) b.title = b.textContent.trim(); }
+$('scopeReset').onclick = () => { delete S.openScope; saveS(); syncScopeReset(); toast('FledgeView will ask which photos to open the next time a folder has subfolders'); };
+setTimeout(syncScopeReset, 0);
 function syncPairBtn() { const on2 = S.pairs !== false; $('pairBtn').setAttribute('aria-pressed', String(on2)); $('pairBtn').setAttribute('aria-checked', String(on2)); }
 syncPairBtn();
 $('pairBtn').onclick = () => { S.pairs = S.pairs === false; saveS(); syncPairBtn(); toast(S.pairs ? 'RAW + JPEG pairs will show as one photo the next time you open a folder' : 'RAW and JPEG files will show separately the next time you open a folder'); };
@@ -5550,30 +5602,81 @@ function lensFolders(it, names, tcSub) {
   if (tcSub && fi && fi.tc) parts.push(`With ${fi.tc}x TC`);
   return parts;
 }
-function orgCandidates() { return state.items.filter(it => it.dir && it.handle && it.root && !it.zone); }
+/* ---------- the organize index: what Organize has placed in a folder, so later runs read only what's new ----------
+   one small file in the organized folder. Each photo (known by name and size) records its folder, the seven camera fields
+   that decide its lens folder, and whether it's settled: placed by Organize, found already in its lens folder, or moved
+   there by hand. New photos stay pending until they're organized, so cancelling a plan doesn't lose them */
+const IDX_FILE = '_fledgeview-index.json', IDX_FIELDS = ['Make', 'Model', 'LensMake', 'LensModel', 'Lens', 'FocalLength', 'FocalLengthIn35mmFormat'];
+const idOf = f => f.name + '|' + f.size;
+const metaSubset = m => { const o = {}; for (const k of IDX_FIELDS) if (m && m[k] != null && m[k] !== '') o[k] = m[k]; return o; };
+async function readIndex(root) { try { const j = JSON.parse(await (await (await root.getFileHandle(IDX_FILE)).getFile()).text()); return j && j.files ? j : null; } catch { return null; } }
+async function writeIndex(root, idx) {
+  try { idx.v = 1; idx.updated = new Date().toISOString(); const w = await (await root.getFileHandle(IDX_FILE, { create: true })).createWritable(); await w.write(JSON.stringify(idx)); await w.close(); return true; } catch { return false; }
+}
+async function relOf(root, dir, cache) { if (cache.has(dir)) return cache.get(dir); const r2 = ((await root.resolve(dir)) || []).join('/'); cache.set(dir, r2); return r2; }
+function stubItem(en, meta) {
+  const it = { name: en.file.name, ext: extOf(en.file.name), file: en.file, handle: en.handle, dir: en.dir, root: en.root, key: keyOf(en.file) };
+  if (meta) { it.meta = meta; it.metaP = Promise.resolve(meta); }
+  return it;
+}
+let orgScanStop = false;
+async function scanForOrganize(root) {
+  orgScanStop = false;
+  const out = []; $('orgStatus').textContent = 'Listing the folder\u2026';
+  await walkHandle(root, out);
+  const photos = out.filter(en => !en.xmp && !en.zone), idx = (await readIndex(root)) || { v: 1, files: {} }, cache = new Map(), seen = new Set();
+  const pending = [], toRead = []; let settled = 0, userMoved = 0;
+  for (const en of photos) {
+    const id = idOf(en.file), rel = await relOf(root, en.dir, cache), e = idx.files[id]; seen.add(id);
+    if (e && e.m) {
+      if (e.d !== rel) { e.d = rel; if (e.s) { userMoved++; continue; } }   // moved by hand after it was settled: leave it there
+      if (e.s) { settled++; continue; }
+      pending.push(stubItem(en, e.m));
+    } else toRead.push({ en, id, rel });
+  }
+  /* read lens data only, a few files at a time; no thumbnails or previews */
+  let read = 0; const t0 = performance.now();
+  const work = async () => { while (toRead.length && !orgScanStop) { const x = toRead.shift(), it = stubItem(x.en); try { await getMeta(it); } catch {} idx.files[x.id] = { d: x.rel, m: metaSubset(it.meta), s: 0 }; pending.push(it); if (++read % 25 === 0) $('orgStatus').textContent = `Reading lens data: ${read.toLocaleString()} of ${(read + toRead.length).toLocaleString()}\u2026`; } };
+  await Promise.all(Array.from({ length: 6 }, work));
+  for (const id of Object.keys(idx.files)) if (!seen.has(id)) delete idx.files[id];   // no longer in the folder
+  await writeIndex(root, idx);
+  $('orgStatus').textContent = '';
+  return { root, idx, items: pending, total: photos.length, settled, userMoved, read, secs: (performance.now() - t0) / 1000, stopped: orgScanStop };
+}
+/* after Organize runs (from a folder or from open photos): record what's settled */
+async function indexSettle(root, list) {
+  if (!root || !list.length) return;
+  const idx = (state.orgSource && state.orgSource.root === root && state.orgSource.idx) || (await readIndex(root)) || { v: 1, files: {} };
+  for (const { it, parts } of list) { try { const f = it.file || await it.handle.getFile(); idx.files[idOf(f)] = { d: parts.join('/'), m: metaSubset(it.meta), s: 1 }; } catch {} }
+  await writeIndex(root, idx);
+}
+function orgCandidates() { return state.orgSource ? state.orgSource.items : state.items.filter(it => it.dir && it.handle && it.root && !it.zone); }
 async function orgPlan() {
   const names = $('orgNames').value, tcSub = $('orgTc').checked;
-  const plan = new Map(); let inPlace = 0;
+  const plan = new Map(), inPlaceList = []; let inPlace = 0;
   for (const it of orgCandidates()) {
     await getMeta(it);
     const parts = lensFolders(it, names, tcSub);
     let rel = null; try { rel = await it.root.resolve(it.dir); } catch {}
-    if (rel && rel.join('/') === parts.join('/')) { inPlace++; continue; }
+    if (rel && rel.join('/') === parts.join('/')) { inPlace++; inPlaceList.push({ it, parts }); continue; }
     const k = parts.join('/');
     if (!plan.has(k)) plan.set(k, { parts, items: [] });
     plan.get(k).items.push(it);
   }
-  return { plan, inPlace };
+  return { plan, inPlace, inPlaceList };
 }
 async function renderOrgPlan() {
   const box = $('orgPlan'); box.innerHTML = '';
   const cands = orgCandidates();
   if (!cands.length) {
-    box.innerHTML = '<div class="orgrow"><span>' + (state.items.length ? whyNoWrite() : 'Open a folder first.') + '</span></div>';
+    if (state.orgSource) { const o = state.orgSource; box.innerHTML = '<div class="orgrow"><span></span></div>'; box.querySelector('span').textContent = `Everything in ${o.root.name} is organized: nothing new to move.`; $('orgGo').disabled = true; $('orgNote').textContent = orgSourceNote(); return; }
+    box.innerHTML = '<div class="orgrow"><span>' + (state.items.length ? whyNoWrite() : 'Open a folder first, or choose a folder above.') + '</span></div>';
     $('orgGo').disabled = true; $('orgNote').textContent = ''; return;
   }
   $('orgStatus').textContent = 'Working out the plan…';
-  const { plan, inPlace } = await orgPlan();
+  const { plan, inPlace, inPlaceList } = await orgPlan();
+  if (inPlaceList.length) await indexSettle(inPlaceList[0].it.root, inPlaceList);
+  if (state.orgSource && inPlaceList.length) { state.orgSource.settled += inPlaceList.length; state.orgSource.items = state.orgSource.items.filter(it => !inPlaceList.some(x => x.it === it)); }
   $('orgStatus').textContent = '';
   const rootName = cands[0].root.name;
   const rows = [...plan.values()].sort((a, b) => b.items.length - a.items.length);
@@ -5589,13 +5692,38 @@ async function renderOrgPlan() {
   const skipped = state.items.filter(it => it.zone).length;
   const noAccess = state.items.filter(it => !(it.dir && it.handle && it.root)).length;
   $('orgNote').textContent = (noAccess ? `${noAccess.toLocaleString()} loaded photo${noAccess === 1 ? ' was' : 's were'} opened without folder access and can’t be moved; use Open folder to load them. ` : '') + (inPlace ? `${inPlace.toLocaleString()} already in the right folder. ` : '') + (skipped ? `${skipped.toLocaleString()} in _picks or _rejects folders are left where they are. ` : '') + 'Teleconverter use is detected from the focal length, so a zoom used with a TC below its longest focal length may stay in the main folder.';
+  if (state.orgSource) $('orgNote').textContent = orgSourceNote();
   $('orgDlg')._plan = plan;
 }
+function orgSourceNote() {
+  const o = state.orgSource; if (!o) return '';
+  return `Scanned ${o.total.toLocaleString()} photos in ${o.root.name}: ${o.settled.toLocaleString()} already organized` + (o.userMoved ? `, ${o.userMoved.toLocaleString()} you moved yourself (left where they are)` : '') + `, ${o.read.toLocaleString()} read for the first time` + (o.read ? ` (${o.secs < 10 ? o.secs.toFixed(1) : Math.round(o.secs)} s)` : '') + '.' + (o.stopped ? ' Reading was stopped early; choose the folder again to finish.' : '');
+}
+async function useOrgFolder(root) {
+  try { if (await root.queryPermission({ mode: 'readwrite' }) !== 'granted' && await root.requestPermission({ mode: 'readwrite' }) !== 'granted') { $('orgStatus').textContent = 'Folder access wasn\u2019t granted.'; return; } } catch {}
+  idbKV.set('orgRoot', root); $('orgFolderBtn').disabled = true;
+  try { state.orgSource = await scanForOrganize(root); } finally { $('orgFolderBtn').disabled = false; }
+  $('orgSrcText').textContent = `Organizing ${root.name} and its subfolders, without opening the photos.`;
+  $('orgUndo').hidden = true; try { await root.getFileHandle(ORG_LOG); $('orgUndo').hidden = false; } catch {}
+  syncOrgAgain(); await renderOrgPlan();
+}
+async function syncOrgAgain() {
+  const h = await idbKV.get('orgRoot'), b = $('orgAgainBtn');
+  b.hidden = !h;
+  if (h) { b.textContent = `Scan ${h.name} again`; b.onclick = () => useOrgFolder(h); }
+}
+$('orgFolderBtn').onclick = async () => {
+  if (!window.showDirectoryPicker || framed) { $('orgStatus').textContent = 'Organizing a folder needs Chrome or Edge with the downloaded or online FledgeView.'; return; }
+  let root; try { root = await window.showDirectoryPicker({ mode: 'readwrite', id: 'chimp-org' }); } catch { return; }
+  await useOrgFolder(root);
+};
+$('orgDlg').addEventListener('close', () => { orgScanStop = true; state.orgSource = null; $('orgSrcText').textContent = 'Organizing the photos you have open.'; });
 async function saveOrgLog(root, log) {
   try { const fh = await root.getFileHandle(ORG_LOG, { create: true }); const w = await fh.createWritable(); await w.write(JSON.stringify(log, null, 1)); await w.close(); $('orgUndo').hidden = false; } catch {}
 }
 async function dirAt(root, parts, create) { let d = root; for (const p of parts) d = await d.getDirectoryHandle(p, { create }); return d; }
 $('orgBtn').onclick = async () => {
+  syncOrgAgain();
   $('orgNames').value = S.orgNames || 'short'; $('orgTc').checked = S.orgTc !== false;
   $('orgStatus').textContent = ''; $('orgDlg').showModal();
   const root = (orgCandidates()[0] || {}).root;
@@ -5612,7 +5740,7 @@ $('orgGo').onclick = async () => {
   if (!confirm(`Move ${total.toLocaleString()} photo${total === 1 ? '' : 's'} into lens folders? Sidecars move with them, nothing is deleted, and you can undo this.`)) return;
   if (!await ensureWrite()) return $('orgStatus').textContent = 'Write permission wasn’t granted, so nothing was moved.';
   $('orgGo').disabled = true;
-  const log = { when: new Date().toISOString(), moves: [] };
+  const log = { when: new Date().toISOString(), moves: [] }, settledNow = [];
   let ok = 0, fail = 0, skip = 0, done = 0, firstErr = '';
   for (const g of plan.values()) {
     for (const it of g.items) {
@@ -5625,7 +5753,7 @@ $('orgGo').onclick = async () => {
         it.handle = await moveHandle(it.handle, from, dest, it.name);
         const movedSc = await moveCompanions(from, dest, it.name);
         it.dir = dest;
-        log.moves.push({ name: it.name, from: fromRel, to: g.parts, sidecars: movedSc });
+        log.moves.push({ name: it.name, from: fromRel, to: g.parts, sidecars: movedSc }); settledNow.push({ it, parts: g.parts });
         if (it.raw && it.raw.handle) { try { it.raw.handle = await moveHandle(it.raw.handle, from, dest, it.raw.name); const rsc = await moveCompanions(from, dest, it.raw.name); it.raw.dir = dest; it.raw.file = await it.raw.handle.getFile(); log.moves.push({ name: it.raw.name, from: fromRel, to: g.parts, sidecars: rsc }); } catch {} }
         if (log.moves.length % 25 === 0) await saveOrgLog(it.root, log);
         try {
@@ -5641,6 +5769,8 @@ $('orgGo').onclick = async () => {
   saveCull(); saveSharp(); saveSeen();
   const root = orgCandidates()[0] && orgCandidates()[0].root;
   if (root && log.moves.length) await saveOrgLog(root, log);
+  if (root && settledNow.length) { for (const x of settledNow) { try { x.it.file = await x.it.handle.getFile(); } catch {} if (x.it.raw) settledNow.push({ it: x.it.raw, parts: x.parts }); } await indexSettle(root, settledNow); }
+  if (state.orgSource) state.orgSource.items = state.orgSource.items.filter(it => !settledNow.some(x => x.it === it));
   const doneMsg = `Moved ${ok.toLocaleString()} photo${ok === 1 ? '' : 's'}.` + (skip ? ` ${skip} skipped (a file with the same name was already there).` : '') + (fail ? ` ${fail} couldn’t be moved (${firstErr}).` : '') + (ok ? ' If these were already in Lightroom, see How to relink below the plan.' : '');
   if (ok) tipNudge();
   $('orgGo').disabled = false;
@@ -5648,7 +5778,7 @@ $('orgGo').onclick = async () => {
   $('orgStatus').textContent = doneMsg;
 };
 $('orgUndo').onclick = async () => {
-  const root = (orgCandidates()[0] || {}).root; if (!root) return;
+  const root = (state.orgSource && state.orgSource.root) || (orgCandidates()[0] || {}).root; if (!root) return;
   let log;
   try { const fh = await root.getFileHandle(ORG_LOG); log = JSON.parse(await (await fh.getFile()).text()); } catch { return $('orgStatus').textContent = 'No organize log found in this folder.'; }
   if (!confirm(`Move ${log.moves.length.toLocaleString()} photos back to where they were before organizing?`)) return;
@@ -5665,6 +5795,8 @@ $('orgUndo').onclick = async () => {
     } catch { fail++; }
   }
   try { await root.removeEntry(ORG_LOG); } catch {}
+  { const idx = await readIndex(root); if (idx) { for (const mv of log.moves) for (const [id, e] of Object.entries(idx.files)) if (id.startsWith(mv.name + '|') && e.d === mv.to.join('/')) { e.d = (mv.from || []).join('/'); e.s = 0; } await writeIndex(root, idx); }
+    if (state.orgSource && state.orgSource.root === root) { const fresh2 = await scanForOrganize(root); state.orgSource = fresh2; } }
   $('orgUndo').hidden = true;
   const backMsg = `Moved ${ok.toLocaleString()} back.` + (fail ? ` ${fail} couldn’t be moved back.` : '') + ' Empty lens folders can be deleted by hand.';
   await renderOrgPlan();
@@ -8127,7 +8259,7 @@ $('impGo').onclick = async () => {
     return d;
   };
   const one = imp.photos.reduce((sum, p) => sum + (p.file ? p.file.size : 0), 0), total = one * (bk ? 2 : 1);
-  let doneBytes = 0, copied = 0, skipped = 0, bCopied = 0, bSkipped = 0; const problems = [], opened = [];
+  let doneBytes = 0, copied = 0, skipped = 0, bCopied = 0, bSkipped = 0; const problems = [], opened = [], placed = [];
   const t0 = performance.now();
   for (let i = 0; i < imp.photos.length; i++) {
     if (imp.stop) break;
@@ -8142,7 +8274,7 @@ $('impGo').onclick = async () => {
     };
     try {
       if (!p.file) throw new Error('could not be read');
-      await step(imp.dst, '', (res, dir) => { copied++; opened.push({ file: res.file, handle: res.fh, dir, root: imp.dst }); }, () => skipped++);
+      await step(imp.dst, '', (res, dir) => { copied++; opened.push({ file: res.file, handle: res.fh, dir, root: imp.dst }); placed.push({ file: res.file, dir, meta: p.meta }); }, () => skipped++);
     } catch (e) { problems.push(`${p.name}: ${e.message || e.name}`); }
     doneBytes += p.file ? p.file.size : 0;
     if (bk && p.file) {
@@ -8152,6 +8284,14 @@ $('impGo').onclick = async () => {
     const secs = (performance.now() - t0) / 1000, rate = doneBytes / Math.max(0.5, secs), left = (total - doneBytes) / Math.max(1, rate);
     $('impBar').style.width = (total ? doneBytes / total * 100 : 100).toFixed(1) + '%';
     $('impProgTxt').textContent = `Copying ${(i + 1).toLocaleString()} of ${imp.photos.length.toLocaleString()}${bk ? ' (main and backup)' : ''} \u00b7 ${fmtBytes(doneBytes)} of ${fmtBytes(total)}${i + 1 < imp.photos.length && secs > 2 ? ` \u00b7 about ${fmtTime(left)} left` : ''}`;
+  }
+  /* record what Import placed, so Organize into lens folders treats these photos as already organized and never needs to read them */
+  if (placed.length) {
+    try {
+      const idx = (await readIndex(imp.dst)) || { v: 1, files: {} }, cache = new Map();
+      for (const x of placed) idx.files[idOf(x.file)] = { d: await relOf(imp.dst, x.dir, cache), m: metaSubset(x.meta), s: 1 };
+      await writeIndex(imp.dst, idx);
+    } catch {}
   }
   imp.busy = false;
   $('impClose').disabled = $('impSrcBtn').disabled = $('impDstBtn').disabled = $('impBkBtn').disabled = $('impBkOn').disabled = false; $('impStop').hidden = true; $('impGo').disabled = false;
@@ -8612,8 +8752,15 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.61 beta';
+const VERSION = '0.9.62 beta';
 const RELEASES = [
+  { v: '0.9.62 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Organize a folder without opening it: Cull \u25be \u2192 Organize into lens folders \u2192 Choose folder\u2026 reads only each photo\u2019s lens data (no thumbnails) and keeps a small index in the folder, so later runs read only new photos and move just those. Photos you\u2019ve moved by hand stay where you put them, Undo marks what it moves back as new again, and Scan again repeats it for the same folder in one click.',
+      'Opening a folder with subfolders now asks what to open: the folder\u2019s own photos, only new photos, or everything, with an option to remember the choice.',
+      'Import has a Lens only folder choice, which puts new photos straight into the same lens folders that Organize uses, and records them in the folder\u2019s index so they never need to be organized again.',
+    ]],
+  ] },
   { v: '0.9.61 beta', date: 'November 2026', groups: [
     ['New', [
       'RAW + JPEG pairs: a raw file and a JPEG with the same name in the same folder now show as one photo, labeled RAW+JPG. Viewing at 100%, Peaking, Focus pt and sharpness scoring use the full-size JPEG, which fixes focus checking for cameras whose raw files embed only a small preview (such as 1616 \u00d7 1080 on the Sony A7R VI). Ratings, picks and rejects cover both files, Move picks and rejects and Organize move both (and Undo brings both back), and Write ratings writes the raw file\u2019s sidecar for Lightroom. View \u25be \u2192 Pair RAW + JPEG turns it off. Thanks to Peter for the report.',
