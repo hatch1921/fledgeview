@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "What the FledgeView window is allowed to do: the basics, plus opening web and email links in the person's own browser and mail app.",
+  "windows": ["main"],
+  "permissions": ["core:default", "opener:default"]
+}

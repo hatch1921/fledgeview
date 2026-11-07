@@ -1,0 +1,33 @@
+[package]
+name = "fledgeview"
+version = "0.9.39"
+description = "FledgeView desktop program"
+authors = ["HatchApps LLC"]
+edition = "2021"
+rust-version = "1.77.2"
+
+[build-dependencies]
+tauri-build = { version = "2.7", features = [] }
+cc = "1"
+
+[dependencies]
+# "devtools" lets testers right-click → Inspect during the beta; remove before 1.0.
+tauri = { version = "2.12", features = ["devtools"] }
+tauri-plugin-opener = "2.7"
+# The system folder window. (Used directly rather than through tauri-plugin-dialog, which replaces
+# the page's alert() and confirm() and would skip FledgeView's "Are you sure?" questions.)
+rfd = { version = "0.17", default-features = false, features = ["gtk3"] }
+tauri-plugin-window-state = "2.5"
+serde_json = "1"
+
+# Windows only: hand the page real folder handles through WebView2 (the native folder bridge).
+[target.'cfg(windows)'.dependencies]
+webview2-com = "0.39"
+windows-core = "0.62"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true
