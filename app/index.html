@@ -84,10 +84,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 .efoot .knob.ebtn{width:100%;margin:0}
 html[data-look="clean"] .efoot{background:#232325;border-radius:0}
 .knob.eopen{display:flex;justify-content:center;align-items:center;gap:8px}
-.eopenrow{display:flex;gap:5px;width:100%}
+.eopenrow{display:flex;gap:5px;width:136px}
 .eopenrow .knob.sharebtn{width:auto}
-.eopenrow #cropTab{flex:0 0 auto;padding-left:12px;padding-right:12px}
-.eopenrow #editTab{flex:1 1 0;min-width:0;white-space:nowrap}
+.eopenrow #cropTab{flex:0 0 auto;padding-left:9px;padding-right:9px}
+.eopenrow #undoBtn{flex:1 1 0;min-width:0;padding-left:3px;padding-right:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* the drawer shows one panel at a time: crop tools, Lens tools, or the Adjust panel */
 .editpanel.pcrop > :not(#eCropSec){display:none!important}
 /* Lens tools: the calculator or the field of view fill the photo area; the controls sit in a wider drawer panel */
@@ -130,6 +130,7 @@ html[data-look="clean"] .knob.eopen[aria-expanded="true"]{background:var(--acc)!
 .drawer.overlay.open{position:absolute;right:214px;top:12px;transform:none;z-index:6;margin:0;background:var(--body);padding:8px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 .editview canvas{width:100%;height:100%;display:block}
 .editnote{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.65);color:#e8e6e1;font-size:13px;padding:3px 9px;border-radius:4px;pointer-events:none}
+.editbadge.editraw{left:auto;right:10px;background:rgba(233,165,59,.85);color:#1b1b1b}
 .editbadge{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.65);color:#fff;font-family:var(--cond);font-size:14px;padding:2px 8px;border-radius:4px}
 .editpanel{display:flex;flex-direction:column;gap:4px}
 .ephead{display:flex;justify-content:space-between;align-items:center;font-family:var(--cond);font-size:15px;color:var(--lcd);margin-bottom:2px}
@@ -174,6 +175,9 @@ html[data-look="clean"] .knob.eopen[aria-expanded="true"]{background:var(--acc)!
 .recipedlg{max-width:820px}
 .rgrid{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;margin:10px 0}
 .rgrid input,.rgrid select,.rgrid textarea{font:inherit;padding:5px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.25);color:inherit}
+.rgrid select option{background:var(--panel);color:var(--ink)}
+.rdest{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.rdest span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink);font-weight:500}
 #recipeDlg .rgrid textarea{height:58px;min-height:40px;resize:vertical;font:inherit;line-height:1.4}
 .rhelp{margin:6px 0 4px;font-size:13px;line-height:1.5}
 .rhelp summary{cursor:pointer;font-weight:600}
@@ -213,6 +217,31 @@ details.lic pre{white-space:pre-wrap;font-size:11.5px;line-height:1.45;max-heigh
 .ereachmm input{width:74px;font:inherit;font-size:12px;color:var(--lcd);background:#1d1e21;border:1px solid rgba(255,255,255,.18);border-radius:5px;padding:2px 6px;color-scheme:dark}
 .ereachg{grid-column:1 / -1;font-size:12px}
 .ecropinfo{grid-column:1 / -1;font-size:11.5px;line-height:1.35;color:var(--lcd-dim)}
+.eprint{grid-column:1 / -1;display:flex;flex-direction:column;gap:5px;margin-top:4px;padding-top:7px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:var(--lcd-dim)}
+.eprhead{display:flex;align-items:center;justify-content:space-between}
+.eprunits{display:flex;border:1px solid rgba(255,255,255,.18);border-radius:5px;overflow:hidden}
+.eprunits button{background:none;border:0;color:var(--lcd-dim);font:inherit;font-size:11px;padding:1px 7px;cursor:pointer}
+.eprunits button[aria-pressed="true"]{background:var(--lcd);color:#000}
+.eprtop{display:flex;align-items:flex-start;gap:4px}
+.eprline{flex:1;text-align:left;background:none;border:0;padding:0;font:inherit;font-size:12.5px;line-height:1.35;color:var(--lcd);cursor:pointer}
+.eprline::after{content:" \25be";color:var(--lcd-dim)}
+.eprint.open .eprline::after{content:" \25b4"}
+.eprinfo{flex:none;background:none;border:0;padding:0 2px;font-size:13px;line-height:1.2;color:var(--lcd-dim);cursor:pointer}
+.eprinfo:hover,.eprinfo[aria-expanded="true"]{color:var(--lcd)}
+.eprmore{display:none;line-height:1.4;padding-left:8px;border-left:2px solid rgba(255,255,255,.12)}
+.eprint.open .eprmore,.eprint:hover .eprmore{display:block}
+.eprnote{margin:0;line-height:1.4;font-size:11.5px}
+.eprrow{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.eprrow select{flex:1;min-width:0;font:inherit;font-size:12px;color:var(--lcd);background:#1d1e21;border:1px solid rgba(255,255,255,.18);border-radius:5px;padding:2px 4px;color-scheme:dark}
+.eprrow select option{background:var(--panel);color:var(--ink)}
+.eprrow input{width:58px;font:inherit;font-size:12px;color:var(--lcd);background:#1d1e21;border:1px solid rgba(255,255,255,.18);border-radius:5px;padding:2px 6px;color-scheme:dark}
+.eprverdict{line-height:1.4;font-size:12px}
+.eprrow.eprlab{flex-direction:column;align-items:stretch;gap:3px}
+.eprrow.eprlab select{flex:none;width:100%}
+.eprverdict:empty{display:none}
+.eprverdict.ok{color:var(--lcd)}
+.eprverdict.low{color:var(--amber)}
+html[data-look="clean"] .eprunits button[aria-pressed="true"]{background:var(--acc);color:#fff}
 .editview.cropping canvas{cursor:crosshair}
 .editview.picking canvas{cursor:crosshair}
 .ewbpick{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin:2px 0 6px}
@@ -337,6 +366,7 @@ html[data-look="clean"] .wheel button{position:static!important;transform:none!i
 html[data-look="clean"] .wheel .w-center{width:64px!important;height:28px!important;box-shadow:none!important;background:rgba(255,255,255,.14)!important;font-size:13px!important}
 html[data-look="clean"] .knob{background:rgba(255,255,255,.07)!important;box-shadow:none!important;border-radius:7px!important;font-size:13px!important;height:28px!important;color:#ececf0!important}
 html[data-look="clean"] .knob[aria-pressed="true"],html[data-look="clean"] .cbtns .ck[aria-pressed="true"]{background:var(--acc)!important;color:#fff!important}
+html[data-look="clean"] .knob.advtog[aria-pressed="true"] .advk{color:#fff;opacity:.75}
 html[data-look="clean"] .osd-top{background:linear-gradient(rgba(0,0,0,.45),transparent)!important;font-size:14px!important}
 html[data-look="clean"] .osd-top .mode{background:var(--acc)!important;color:#fff!important;border-radius:5px!important;font-size:13px!important}
 html[data-look="clean"] .dtab{background:rgba(255,255,255,.09)!important;color:#ececf0!important;border:1px solid rgba(255,255,255,.08)!important}
@@ -531,6 +561,7 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;white-space:no
 .pane .ov{pointer-events:none}
 .pane .blink{animation:blink 1s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
+.af.afbox{margin:0}
 .af{position:absolute;width:46px;height:46px;margin:-23px 0 0 -23px;border:2px solid #5be37a;border-radius:3px;box-shadow:0 0 0 1px rgba(0,0,0,.7),inset 0 0 0 1px rgba(0,0,0,.5);pointer-events:none}
 .cap{position:absolute;left:0;right:0;bottom:0;padding:22px 10px 7px;background:linear-gradient(transparent,rgba(0,0,0,.75));color:var(--lcd);font-family:var(--cond);font-size:15px;text-shadow:0 1px 2px rgba(0,0,0,.85);pointer-events:none;display:none}
 .cap b{color:var(--amber);font-weight:500}
@@ -610,6 +641,14 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;white-space:no
 .rate button:hover{color:#f3c27a}
 .flags .knob[aria-pressed="true"].pick{background:var(--lcd);color:#000}
 .flags .knob[aria-pressed="true"].reject{background:#c0392b;color:#fff}
+.pickrow{gap:3px}
+.pickrow .knob.pick,.pickrow .knob.reject{padding:0 7px;font-size:15px}
+.knob.parrow{min-width:0;width:21px;padding:0;font-size:12px;color:var(--lcd-dim)}
+.knob.parrow:hover:not(:disabled){color:var(--lcd)}
+.knob.advtog{height:24px;font-size:13px;padding:0 10px;margin-top:-3px}
+.knob.advtog .advk{color:var(--lcd-dim)}
+.knob.advtog[aria-pressed="true"]{background:var(--lcd);color:#000}
+.knob.advtog[aria-pressed="true"] .advk{color:#000;opacity:.65}
 .readout{color:var(--lcd-dim);font-family:var(--cond);font-size:14px;text-align:center;word-break:break-all;max-width:140px}
 .readout b{display:block;color:var(--lcd);font-weight:500;font-size:20px}
 .readout .rname{display:block;color:var(--lcd);font-size:16px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;word-break:normal}
@@ -688,6 +727,9 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;white-space:no
 .th .xp.over{background:#d9822b}.th .xp.under{background:#3a6fd8}
 .th{container-type:inline-size}
 .th .bn .bs{display:none}
+.th .bn.bsf{cursor:pointer;background:rgba(233,165,59,.9);color:#000}
+.th .sbar{position:absolute;left:4px;right:4px;bottom:24px;height:4px;background:rgba(0,0,0,.55);border-radius:2px;overflow:hidden}
+.th .sbar i{display:block;height:100%;background:#5be37a}
 @container (max-width:140px){.th .bn .bl{display:none}.th .bn .bs{display:inline}}
 .th .sp.best{background:var(--amber);color:#000}
 .th .sp.ok{background:rgba(31,122,58,.88);color:#fff}
@@ -738,6 +780,25 @@ html[data-look="clean"] .loadcard .lcbar{background:rgba(255,255,255,.12)}
 .toast.show{opacity:1}
 dialog{background:var(--panel);color:var(--ink);border:1px solid var(--panel-line);border-radius:10px;width:min(640px,92vw);padding:18px 20px}
 dialog::backdrop{background:rgba(0,0,0,.45)}
+#nrDlg{width:min(1180px,96vw);max-height:94vh}
+.nrhead{display:flex;align-items:baseline;gap:12px}
+.nrbody{display:flex;gap:16px;margin-top:8px}
+.nrview{position:relative;flex:1;min-width:0;height:min(620px,68vh);background:#111;border-radius:8px;overflow:hidden;cursor:grab;touch-action:none}
+.nrview.drag{cursor:grabbing}
+.nrview img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none}
+.nrbusy{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#ddd;font-size:15px;background:rgba(0,0,0,.35)}
+.nrtag{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.65);color:#fff;font-size:13px;padding:2px 8px;border-radius:4px}
+.nrmap{position:absolute;right:10px;bottom:10px;border:1px solid rgba(255,255,255,.5);border-radius:4px;background:#000;cursor:crosshair}
+.nrside{width:270px;flex:none;display:flex;flex-direction:column;gap:9px}
+.nrlbl{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--ink-soft)}
+.nrsl{display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:13px}
+.nrsl input{grid-column:1 / -1;accent-color:var(--amber)}
+.nrsmall{font-size:12px;margin:0}
+.nrside .dtabs{display:flex;gap:4px}
+.nrside .dtabs .btn{flex:1}
+.nrside .dtabs .btn[aria-pressed="true"]{background:var(--amber);color:#1b1b1b;border-color:transparent}
+.enr{margin-top:4px}
+.enr .enote{margin:2px 0 0}
 dialog h2{font-family:var(--cond);font-weight:600;font-size:24px;margin:0 0 4px}
 dialog p{margin:0 0 10px}
 dialog textarea{width:100%;height:280px;font:13px/1.45 Consolas,"SF Mono",monospace;background:var(--page);color:var(--ink);border:1px solid var(--panel-line);border-radius:6px;padding:8px}
@@ -853,6 +914,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <label class="mrow" data-f="cull"><input type="checkbox" id="advance"> Advance after rating</label>
         <div class="msep"></div>
         <button class="mi" id="keepBurst" data-f="bursts">Keep this, reject rest of burst <kbd>⇧P</kbd></button>
+        <button class="mi" id="keepBest" data-f="bursts" hidden>Keep best, reject rest of burst <kbd>K</kbd></button>
         <button class="mi" id="scoreBurst" data-f="sharp">Score burst</button>
         <button class="mi" id="autoBtn" data-f="sharp">Auto-pick sharpest…</button>
         <button class="mi" id="writeXmp" data-f="cull">Write ratings</button>
@@ -938,7 +1000,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
       <span class="tsize-ico" aria-hidden="true" style="font-size:18px">■</span>
       <button class="btn collapse" id="panelHide" aria-label="Hide sidebar" title="Hide sidebar">‹</button>
     </div>
-    <div class="side-sort"><label class="tl" for="sortSel">Sort</label><select id="sortSel"><option value="name">File name</option><option value="time">Capture time – Oldest</option><option value="timeNew">Capture time – Newest</option><option value="burst">Sharpest first in each burst</option><option value="sharp">Sharpest first (whole folder)</option><option value="rating">Rating (best first)</option></select></div>
+    <div class="side-sort"><label class="tl" for="sortSel">Sort</label><select id="sortSel"><option value="name">File name</option><option value="time">Capture time – Oldest</option><option value="timeNew">Capture time – Newest</option><option value="burst">Sharpest first in each burst</option><option value="bsf" id="sortBsf">Bursts collapsed to their sharpest frame</option><option value="sharp">Sharpest first (whole folder)</option><option value="rating">Rating (best first)</option></select></div>
     <div class="side-filter" id="sideFilter" hidden><label class="tl" for="fLens">Filter</label><button class="btn fclear" id="fClear" hidden title="Show photos from every lens, camera, and file type">Clear</button><select id="fLens" title="Show only photos taken with one lens"></select><select id="fCam" hidden title="Show only photos from one camera"></select><select id="fType" hidden title="Show only one kind of file"></select></div>
     <nav class="strip" id="strip" aria-label="Loaded photos"></nav>
     <section class="info" id="infoSec">
@@ -968,7 +1030,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <div class="beyond" id="beyond" hidden></div>
         <div class="frameview" id="frameView" hidden><canvas id="frameCanvas"></canvas></div>
         <div class="lensview" id="lensView" hidden></div>
-        <div class="editview" id="editView" hidden><canvas id="editCanvas"></canvas><div class="editbadge" id="editBadge" hidden>Before</div><div class="editnote" id="editNote" hidden></div></div>
+        <div class="editview" id="editView" hidden><canvas id="editCanvas"></canvas><div class="editbadge" id="editBadge" hidden>Before</div><div class="editbadge editraw" id="editRaw" hidden title="Showing the desktop program’s result, made from the raw file itself">Raw</div><div class="editnote" id="editNote" hidden></div></div>
         <div class="osd" id="osd" hidden>
           <div class="osd-top">
             <span class="mode" id="oMode"></span>
@@ -1030,15 +1092,13 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
       <div class="readout" id="readout"><b>–</b>No photo</div>
       <div class="slabel" data-f="cull">Rate</div>
       <div class="rate" id="rate" data-f="cull" role="group" aria-label="Rating"></div>
-      <div class="flags" data-f="cull">
+      <div class="flags pickrow" data-f="cull">
+        <button class="knob parrow" id="fPrev" aria-label="Previous photo">◀</button>
         <button class="knob pick" id="fPick" aria-pressed="false">Pick</button>
         <button class="knob reject" id="fRej" aria-pressed="false">Reject</button>
+        <button class="knob parrow" id="fNext" aria-label="Next photo">▶</button>
       </div>
-      <div class="slabel" data-f="cull">Advance</div>
-      <div class="flags advseg" data-f="cull" role="group" aria-label="Advance after rating">
-        <button class="knob rfp" id="advAuto" aria-pressed="false" title="Move to the next photo after you rate, pick, or reject">Auto</button>
-        <button class="knob rfp" id="advManual" aria-pressed="true" title="Stay on the photo until you move on">Manual</button>
-      </div>
+      <button class="knob advtog" id="advTog" data-f="cull" aria-pressed="false" title="Advance after rating. Manual: stay on the photo until you move on. Auto: move to the next photo after you rate, pick, or reject. Click to switch."><span class="advk">Advance:</span> <span id="advVal">Manual</span></button>
       <div class="sdiv" data-f="cull"></div>
       <div class="slabel" data-f="cull">Show</div>
       <div class="rfwrap" data-f="cull">
@@ -1048,7 +1108,8 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
       </div>
       <div class="csec" aria-label="Edit and share">
         <div class="slabel">Edit and share</div>
-        <div class="eopenrow"><button class="knob sharebtn eopen" id="cropTab" aria-expanded="false" aria-controls="editPanel" title="Crop and straighten, in a panel to the right (R)"><span>Crop</span></button><button class="knob sharebtn eopen" id="editTab" aria-expanded="false" aria-controls="editPanel" title="Adjust: exposure, contrast, color, and more, in a panel to the right (open or close)"><span>Adjust</span></button></div>
+        <button class="knob sharebtn eopen" id="editTab" aria-expanded="false" aria-controls="editPanel" title="Adjust: exposure, contrast, color, and more, in a panel to the right (open or close)"><span>Adjust</span></button>
+        <div class="eopenrow"><button class="knob sharebtn eopen" id="cropTab" aria-expanded="false" aria-controls="editPanel" title="Crop and straighten, in a panel to the right (R)"><span>Crop</span></button><button class="knob sharebtn" id="undoBtn" disabled title="Undo the last crop or adjustment on this photo, one step at a time (Ctrl+Z)">Undo</button></div>
         <button class="knob sharebtn" id="shareGal" title="Make a gallery page to email or post">Web gallery</button>
         <button class="knob sharebtn" id="shareSocial" title="Resize and crop copies for Instagram, Facebook, and the web">Social media</button>
       </div>
@@ -1063,6 +1124,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <div class="ehist"><canvas id="eHist" width="360" height="120" aria-label="Histogram of the edited photo"></canvas><button class="eclip lo" id="eClipLo" aria-pressed="false" title="Crushed blacks indicator. Click to turn clipping warnings on or off (J)"></button><button class="eclip hi" id="eClipHi" aria-pressed="false" title="Blown highlights indicator. Click to turn clipping warnings on or off (J)"></button><span class="eclipnote" id="eClipNote"></span></div>
         <label class="ewarn" title="Show blown highlights in red and crushed blacks in blue on the photo (J)"><input type="checkbox" id="eWarn"> Clipping warnings</label>
         <div id="eSliders"></div>
+        <div class="enr"><button class="knob ebtn wide" id="eNr" hidden title="Reduce grain and color noise in a large window, with a live preview">Noise reduction…</button><p class="enote" id="eNrWeb">Noise reduction: in the FledgeView desktop program.</p></div>
         <div class="ebtns"><button class="knob ebtn" id="eBefore" title="Hold to see the original (or hold the \\ key)">Before</button><button class="knob ebtn" id="eReset" title="Clear this photo’s edits">Reset</button></div>
         <div class="ebtns"><button class="knob ebtn" id="eCopy" title="Copy this photo’s edits">Copy</button><button class="knob ebtn" id="ePaste" title="Paste copied edits onto this photo">Paste</button></div>
         <button class="knob ebtn wide" id="ePasteSel" title="Paste copied edits onto the selected photos. Ctrl-click or Shift-click thumbnails to select.">Paste to selected</button>
@@ -1086,6 +1148,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <label>Size <select id="fSize"><option value="8x10">8 × 10</option><option value="11x14">11 × 14</option><option value="16x20">16 × 20</option><option value="20x30">20 × 30</option><option value="24x36">24 × 36</option></select></label>
         <label>Wall <select id="fWall"><option value="warm">Warm white</option><option value="gray">Light gray</option><option value="sage">Sage</option><option value="charcoal">Charcoal</option></select></label>
         <label>Guides <select id="fGuides" title="Composition guides on the preview only (G)"><option value="off">Off</option><option value="thirds">Rule of thirds</option><option value="golden">Golden ratio</option><option value="diag">Diagonals</option></select></label>
+        <label id="fDestL" title="Where Save image puts the file">Save to <select id="fDest"><option value="dl">Downloads folder</option><option value="dir" hidden></option><option value="pick">Choose folder…</option></select></label>
         <button class="knob" id="fSave">Save image</button>
         <span class="finfo" id="frameInfo"></span>
       </div>
@@ -1232,10 +1295,12 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
 </dialog>
 <dialog id="recipeDlg" class="recipedlg" aria-labelledby="recipeH">
   <h2 id="recipeH">Recipe card</h2>
-  <p class="sub">The photo beside the Lightroom settings that made it, saved as a JPEG, with the matching preset (.xmp) under the same name.</p>
+  <p class="sub">The photo with the Lightroom settings that made it, saved as a JPEG, with the matching preset (.xmp) under the same name. Choose a Shape to make a version sized for social media.</p>
   <div class="rgrid">
     <label for="rTitle">Title</label><input id="rTitle" type="text" maxlength="60" placeholder="Retro #22322">
     <label for="rBy">Byline</label><input id="rBy" type="text" maxlength="80" placeholder="Your name or website (optional)">
+    <label for="rShape">Shape</label><select id="rShape"><option value="fit">Fit the photo (wide or tall)</option><option value="p45">Portrait 4:5 for Instagram and Facebook (1080 × 1350)</option><option value="sq">Square 1:1 (1080 × 1080)</option><option value="story">Story 9:16 for Stories and Reels (1080 × 1920)</option></select>
+    <label id="rDestL" for="rDestBtn">Save to</label><div class="rdest" id="rDestRow"><span id="rDest">Your Downloads folder</span><button class="btn" id="rDestBtn" type="button">Choose folder…</button><button class="btn" id="rDestReset" type="button" hidden>Use Downloads</button></div>
     <label for="rTheme">Panel</label><select id="rTheme"><option value="light">Light</option><option value="dark">Dark</option></select>
     <label for="rOther">Other steps</label><textarea id="rOther" rows="2" maxlength="300" placeholder="Anything done outside Lightroom, for example Topaz Photo AI: denoise, low; Nik Color Efex: Detail Extractor 30%"></textarea>
   </div>
@@ -1529,7 +1594,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
           <li>Works with JPEG, PNG, WebP, and RAW files from most cameras: Sony ARW, Nikon NEF, Canon CR2 and CR3, DNG, Olympus ORF, Panasonic RW2, Fuji RAF, and more.</li>
           <li><strong>RAW files show the JPEG preview the camera stores inside the file.</strong> It’s great for culling, but it isn’t the full raw data, so judge critical sharpness in your raw editor when it matters.</li>
           <li>The slider above the thumbnails changes their size. The <kbd>‹</kbd> button hides the sidebar for a bigger screen, and <strong>Photo info</strong> at the bottom expands the full EXIF details.</li>
-          <li><strong>Presets ▾</strong> (top toolbar) lights up with a dot when the photo you’re on carries Lightroom adjustments: make a recipe card, save a Lightroom preset, or show the settings.</li>
+          <li><strong>Presets ▾</strong> (top toolbar) lights up with a dot when the photo you’re on carries Lightroom adjustments: make a recipe card, save a Lightroom preset, or show the settings. The recipe card’s <strong>Shape</strong> makes ready-to-post versions: portrait 4:5 for Instagram and Facebook, square, or 9:16 for Stories and Reels. In Chrome and Edge, <strong>Save to</strong> lets you choose a folder for cards and presets; FledgeView remembers it and never replaces a file that’s already there. Frame’s <strong>Save to</strong> works the same way for framed prints.</li>
           <li><strong>Lightroom edits:</strong> for a JPEG or TIFF exported from Lightroom with full metadata (in Lightroom Classic’s Export window, Metadata → Include: All Metadata), Photo info lists the adjustments that were made, and <strong>Save as Lightroom preset</strong> turns them into a preset to import in Lightroom (Develop → Presets → + → Import Presets). The crop, masks and spot removal belong to that one photo and are left out.</li>
         </ul>
         <div class="tip">Moving files and saving to folders need <strong>Chrome or Edge</strong>. Safari and Firefox can view, rate, and export, but not organize. On a Mac, the downloaded copy opens in Safari by default: right-click it and choose <strong>Open With → Google Chrome</strong>.</div>
@@ -1547,8 +1612,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
         <h4>The three panels on the right</h4>
         <ul>
           <li><strong>View:</strong> the Info dial (<kbd>I</kbd> cycles full info, exposure only, and the photo alone), zoom, and the review tools.</li>
-          <li><strong>Rate:</strong> position and file name, rating icons, Pick and Reject, <strong>Advance</strong> (Auto moves to the next photo after you rate; Manual stays put), and the <strong>Show</strong> filter.</li>
-          <li><strong>Share:</strong> <strong>Web gallery</strong> and <strong>Social media</strong>.</li>
+          <li><strong>Rate:</strong> position and file name, rating icons, <strong>◀ Pick Reject ▶</strong> (the arrows move to the previous or next photo, like the arrow keys), the <strong>Advance</strong> switch under them (click to change: Auto moves to the next photo after you rate; Manual stays put), and the <strong>Show</strong> filter.</li>
+          <li><strong>Edit and share:</strong> <strong>Adjust</strong>, <strong>Crop</strong> with <strong>Undo</strong> beside it, <strong>Web gallery</strong>, and <strong>Social media</strong>.</li>
         </ul>
       </section>
       <section data-g="Review tools">
@@ -1558,11 +1623,12 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
           <li><strong>RAW + JPEG pairs:</strong> when a folder has a raw file and a JPEG with the same name (DSC01234.ARW and DSC01234.JPG), FledgeView shows them as one photo, labeled RAW+JPG, and checks focus and sharpness on the full-size JPEG. That matters for cameras whose raw files embed only a small preview. Ratings, picks and rejects cover both files, Move picks and rejects moves both, and Write ratings writes the raw file’s sidecar, which Lightroom reads for the pair. Turn it off under View ▾ → Pair RAW + JPEG.</li>
           <li><strong>Organize a big folder quickly:</strong> in Cull ▾ → Organize into lens folders, <strong>Choose folder…</strong> organizes a folder and its subfolders without opening the photos. FledgeView reads only each photo’s lens data and keeps a small index file (_fledgeview-index.json) in the folder, so later runs read only new photos and move just those into your lens folders. The top level works as an inbox: drop new photos there (or move one back from a lens folder) and click <strong>Scan again</strong> to sort them. Photos you’ve moved from one lens folder to another are left where you put them. Import records what it copies in the same index, and its <strong>Lens only</strong> folder choice puts new photos straight into the same lens folders.</li>
           <li><strong>Opening a folder with subfolders:</strong> FledgeView asks whether to open the folder’s own photos, only new photos (ones Organize hasn’t placed yet), or everything, since reading thousands of photos takes time. You can have it remember your choice; View ▾ → Ask again about subfolders resets it.</li>
+          <li><strong>Desktop program only:</strong> Sort → <strong>Bursts collapsed to their sharpest frame</strong> shows each burst as its sharpest frame (“1 of 12, sharpest”). Click that label, or press <kbd>O</kbd>, to open the burst sharpest first with a sharpness bar under each frame; <kbd>K</kbd> keeps the best and rejects the rest.</li>
           <li><strong>Keep the best of a burst:</strong> on the frame you want, press <kbd>Shift</kbd> + <kbd>P</kbd> (or Cull ▾ → Keep this, reject rest of burst): it’s picked, the rest of the burst is rejected (frames you already picked stay picked), and FledgeView moves on to the next photo. <kbd>Shift</kbd> + <kbd>U</kbd> undoes it.</li>
           <li><strong>Session summary</strong> (Cull ▾): photos reviewed, picks, rejects, time spent and photos per minute. It also appears once when you reach the last photo.</li>
           <li><strong>Blinkies</strong> (<kbd>B</kbd>): blown highlights flash red, and shadows crushed to pure black flash blue.</li>
           <li><strong>Peaking</strong> (<kbd>E</kbd>): paints the sharpest edges yellow. The slider under the screen sets how much is highlighted.</li>
-          <li><strong>Focus pt</strong> (<kbd>A</kbd>): a green box shows where the camera focused. Sony files only, and only straight-from-camera files; edited exports usually lose this information.</li>
+          <li><strong>Focus pt</strong> (<kbd>A</kbd>): a green box shows where the camera focused. Sony files here; Canon, Nikon, Fujifilm, OM System and Panasonic too in the FledgeView desktop program, which can show several boxes when several AF points were in focus. Only straight-from-camera files; edited exports usually lose this information.</li>
           <li><strong>Compare</strong> (<kbd>C</kbd>): the current photo and the next one side by side, with zoom linked. Click either photo to select it; ratings, <kbd>P</kbd>, and <kbd>X</kbd> apply to the selected one.</li>
           <li><strong>4-up</strong> (<kbd>Q</kbd>): four photos at once. Click one to select it, then rate, pick, or reject it. With <strong>Advance: Manual</strong>, you stay on the same four, so you can pick one and reject the rest. With <strong>Auto</strong>, <kbd>P</kbd> picks the selected photo and loads the next four. <kbd>←</kbd> <kbd>→</kbd> move four at a time.</li>
           <li><strong>Frame</strong> (<kbd>M</kbd>): see your photo framed on a wall.</li>
@@ -1602,7 +1668,10 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
         <p>Click <strong>Crop</strong> or <strong>Adjust</strong> in the Edit and share section of the control panel (or <strong>Edit</strong> in the top toolbar for Adjust, or press <kbd>R</kbd> for Crop) to open that panel to the right. Crop first, then finish, then share. Your other panels stay put, so you can rate and edit in one pass. Click <strong>Adjust</strong> again or <strong>Done</strong> to close it; FledgeView remembers whether you left it open.</p>
         <ul>
           <li><strong>Light:</strong> exposure, contrast, highlights, shadows, whites, and blacks. <strong>Color:</strong> temperature (blue to amber) and tint (green to magenta), shown on colored scales, plus vibrance. <strong>Detail and effects:</strong> sharpen and vignette. Double-click a slider to reset it.</li>
-          <li><strong>Crop and straighten:</strong> click <strong>Crop</strong>, then drag the corners or the whole box; choose an <strong>Aspect</strong> or Free. <strong>Straighten</strong> levels a tilted horizon, showing a grid while you drag. Click <strong>Done</strong> (or press Enter) to finish. <strong>Undo</strong>, beside Crop, steps back through crop and straighten changes one at a time without touching your other edits. While you crop, the box shows the size you’re cropping to: pixels, megapixels, print size in inches (at 240, 300, or 360 ppi; choose under the readout), and the focal length the crop is equivalent to. <strong>Reach</strong> crops to what a 1.4× or 2× teleconverter would have framed, or to any focal length you type (Custom); <strong>Reach guides</strong> show those framings as dashed boxes you can click. In Export, the <strong>Crop reach</strong> info bar field adds the equivalent focal length on cropped photos. The crop is kept with your other edits, and Export\u2019s social shapes crop from the cropped photo.</li>
+          <li><strong>Crop and straighten:</strong> click <strong>Crop</strong>, then drag the corners or the whole box; choose an <strong>Aspect</strong> or Free. <strong>Straighten</strong> levels a tilted horizon, showing a grid while you drag. Click <strong>Done</strong> (or press Enter) to finish. The Crop panel’s own <strong>Undo</strong> steps back through crop and straighten changes one at a time without touching your other edits. While you crop, the box shows the size you’re cropping to: pixels, megapixels, and the focal length the crop is equivalent to. <strong>Reach</strong> crops to what a 1.4× or 2× teleconverter would have framed, or to any focal length you type (Custom); <strong>Reach guides</strong> show those framings as dashed boxes you can click. In Export, the <strong>Crop reach</strong> info bar field adds the equivalent focal length on cropped photos. The crop is kept with your other edits, and Export\u2019s social shapes crop from the cropped photo.</li>
+          <li><strong>Undo</strong> in the Edit and share section (beside Crop) steps back through this photo’s changes one at a time, newest first, and names what it will undo: <strong>Undo crop</strong> for a crop or straighten, <strong>Undo adjust</strong> for an adjustment (each slider movement, Auto, Pick neutral, or black and white is one step), and Undo reset or Undo paste. <kbd>Ctrl</kbd>+<kbd>Z</kbd> (<kbd>Cmd</kbd>+<kbd>Z</kbd> on a Mac) does the same. Each photo keeps its own steps until you close FledgeView.</li>
+          <li><strong>Print size</strong>, under the crop readout, says how big the crop prints: for example “Book or close-up print: to 29 × 19 in (300 ppi).” Hover or click it for two more lines: most labs’ minimum (200 ppi), and canvas or a wall seen from across the room (150 ppi). <strong>My print lab</strong> (photo book, fine art print, canvas, or Custom) makes the sizes use your lab’s ppi. <strong>Will it print at</strong> shows the ppi for a paper size you pick, with a ✓ when it meets your lab’s minimum (or 200 ppi if no lab is set); a paper of a different shape trims the edges. The ⓘ explains why labs differ. Sizes show in centimetres or inches to suit your region; the in and cm buttons switch. Photo info shows the print size too, for the whole photo or its crop.</li>
+          <li><strong>Noise reduction</strong> (desktop program, raw files): opens a large window with a live preview of part of the photo. Drag the view or click the small map to move around. <strong>Judge at</strong> 100%, Print, or Web; noise you see at 100% is much less visible in a print or online. Start from a preset (Auto, Low light, Severe noise, Color noise only), adjust Amount, Detail and Color, and choose <strong>Apply to</strong>: the entire image, the background (protecting the subject), or the subject only. <strong>Show subject</strong> tints the protected area; hold <strong>Before</strong> (or <kbd>\</kbd>) to compare. Apply saves it with the photo’s adjustments; Undo, Copy and Paste include it.</li>
           <li><strong>Saturation</strong> boosts or calms every color evenly, while <strong>Vibrance</strong> favors muted colors. <strong>Clarity</strong> adds contrast to mid-size detail, such as feathers and fur, without sharpening smooth backgrounds.</li>
           <li><strong>Pick neutral</strong> (<kbd>W</kbd>), at the top of Color: click it, then click something that should be neutral gray or white, such as a gray card, a white feather, or a cloud. Temperature and Tint are set so that spot becomes neutral, which corrects a color cast; for the most accurate skin tones, photograph a gray card in the same light and pick it. Zoom in first to pick a small spot.</li>
           <li><strong>Reset one adjustment:</strong> a changed slider shows a small <strong>↺</strong> beside its value; click it to reset just that slider (or double-click the slider or its number). The ↺ also shows at a glance which adjustments are active.</li>
@@ -1614,7 +1683,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
           <li><strong>Copy</strong> and <strong>Paste</strong> move edits between photos. To apply them to a series, select the photos first: <strong>Ctrl-click</strong> (<strong>Cmd-click</strong> on a Mac) thumbnails one by one, <strong>Shift-click</strong> for a range, or <kbd>Ctrl</kbd>+<kbd>A</kbd> for every photo shown. Then click <strong>Paste to selected</strong>. <strong>Paste to all shown</strong> does the whole sidebar at once.</li>
           <li>Edited photos show an <strong>Edited</strong> mark. Edits are saved in this browser and applied when you export, make a gallery, or use Frame mode. <strong>Your originals never change.</strong> <strong>Export…</strong> at the bottom of the drawer opens Export with this photo (or your selected photos) already chosen.</li>
         </ul>
-        <div class="tip">Adjust works best on finished or straight-from-camera JPEGs. RAW files edit their embedded preview, and blown highlights can’t be brought back from a JPEG; for heavy work, use your raw editor.</div>
+        <div class="tip" id="rawTip">Adjust works best on finished or straight-from-camera JPEGs. RAW files edit their embedded preview, and blown highlights can’t be brought back from a JPEG; for heavy work, use your raw editor. The FledgeView desktop program works from the raw file itself.</div>
       </section>
       <section data-g="Social media">
         <h3>Social media and export</h3>
@@ -1711,6 +1780,35 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
   </div>
   <p class="sub" style="margin-top:10px">The sharpness options score each photo first. For a large folder of RAW files, the first time can take a few minutes; scores are saved for next time.</p>
   <div class="end"><label class="chk" style="margin-right:auto;font-size:14px"><input type="checkbox" id="sortAsk"> Ask each time I open photos</label><button class="btn go" id="sortGo">Sort</button></div>
+</dialog>
+
+<dialog id="nrDlg" aria-labelledby="nrTitle">
+  <div class="nrhead"><h2 id="nrTitle">Noise reduction</h2><span class="sub" id="nrFile"></span></div>
+  <div class="nrbody">
+    <div class="nrview" id="nrView" title="Drag to move around the photo">
+      <img id="nrImg" alt="Preview of the selected area">
+      <img id="nrMask" alt="" hidden>
+      <div class="nrbusy" id="nrBusy" hidden>Developing raw…</div>
+      <span class="nrtag" id="nrTag" hidden>Before</span>
+      <canvas class="nrmap" id="nrMap" width="160" height="107" title="Click to choose the area to check"></canvas>
+    </div>
+    <div class="nrside">
+      <div class="nrlbl">Judge at</div>
+      <div class="dtabs" role="group" aria-label="Judge at"><button class="btn" data-sc="1" aria-pressed="true">100%</button><button class="btn" data-sc="print" aria-pressed="false">Print</button><button class="btn" data-sc="web" aria-pressed="false">Web</button></div>
+      <p class="sub nrsmall">Noise you see at 100% is much less visible in a print or online.</p>
+      <label class="nrlbl">Preset <select id="nrPreset"><option value="auto">Auto</option><option value="low">Low light</option><option value="severe">Severe noise</option><option value="color">Color noise only</option><option value="custom">Custom</option></select></label>
+      <label class="nrsl">Amount <output id="nrAv"></output><input type="range" id="nrA" min="0" max="100" step="1" title="Grain. Double-click to reset"></label>
+      <label class="nrsl">Detail <output id="nrDv"></output><input type="range" id="nrD" min="0" max="100" step="1" title="Higher keeps more fine texture. Double-click to reset"></label>
+      <label class="nrsl">Color <output id="nrCv"></output><input type="range" id="nrC" min="0" max="100" step="1" title="Color blotches. Double-click to reset"></label>
+      <label class="nrlbl">Apply to <select id="nrT"><option value="0">Entire image</option><option value="1">Background, protect subject</option><option value="2">Subject only</option></select></label>
+      <div id="nrProt" hidden><label class="nrsl">Protect subject <output id="nrPv"></output><input type="range" id="nrP" min="0" max="100" step="1" title="100 leaves the subject untouched. Double-click to reset"></label>
+        <p class="sub nrsmall">Works best on a sharp subject against a softer background.</p></div>
+      <label class="chk nrsmall"><input type="checkbox" id="nrShowSub"> Show subject</label>
+      <button class="btn" id="nrBefore" title="Hold to see the photo without noise reduction (or hold the \ key)">Hold for Before</button>
+      <p class="sub nrsmall" id="nrPrint"></p>
+    </div>
+  </div>
+  <div class="end"><button class="btn" id="nrReset" style="margin-right:auto">Reset</button><button class="btn" data-close>Cancel</button><button class="btn primary" id="nrApply">Apply</button></div>
 </dialog>
 
 <dialog id="upDlg">
@@ -1882,7 +1980,7 @@ const FEATURES = [
   ['sharp', 'Sharpness score', 'Estimates how sharp the sharpest part of each frame is, shown as a percentage of the best frame in its burst.'],
   ['peak', 'Focus peaking', 'Highlights the sharpest edges in the frame. Overlay only; your files are never changed.'],
   ['blink', 'Blinkies', 'Flashes areas that are blown out (red) or crushed to pure black (blue) in the preview.'],
-  ['af', 'Focus point', 'Shows where the camera focused. Sony files only for now.'],
+  ['af', 'Focus point', 'Shows where the camera focused. Sony files here; every major brand in the desktop program.'],
   ['stats', 'Folder stats', 'Charts of the focal lengths, ISOs, shutter speeds, and lenses you use.'],
   ['web', 'Export for web', 'Resizes finished photos for the web, with an optional info bar under each one.'],
 ];
@@ -1980,6 +2078,7 @@ function addFiles(list, focusNew = false) {
   refreshFilterOptions();
   queueThumbs(fresh);
   queueMeta(fresh);
+  deskWarmFocus(fresh);
   if (sidecars.size) readSidecarRatings(fresh, list, sidecars);
 }
 /* ---------- ratings already made elsewhere (Lightroom sidecars, or stored in the photo) ---------- */
@@ -2143,6 +2242,7 @@ function setEmpty(filtered) {
   const e = $('empty');
   if (filtered) { e.textContent = 'No photos match this filter'; return; }
   e.textContent = ''; const m = document.createElement('span'); m.className = 'emptymsg'; m.textContent = 'No photo loaded. Use Import to copy a memory card, or Open folder for photos already on your computer. You can also drop photos anywhere on this page.'; e.append(m);
+  if (window.FV_DESKTOP) return;   // the desktop program has no browser folder picker, so no “Upload” wording to explain
   const n = document.createElement('span'); n.className = 'emptynote'; n.textContent = 'Your browser may say \u201cUpload\u201d when you choose a folder. Nothing is uploaded: FledgeView reads your photos right here, on your computer.'; e.append(n);
 }
 function openFolderInput() {
@@ -2278,11 +2378,46 @@ async function pumpMeta() {
   else pumpMeta();
 }
 
-/* ---------- Sony focus point (maker notes) ---------- */
-async function sonyFocus(it) {
+/* ---------- the desktop program (window.FV_DESKTOP exists only there; fledgeview.com never has it) ---------- */
+const deskHas = f => !!(window.FV_DESKTOP && window.FV_DESKTOP.features && window.FV_DESKTOP.features[f]);
+const isSony = it => /sony/i.test((it.meta && it.meta.Make) || '');
+/* ---------- focus points: Sony files from their maker notes, read right here; every other brand (Canon, Nikon, Fujifilm,
+   OM System/Olympus, Panasonic) from the desktop program, which reads them with ExifTool. it.af is the point in the file's own
+   (unrotated) frame, as the Sony reader gives it; it.afBoxes are the program's boxes as fractions of the photo as shown ---------- */
+async function getFocus(it) {
   if (it.af !== undefined) return it.af;
   it.af = null;
-  if (!/sony/i.test((it.meta && it.meta.Make) || '')) return null;
+  if (isSony(it)) it.af = await sonyRead(it);
+  if (!it.af && deskHas('focusPoints')) {
+    const f = await deskFocus(it);
+    if (f && f.found && f.boxes && f.boxes.length) {
+      it.afBoxes = f.boxes.map(b => b.display).filter(d => d && d.w > 0 && d.h > 0);
+      const d = it.afBoxes[0];
+      if (d) { const cx = d.x + d.w / 2, cy = d.y + d.h / 2, r = rotFor(it.orient);   // back to the file's own frame, the reverse of afFor
+        it.af = r === 90 ? { x: cy, y: 1 - cx } : r === 270 ? { x: 1 - cy, y: cx } : r === 180 ? { x: 1 - cx, y: 1 - cy } : { x: cx, y: cy }; }
+    }
+  }
+  return it.af;
+}
+/* the program's answer for one photo (kept, so it's asked once); null when the photo wasn't opened from a folder */
+async function deskFocus(it) {
+  if (it.deskF !== undefined) return it.deskF;
+  it.deskF = null;
+  if (!it.handle) return null;
+  try { it.deskF = (await window.FV_DESKTOP.focus(it.handle)) || null; } catch { it.deskF = null; }
+  return it.deskF;
+}
+/* after photos open, ask the program for all of their focus points in one call, so later lookups are instant */
+function deskWarmFocus(list) {
+  if (!deskHas('focusPoints')) return;
+  const todo = list.filter(it => it.handle && it.deskF === undefined); if (!todo.length) return;
+  Promise.resolve(window.FV_DESKTOP.focus(todo.map(it => it.handle))).then(res => {
+    if (!Array.isArray(res)) return;
+    todo.forEach((it, i) => { if (it.deskF === undefined) it.deskF = res[i] || null; });
+  }).catch(() => {});
+}
+/* Sony maker notes: the focus point as a fraction of the frame */
+async function sonyRead(it) {
   try {
     const ab = await it.file.slice(0, 8 * 1024 * 1024).arrayBuffer();
     const dv = new DataView(ab);
@@ -2312,9 +2447,14 @@ async function sonyFocus(it) {
     const off = u32(e + 8);
     const w = u16(off), h = u16(off + 2), x = u16(off + 4), y = u16(off + 6);
     if (!w || !h || x > w || y > h || (!x && !y)) return null;
-    it.af = { x: x / w, y: y / h };
-  } catch { it.af = null; }
-  return it.af;
+    return { x: x / w, y: y / h };
+  } catch { return null; }
+}
+/* what to say when a photo shows no focus point */
+function afMissing(it) {
+  if (it.deskF && !it.deskF.found && it.deskF.note) return it.deskF.note;
+  if (isSony(it) || deskHas('focusPoints')) return 'No focus point recorded in this file';
+  return 'Focus points for Canon, Nikon, Fujifilm, OM System and Panasonic: in the FledgeView desktop program';
 }
 function afFor(it) {
   if (!it.af) return null;
@@ -2530,7 +2670,8 @@ async function ensureCanvas(it) {
   w = Math.round(w * s); h = Math.round(h * s);
   const swap = rot === 90 || rot === 270;
   c.width = swap ? h : w; c.height = swap ? w : h;
-  const x = c.getContext('2d');
+  /* read back on every mouse move by the brightness readout under the screen, so the browser keeps it ready for reading */
+  const x = c.getContext('2d', { willReadFrequently: true });
   x.save(); x.translate(c.width / 2, c.height / 2); x.rotate(rot * Math.PI / 180);
   x.drawImage(p.img, -w / 2, -h / 2, w, h); x.restore();
   it.cache = { canvas: c, work: null, src: s < 1 && !p.extracted ? p.img : null };
@@ -2857,14 +2998,22 @@ function essentialRows(it, m) {
   add('Lens', 'Effective focal length', fi ? fi.eff + ' mm' : '');
   add('Capture', 'Camera', [m.Make, m.Model].filter(Boolean).join(' '));
   add('Capture', 'Date taken', fmtDate(m.DateTimeOriginal || m.CreateDate));
-  { const dm = pixelDims(it, m); add('Capture', 'Dimensions', dm ? `${dm[0]} × ${dm[1]} (${fmtMp(dm[0], dm[1])} MP)` : ''); }
+  { const dm = pixelDims(it, m); add('Capture', 'Dimensions', dm ? `${dm[0]} × ${dm[1]} (${fmtMp(dm[0], dm[1])} MP)` : '');
+    /* print size for the whole frame, or for the crop when the photo has one */
+    if (dm) { const up = [5, 6, 7, 8].includes(it.orient) ? [dm[1], dm[0]] : dm, er = editOf(it), c = er && er.crop;
+      add('Capture', 'Print size', printLines(Math.round((c ? c.w : 1) * up[0]), Math.round((c ? c.h : 1) * up[1])).main.replace(/\.$/, '') + (c ? ', as cropped' : '')); } }
   add('Capture', 'Focus distance', fmtDist(distOf(m)));
   if (it.prev) add('Capture', 'Preview shown', `${it.prev.w} × ${it.prev.h}` + (DIRECT.has(it.ext) || TIF.has(it.ext) ? ' (full image)' : ' (embedded JPEG)'));
   if (on('bursts') && it.burst) add('Capture', 'Burst', `Frame ${it.burst.pos} of ${it.burst.size}`);
   if (on('sharp') && it.sharp != null) {
     const p = sharpPct(it); if (p != null) add('Capture', 'Sharpness in burst', (p === 100 ? 'Sharpest frame' : (burstAtFocus(it) ? '' : 'About ') + p + '% of the sharpest') + (burstAtFocus(it) ? ', at the focus point' : ', across the whole frame'));
   }
-  if (on('af')) add('Capture', 'Focus point', it.af ? `${Math.round(it.af.x * 100)}% across, ${Math.round(it.af.y * 100)}% down` : '');
+  if (on('af')) {
+    const a = it.af ? afFor(it) : null, n = it.afBoxes && it.afBoxes.length;
+    add('Capture', 'Focus point', a ? `${Math.round(a.x * 100)}% across, ${Math.round(a.y * 100)}% down` + (n > 1 ? ` (${n} points in focus)` : '')
+      : it.deskF && !it.deskF.found && it.deskF.note ? it.deskF.note
+      : !window.FV_DESKTOP && !isSony(it) && (RAW.has(it.ext) || it.raw) && it.meta ? 'Focus points for Canon, Nikon, Fujifilm, OM System and Panasonic: in the FledgeView desktop program.' : '');
+  }
   if (on('cull')) { const c = cullOf(it); add('Capture', 'Rating', c.r ? stars(c.r) : ''); add('Capture', 'Flag', c.f === 1 ? 'Pick' : c.f === -1 ? 'Reject' : ''); }
   add('Location', 'Latitude', typeof m.latitude === 'number' ? m.latitude.toFixed(6) : '');
   add('Location', 'Longitude', typeof m.longitude === 'number' ? m.longitude.toFixed(6) : '');
@@ -3007,19 +3156,29 @@ function wrapLines(ctx, text, maxW) {
 }
 async function drawRecipeCard(it, o) {
   const cc = await ensureCanvas(it), src = cc && cc.canvas; if (!src || !it.lr) return null;
-  const pw = src.width, ph = src.height, side = pw >= ph, dark = o.theme === 'dark';
-  const imgH = side ? Math.min(2000, ph) : Math.round(Math.min(1600, pw) * ph / pw), imgW = Math.round(imgH * pw / ph);
-  const panelW = side ? Math.round(imgH * 0.5) : imgW, panelH = side ? imgH : Math.round(imgW * 1.0);
-  const W = side ? panelW + imgW : imgW, H = side ? imgH : imgH + panelH;
+  const pw = src.width, ph = src.height, dark = o.theme === 'dark';
+  /* social shapes: an exact size the networks show without cropping. The photo spans the top (a tall photo is centred, never
+     cropped) and the settings fill the rest in up to three columns */
+  const SOC = { p45: [1080, 1350, 0.56, 0.04], sq: [1080, 1080, 0.58, 0.036], story: [1080, 1920, 0.42, 0.05] }[o.shape];   // width, height, most of the height for the photo, title size
+  const side = !SOC && pw >= ph;
+  let imgH, imgW, panelW, panelH, W, H, imgX = 0;
+  if (SOC) {
+    [W, H] = SOC; const k = Math.min(W / pw, Math.round(H * SOC[2]) / ph);
+    imgW = Math.round(pw * k); imgH = Math.round(ph * k); imgX = Math.round((W - imgW) / 2); panelW = W; panelH = H - imgH;
+  } else {
+    imgH = side ? Math.min(2000, ph) : Math.round(Math.min(1600, pw) * ph / pw); imgW = Math.round(imgH * pw / ph);
+    panelW = side ? Math.round(imgH * 0.5) : imgW; panelH = side ? imgH : Math.round(imgW * 1.0);
+    W = side ? panelW + imgW : imgW; H = side ? imgH : imgH + panelH;
+  }
   const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
   try { await Promise.all(['600 20px "Barlow Condensed"', '500 20px "Barlow Condensed"', '400 20px "Barlow Condensed"'].map(f => document.fonts.load(f))); } catch {}
   const bg = dark ? '#141517' : '#ffffff', ink = dark ? '#e6e6e6' : '#222222', soft = dark ? '#9a9da2' : '#6a6a6a', rule = dark ? 'rgba(255,255,255,.14)' : 'rgba(0,0,0,.12)';
   x.fillStyle = bg; x.fillRect(0, 0, W, H);
-  x.imageSmoothingQuality = 'high'; x.drawImage(src, side ? panelW : 0, 0, imgW, imgH);
+  x.imageSmoothingQuality = 'high'; x.drawImage(src, side ? panelW : imgX, 0, imgW, imgH);
   const px0 = side ? 0 : 0, py0 = side ? 0 : imgH, pad = Math.round(Math.min(panelW, panelH) * (side ? 0.09 : 0.05));
   const groups = recipeGroups(it.lr), F = (wt, sz) => `${wt} ${Math.round(sz)}px "Barlow Condensed", "Arial Narrow", sans-serif`;
   /* header */
-  let y = py0 + pad, hs = Math.round((side ? panelW : panelH) * (side ? 0.042 : 0.06));
+  let y = py0 + pad, hs = SOC ? Math.round(Math.min(W * SOC[3], panelH * 0.09)) : Math.round((side ? panelW : panelH) * (side ? 0.042 : 0.06));
   x.fillStyle = soft; x.font = F(600, hs * 0.55); x.textBaseline = 'top'; x.letterSpacing = Math.round(hs * 0.12) + 'px'; x.fillText('LIGHTROOM PRESET', px0 + pad, y); x.letterSpacing = '0px';
   y += hs * 0.85; x.fillStyle = ink; x.font = F(600, hs * 1.25);
   for (const l of wrapLines(x, (o.title || 'Untitled').toUpperCase(), panelW - 2 * pad)) { x.fillText(l, px0 + pad, y); y += hs * 1.35; }
@@ -3031,12 +3190,13 @@ async function drawRecipeCard(it, o) {
   if (o.other) foot.push('Other steps: ' + o.other);
   if (o.howto) { const fname = ((o.title || it.name.replace(/\.[^.]+$/, '')).replace(/[\\/:*?"<>|]+/g, '-').trim() || 'Recipe') + '.xmp'; foot.push(`Preset file: ${fname} \u00b7 To load it in Lightroom Classic: Develop \u2192 Presets \u2192 + \u2192 Import Presets (it appears in the FledgeView group).`); }
   /* body: fit the text to the space, in one or two columns */
-  const top = y, bottom = py0 + panelH - pad, colsMax = 2;
+  const top = y, bottom = py0 + panelH - pad, colsMax = SOC ? 3 : 2;
   let fs = side ? hs * 0.62 : hs * 0.45, cols = side ? 1 : 2, layout = null;
   const plan = (fsz, ncol) => {
     const cw = (panelW - 2 * pad - (ncol - 1) * pad * 0.8) / ncol, items = [];
     x.font = F(500, fsz);
-    for (const g of groups) { items.push({ t: g.title.toUpperCase(), h: true }); for (const l of g.lines) for (const wl of wrapLines(x, l.toUpperCase(), cw)) items.push({ t: wl }); items.push({ gap: true }); }
+    let wide = false;
+    for (const g of groups) { x.font = F(600, fsz * 1.02); if (x.measureText(g.title.toUpperCase()).width + g.title.length * Math.round(fsz * 0.08) > cw) wide = true; x.font = F(500, fsz); items.push({ t: g.title.toUpperCase(), h: true }); for (const l of g.lines) for (const wl of wrapLines(x, l.toUpperCase(), cw)) items.push({ t: wl }); items.push({ gap: true }); }
     x.font = F(400, fsz * 0.9); const footL = []; for (const f of foot) footL.push(...wrapLines(x, f, panelW - 2 * pad)); footL.push('Card made with FledgeView \u00b7 fledgeview.com');
     const lh = fsz * 1.38, footH = footL.length * fsz * 1.25 + fsz * 0.8, avail = bottom - top - footH;
     const colsArr = [[]]; let hh = 0;
@@ -3046,9 +3206,12 @@ async function drawRecipeCard(it, o) {
       colsArr[colsArr.length - 1].push(it2); hh += ih;
     }
     const used = Math.max(...colsArr.map(cl => cl.reduce((a, b) => a + (b.gap ? lh * 0.55 : lh), 0)));
-    return { cw, colsArr, lh, footL, footH, ok: used <= avail + 0.5, fsz };
+    return { cw, colsArr, lh, footL, footH, ok: used <= avail + 0.5 && !wide, fsz };
   };
-  for (let tries = 0; tries < 40; tries++) { layout = plan(fs, cols); if (layout.ok) break; if (cols < colsMax && fs < hs * 0.5) { cols++; fs = hs * 0.62; } else fs *= 0.94; }
+  if (SOC) {   // social shapes: the largest text that fits, in one, two or three columns, so the settings read on a phone
+    for (let nc = 1; nc <= colsMax; nc++) { let f2 = hs * 0.72, l2 = null; for (let t = 0; t < 60; t++) { l2 = plan(f2, nc); if (l2.ok) break; f2 *= 0.96; } if (l2 && l2.ok && (!layout || l2.fsz > layout.fsz)) layout = l2; }
+    if (!layout) layout = plan(hs * 0.3, colsMax);
+  } else for (let tries = 0; tries < 40; tries++) { layout = plan(fs, cols); if (layout.ok) break; if (cols < colsMax && fs < hs * 0.5) { cols++; fs = hs * 0.62; } else fs *= 0.94; }
   const { cw, colsArr, lh, footL, fsz } = layout;
   colsArr.forEach((cl, ci) => { let yy = top; const xx = px0 + pad + ci * (cw + pad * 0.8);
     for (const it2 of cl) { if (it2.gap) { yy += lh * 0.55; continue; } x.fillStyle = it2.h ? ink : (dark ? '#c9c9c9' : '#3a3a3a'); x.font = F(it2.h ? 600 : 400, it2.h ? fsz * 1.02 : fsz); if (it2.h) x.letterSpacing = Math.round(fsz * 0.08) + 'px'; x.fillText(it2.t, xx, yy); x.letterSpacing = '0px'; yy += lh; } });
@@ -3082,13 +3245,38 @@ $('pmShow').onclick = () => {
 };
 function openRecipe(it) {
   if (!it || !it.lr) return;
-  const o = S.recipe = { theme: 'light', by: '', other: '', preset: true, ...(S.recipe || {}) };
-  $('rTitle').value = it.name.replace(/\.[^.]+$/, ''); $('rBy').value = o.by; $('rOther').value = o.other; $('rTheme').value = o.theme; $('rPreset').checked = o.preset !== false; $('rHowTo').checked = o.howto !== false; $('rHowTo').disabled = !$('rPreset').checked;
+  const o = S.recipe = { theme: 'light', shape: 'fit', by: '', other: '', preset: true, ...(S.recipe || {}) };
+  $('rTitle').value = it.name.replace(/\.[^.]+$/, ''); $('rBy').value = o.by; $('rOther').value = o.other; $('rTheme').value = o.theme; $('rShape').value = o.shape || 'fit'; $('rPreset').checked = o.preset !== false; $('rHowTo').checked = o.howto !== false; $('rHowTo').disabled = !$('rPreset').checked;
   $('recipeDlg').dataset.key = it.key; $('rStatus').textContent = '';
-  $('recipeDlg').showModal(); recipePreview();
+  $('recipeDlg').showModal(); loadCardDir(); recipePreview();
 }
 let recipeTimer = 0;
-function recipeOpts() { return { title: $('rTitle').value.trim(), by: $('rBy').value.trim(), other: $('rOther').value.trim(), theme: $('rTheme').value, howto: $('rPreset').checked && $('rHowTo').checked }; }
+/* where cards are saved: the Downloads folder, or a folder you choose once (Chrome and Edge); FledgeView remembers it */
+let cardDir = null, cardDirLoaded = false;
+async function loadCardDir() { if (!cardDirLoaded) { cardDirLoaded = true; try { cardDir = await idbKV.get('cardDest') || null; } catch {} } syncCardDir(); }
+function syncCardDir() {
+  const ok = canFolder(); $('rDestL').hidden = $('rDestRow').hidden = !ok; if (!ok) return;
+  $('rDest').textContent = cardDir ? cardDir.name : 'Your Downloads folder';
+  $('rDest').title = cardDir ? 'Cards and presets are saved straight into this folder' : 'Cards and presets download like any other file';
+  $('rDestBtn').textContent = cardDir ? 'Change\u2026' : 'Choose folder\u2026'; $('rDestReset').hidden = !cardDir;
+}
+$('rDestBtn').onclick = async () => {
+  try { const h = await window.showDirectoryPicker({ mode: 'readwrite', id: 'fv-cards' }); cardDir = h; idbKV.set('cardDest', h); $('rStatus').textContent = ''; }
+  catch (e) { $('rStatus').textContent = e && e.name === 'AbortError' ? pickHint : 'That folder can\u2019t be used. Try another.'; }
+  syncCardDir();
+};
+$('rDestReset').onclick = () => { cardDir = null; idbKV.set('cardDest', null); syncCardDir(); $('rStatus').textContent = 'Cards will go to your Downloads folder.'; };
+/* save into the chosen folder without replacing a file that's already there; fall back to a download if the folder can't be used */
+async function saveCardFile(name, blob) {
+  if (cardDir) {
+    try {
+      const n = await writeInto(cardDir, name, blob);
+      return { r: 'saved', name: n, where: cardDir.name };
+    } catch { const r = await saveFile(name, blob); return { r, name, where: '', fell: true }; }
+  }
+  return { r: await saveFile(name, blob), name, where: '' };
+}
+function recipeOpts() { return { title: $('rTitle').value.trim(), by: $('rBy').value.trim(), other: $('rOther').value.trim(), theme: $('rTheme').value, shape: $('rShape').value, howto: $('rPreset').checked && $('rHowTo').checked }; }
 async function recipePreview() {
   const it = cur(); if (!it || $('recipeDlg').dataset.key !== it.key) return;
   const c = await drawRecipeCard(it, recipeOpts()); if (!c) return;
@@ -3097,7 +3285,7 @@ async function recipePreview() {
 }
 $('recipeDlg').addEventListener('input', e => {
   if (e.target.id === 'rPreset' || e.target.id === 'rHowTo') return;
-  Object.assign(S.recipe, { by: $('rBy').value.trim(), other: $('rOther').value.trim(), theme: $('rTheme').value }); saveS();
+  Object.assign(S.recipe, { by: $('rBy').value.trim(), other: $('rOther').value.trim(), theme: $('rTheme').value, shape: $('rShape').value }); saveS();
   clearTimeout(recipeTimer); recipeTimer = setTimeout(recipePreview, 250);
 });
 $('rPreset').onchange = e => { S.recipe.preset = e.target.checked; $('rHowTo').disabled = !e.target.checked; saveS(); recipePreview(); };
@@ -3108,15 +3296,20 @@ $('rSave').onclick = async () => {
   $('rStatus').textContent = 'Making the card\u2026';
   const c = await drawRecipeCard(it, o); if (!c) { $('rStatus').textContent = 'This photo has no Lightroom settings.'; return; }
   const blob = await new Promise(res => c.toBlob(res, 'image/jpeg', 0.92));
-  const r1 = await saveFile(base + '.jpg', blob); let r2 = 'skipped';
-  if ($('rPreset').checked) { const xm = await lrPresetXmp(it, o.title || base).catch(() => null); r2 = xm ? await saveFile(base + '.xmp', new Blob([xm], { type: 'application/rdf+xml' })) : 'none'; }
-  $('rStatus').textContent = r1 === 'saved' ? `Saved ${base}.jpg` + (r2 === 'saved' ? ` and ${base}.xmp. To use the preset, see How to use the .xmp preset below.` : '.') : 'The card wasn\u2019t saved.';
+  const cardName = base + ({ p45: ' (4x5)', sq: ' (square)', story: ' (story)' }[o.shape] || '') + '.jpg';   // a social version doesn't replace the full card
+  const s1 = await saveCardFile(cardName, blob); let s2 = { r: 'skipped' };
+  if ($('rPreset').checked) { const xm = await lrPresetXmp(it, o.title || base).catch(() => null); s2 = xm ? await saveCardFile(base + '.xmp', new Blob([xm], { type: 'application/rdf+xml' })) : { r: 'none' }; }
+  const both = s1.name + (s2.r === 'saved' ? ` and ${s2.name}` : '');
+  $('rStatus').textContent = s1.r !== 'saved' ? 'The card wasn\u2019t saved.'
+    : (s1.where ? `Saved ${both} in ${s1.where}.` : `Downloaded ${both} (check your Downloads folder${s1.fell ? '; the chosen folder couldn\u2019t be used' : ''}).`)
+      + (s2.r === 'saved' ? ' To use the preset, see How to use the .xmp preset below.' : '');
 };
 async function saveLrPreset(it) {
   const x = await lrPresetXmp(it).catch(() => null);
   if (!x) { toast('This photo has no Lightroom settings to save'); return; }
-  const out = await saveFile(it.name.replace(/\.[^.]+$/, '') + ' (FledgeView preset).xmp', new Blob([x], { type: 'application/rdf+xml' }));
-  if (out === 'saved') toast('Preset saved. In Lightroom Classic: Develop \u2192 Presets \u2192 + \u2192 Import Presets; it appears in the FledgeView group.');
+  const pname = it.name.replace(/\.[^.]+$/, '') + ' (FledgeView preset).xmp';
+  const out = await saveFile(pname, new Blob([x], { type: 'application/rdf+xml' }));
+  if (out === 'saved') toast(dlNote(pname) + ' In Lightroom Classic: Develop \u2192 Presets \u2192 + \u2192 Import Presets; it appears in the FledgeView group.');
 }
 function buildRows(it, m) {
   if (!state.allTags) return essentialRows(it, m);
@@ -3188,15 +3381,16 @@ const panes = [0, 1, 2, 3].map(i => {
 function clearPane(p) {
   p.el.querySelectorAll('canvas.img').forEach(x => x.remove());
   p.img = null; p.item = null; p.ok = false; p.detail.hidden = p.blink.hidden = p.peak.hidden = p.af.hidden = true; p.cap.textContent = '';
+  p.afBoxes = null; (p.afEls || []).forEach(d => { d.hidden = true; });
 }
 async function loadPane(p, it, tok) {
   p.item = it;
   const c = await ensureCanvas(it);
   if (tok !== state.token) return;
-  if (on('af')) await sonyFocus(it);
+  if (on('af')) await getFocus(it);
   p.el.querySelectorAll('canvas.img').forEach(x => x.remove());
   p.detail.hidden = true;
-  if (!c) { p.img = null; p.ok = false; p.blink.hidden = p.peak.hidden = p.af.hidden = true; return; }
+  if (!c) { p.img = null; p.ok = false; p.blink.hidden = p.peak.hidden = p.af.hidden = true; p.afBoxes = null; (p.afEls || []).forEach(d => { d.hidden = true; }); return; }
   p.img = c.canvas; p.el.prepend(c.canvas); p.ok = true;
   paintOverlays(p);
 }
@@ -3207,7 +3401,12 @@ function paintOverlays(p) {
   p.peak.hidden = !(p.ok && work && on('peak') && state.show.peak);
   if (!p.peak.hidden) { p.peak.width = work.w; p.peak.height = work.h; p.peak.getContext('2d').putImageData(peakImage(work, S.peakPct), 0, 0); }
   p.afPt = p.ok && it && on('af') && state.show.af ? afFor(it) : null;
-  p.af.hidden = !p.afPt;
+  /* the program's boxes keep their own size and can be several (Canon marks every AF point that was in focus) */
+  p.afBoxes = p.afPt && it.afBoxes && it.afBoxes.length ? it.afBoxes : null;
+  p.af.hidden = !p.afPt || !!p.afBoxes;
+  p.afEls = p.afEls || [];
+  while (p.afEls.length < (p.afBoxes ? p.afBoxes.length : 0)) { const d = document.createElement('div'); d.className = 'af afbox'; d.setAttribute('aria-hidden', 'true'); p.el.append(d); p.afEls.push(d); }
+  p.afEls.forEach((d, i) => { d.hidden = !(p.afBoxes && i < p.afBoxes.length); });
 }
 function updateCaptions() {
   if (!state.show.compare && !state.show.quad) return;
@@ -3336,7 +3535,9 @@ function layoutPane(p, primary) {
   drawDetail(p);
   const tf = `translate(${x}px,${y}px) scale(${s})`;
   for (const el of [c, p.blink, p.peak]) { el.style.width = c.width + 'px'; el.style.height = c.height + 'px'; el.style.transform = tf; }
-  if (p.afPt) { p.af.style.left = (x + p.afPt.x * cw) + 'px'; p.af.style.top = (y + p.afPt.y * ch) + 'px'; }
+  if (p.afPt && !p.afBoxes) { p.af.style.left = (x + p.afPt.x * cw) + 'px'; p.af.style.top = (y + p.afPt.y * ch) + 'px'; }
+  if (p.afBoxes) p.afBoxes.forEach((b, i) => { const d = p.afEls[i], w = Math.max(14, b.w * cw), h = Math.max(14, b.h * ch);
+    d.style.left = (x + (b.x + b.w / 2) * cw - w / 2) + 'px'; d.style.top = (y + (b.y + b.h / 2) * ch - h / 2) + 'px'; d.style.width = w + 'px'; d.style.height = h + 'px'; });
 }
 function layoutAll() {
   if (state.framing) { syncViewEdits(); return frameZoomUi(); }
@@ -3574,6 +3775,7 @@ function editKind(r) {
   if (r.rot) geo.push('Straighten ' + editVal('rot', r.rot));
   if (r.bw) tone.push('Black & white');
   for (const [k, label] of EDIT_UI) if (label && k !== 'rot' && r[k]) tone.push(label + ' ' + editVal(k, r[k]));
+  if (r.nr || r.nrc) tone.push(`Noise reduction ${r.nr || 0}/${r.nrc || 0}`);
   const label = geo.length && tone.length ? 'Cropped + edited' : geo.length ? (r.crop ? 'Cropped' : 'Straightened') : 'Edited';
   return { label, tip: [...geo, ...tone].join(' \u00b7 ') };
 }
@@ -3587,7 +3789,7 @@ function queueAf(it) {
   (async () => {
     while (afQueue.length) {
       const x = afQueue.shift();
-      if (x.af === undefined && state.items.includes(x)) { try { await sonyFocus(x); } catch {} }
+      if (x.af === undefined && state.items.includes(x)) { try { await getFocus(x); } catch {} }
       if (x.burst && x.burst.members.every(m => m.af !== undefined || m.sharp == null)) x.burst.members.forEach(paintThumb);
       await new Promise(res => setTimeout(res, 0));   // let the photo on screen, thumbnails and typing go first
     }
@@ -3609,13 +3811,20 @@ function paintThumb(it) {
   b.classList.toggle('msel', !!(state.sel && state.sel.has(it.key)));
   if (on('bursts') && it.burst) {
     add('bbar b' + (it.burst.id % 2), '');
-    if (it.burst.pos === 1) { const bn = add('bn', ''); bn.title = `Burst of ${it.burst.size}`; const l = document.createElement('span'); l.className = 'bl'; l.textContent = `Burst of ${it.burst.size}`; const sh = document.createElement('span'); sh.className = 'bs'; sh.textContent = `×${it.burst.size}`; bn.append(l, sh); }
+    if (bsfOn() && it.burst.size > 1) {
+      const rk = burstRank(it), open = state.openBurst === it.burst.members, n = it.burst.size;
+      const bn = add('bn bsf', ''); bn.title = open ? `${rk} of ${n} by sharpness. Click to close this burst (O)` : `Burst of ${n}, this is the sharpest frame. Click to open the burst (O)`;
+      const l = document.createElement('span'); l.className = 'bl'; l.textContent = open ? `${rk} of ${n}` : `1 of ${n}, sharpest`;
+      const sh = document.createElement('span'); sh.className = 'bs'; sh.textContent = open ? `${rk}/${n}` : `\u00d7${n}`; bn.append(l, sh);
+      bn.addEventListener('click', e => { e.stopPropagation(); toggleBurst(it); });
+      if (open) { const p = sharpPct(it); if (p != null) { const bar = add('sbar', ''); const f = document.createElement('i'); f.style.width = p + '%'; bar.append(f); bar.title = `${p}% of the sharpest`; } }
+    } else if (it.burst.pos === 1) { const bn = add('bn', ''); bn.title = `Burst of ${it.burst.size}`; const l = document.createElement('span'); l.className = 'bl'; l.textContent = `Burst of ${it.burst.size}`; const sh = document.createElement('span'); sh.className = 'bs'; sh.textContent = `×${it.burst.size}`; bn.append(l, sh); }
   }
   if (on('sharp')) { const p = sharpPct(it); if (p != null) { const band = sharpBand(p, burstAtFocus(it)); add('sp ' + band.cls, band.label).title = sharpTip(it, p); } }
   /* the sharpness label and Edited share the bottom-left corner: put them side by side instead of on top of each other */
   { const sp = b.querySelector(':scope > .sp'), ed = b.querySelector(':scope > .ed'); if (sp && ed) { const row = document.createElement('span'); row.className = 'lrow'; row.append(sp, ed); b.append(row); } }
   /* find out whether this Sony file has a focus point, so its burst's labels show the right confidence */
-  if (on('sharp') && it.burst && it.sharp != null && it.af === undefined && it.meta && /sony/i.test(it.meta.Make || '')) queueAf(it);
+  if (on('sharp') && it.burst && it.sharp != null && it.af === undefined && it.meta && (isSony(it) || deskHas('focusPoints'))) queueAf(it);
 }
 function updateStrip() {
   const qb = state.show.quad ? state.quadBase : -10;
@@ -3761,6 +3970,32 @@ function undoKeepBurst() {
   burstUndo = null; sess.kept = Math.max(0, sess.kept - 1); saveCull(); refreshCullUi(); refreshOsd(); refreshRows(); toast('Burst restored');
 }
 $('keepBurst').onclick = () => keepBurst(rateTarget() || cur());
+/* ---------- sharpest-first bursts (desktop program): each burst collapses to its sharpest frame, chosen by sharpness at
+   the focus point; opening it lines the frames up sharpest first, each with a small sharpness bar ---------- */
+const bsfOn = () => deskHas('bursts') && S.sort === 'bsf' && on('bursts');
+function burstRank(it) {
+  const ms = it.burst.members.slice().sort((a, b) => (b.sharp ?? -1) - (a.sharp ?? -1));
+  return ms.indexOf(it) + 1;
+}
+const burstBest = it => it.burst.members.reduce((a, b) => (b.sharp ?? -1) > (a.sharp ?? -1) ? b : a);
+function toggleBurst(it) {
+  if (!it || !it.burst || !bsfOn()) return;
+  const open = state.openBurst === it.burst.members;
+  state.openBurst = open ? null : it.burst.members;
+  const keep = open ? burstBest(it) : it;
+  state.items.forEach(m => m.burst && m.burst.members === it.burst.members && paintThumb(m));
+  rebuildView(keep);
+  if (state.openBurst) state.openBurst.forEach(paintThumb);
+}
+/* Keep best, reject rest (K): picks the sharpest frame and rejects the others, scoring the burst first if needed */
+async function keepBest(it) {
+  if (!it || !on('bursts') || !it.burst || it.burst.size < 2) { toast('This photo isn\u2019t part of a burst'); return; }
+  const mem = it.burst.members, todo = mem.filter(m => m.sharp == null);
+  if (todo.length) { await scorePool(todo, n => status(`Scoring burst ${n} of ${todo.length}`), () => false); status(''); }
+  keepBurst(burstBest(it));
+  if (state.openBurst === mem) { state.openBurst = null; rebuildView(burstBest(it)); }
+}
+$('keepBest').onclick = () => keepBest(rateTarget() || cur());
 function setCull(it, patch, advance = true) {
   sess.touched.add(it.key); sessTick();
   const c = { ...cullOf(it), ...patch };
@@ -3815,11 +4050,13 @@ $('advance').onchange = e => setAdvance(e.target.checked);
 function setAdvance(v) {
   S.advance = !!v; saveS();
   $('advance').checked = S.advance;
-  $('advAuto').setAttribute('aria-pressed', S.advance);
-  $('advManual').setAttribute('aria-pressed', !S.advance);
+  $('advTog').setAttribute('aria-pressed', S.advance);
+  $('advVal').textContent = S.advance ? 'Auto' : 'Manual';
 }
-$('advAuto').onclick = () => setAdvance(true);
-$('advManual').onclick = () => setAdvance(false);
+$('advTog').onclick = () => setAdvance(!S.advance);
+/* arrows beside Pick and Reject, so you can rate and move on without reaching up to the Info dial; same as the arrow keys */
+$('fPrev').onclick = () => $('prev').click();
+$('fNext').onclick = () => $('next').click();
 
 $('copyList').onclick = () => {
   const picks = [], rejects = [], rated = [];
@@ -3885,6 +4122,44 @@ $('writeXmp').onclick = async () => {
   toast(`Wrote ${ok} sidecar file${ok === 1 ? '' : 's'}` + (fail ? `. ${fail} failed` : '') + (skipped ? `. Skipped ${skipped} non-RAW file${skipped === 1 ? '' : 's'}` : '') + '.');
 };
 /* editor sidecars that travel with a photo: Adobe .xmp, DxO .dop, RawTherapee .pp3 */
+/* ---------- same-name photos (Organize and Import): a true duplicate (the same photo) or a different photo with the same name,
+   such as a camera counter rollover or two bodies with the same naming. Nothing is ever left behind or deleted ---------- */
+const SAME_DIR = '_same name', DUPE_DIR = '_already there';
+async function sameContent(a, b) {
+  if (a.size !== b.size) return false;
+  const M = 1048576, spans = a.size <= 2 * M ? [[0, a.size]] : [[0, M], [a.size - M, a.size]];
+  for (const [s0, e0] of spans) {
+    const [x, y] = await Promise.all([a.slice(s0, e0).arrayBuffer(), b.slice(s0, e0).arrayBuffer()]);
+    const u = new Uint8Array(x), v = new Uint8Array(y);
+    for (let i = 0; i < u.length; i++) if (u[i] !== v[i]) return false;
+  }
+  return true;
+}
+/* 'free', 'dupe' (the same photo is already there) or 'other' (a different photo has that name) */
+async function nameClash(dir, name, file) {
+  let old; try { old = await (await dir.getFileHandle(name)).getFile(); } catch { return 'free'; }
+  return (await sameContent(file, old)) ? 'dupe' : 'other';
+}
+/* the first "_same name", "_same name 2"… (or "_already there"…) subfolder of dir that doesn't already hold a file called name */
+async function clashDir(dir, base, name) {
+  for (let i = 1; i < 100; i++) {
+    const sub = i === 1 ? base : `${base} ${i}`;
+    let d; try { d = await dir.getDirectoryHandle(sub); } catch { return { d: await dir.getDirectoryHandle(sub, { create: true }), sub }; }
+    try { await d.getFileHandle(name); } catch { return { d, sub }; }
+  }
+  throw new Error('too many files with the same name');
+}
+/* for a plan: a quick estimate from name and size only (the exact check runs when the photos move) */
+async function clashGuess(dir, name, size) {
+  if (!dir) return 'free';
+  try { const old = await (await dir.getFileHandle(name)).getFile(); return old.size === size ? 'dupe' : 'other'; } catch { return 'free'; }
+}
+/* plan wording: "1 has … it'll go", "3 have … they'll go" */
+function clashWords(same, dupe) {
+  const go = n => (n === 1 ? 'it\u2019ll go' : 'they\u2019ll go');
+  return (same ? ` ${same.toLocaleString()} ${same === 1 ? 'has' : 'have'} the same name as a different photo already there: ${go(same)} into that lens folder\u2019s ${SAME_DIR} folder.` : '')
+    + (dupe ? ` ${dupe.toLocaleString()} look${dupe === 1 ? 's' : ''} like ${dupe === 1 ? 'a copy of a photo' : 'copies of photos'} already there: ${go(dupe)} into ${DUPE_DIR}.` : '');
+}
 function companionNames(name) {
   const b = baseOf(name);
   return [...new Set([b + '.xmp', name + '.xmp', name + '.dop', b + '.dop', name + '.pp3'])];
@@ -4145,6 +4420,13 @@ async function renderOrgPlan() {
   $('orgNote').textContent = (noAccess ? `${noAccess.toLocaleString()} loaded photo${noAccess === 1 ? ' was' : 's were'} opened without folder access and can’t be moved; use Open folder to load them. ` : '') + (inPlace ? `${inPlace.toLocaleString()} already in the right folder. ` : '') + (skipped ? `${skipped.toLocaleString()} in _picks or _rejects folders are left where they are. ` : '') + 'Teleconverter use is detected from the focal length, so a zoom used with a TC below its longest focal length may stay in the main folder.';
   if (state.orgSource) $('orgNote').textContent = orgSourceNote();
   $('orgDlg')._plan = plan;
+  const tok = $('orgDlg')._clashTok = {}; let same = 0, dupe = 0;
+  for (const g of rows) {
+    let d = null; try { d = await dirAt(g.items[0].root, g.parts, false); } catch {}
+    if (d) for (const it of g.items) { const c = await clashGuess(d, it.name, (it.file && it.file.size) || 0); if (c === 'other') same++; else if (c === 'dupe') dupe++; }
+    if ($('orgDlg')._clashTok !== tok) return;
+  }
+  if (same || dupe) $('orgNote').textContent += clashWords(same, dupe) + ' Nothing is left behind or deleted.';
 }
 function orgSourceNote() {
   const o = state.orgSource; if (!o) return '';
@@ -4195,20 +4477,27 @@ $('orgGo').onclick = async () => {
   const runRoot = (state.orgSource && state.orgSource.root) || (orgCandidates()[0] || {}).root;   // kept for the whole run, even if the window is closed
   const lockIds = ['orgUndo', 'orgFolderBtn', 'orgAgainBtn', 'orgNames', 'orgTc'], closeBtn = document.querySelector('#orgDlg [data-close]'); lockIds.forEach(id => { $(id).disabled = true; }); closeBtn.disabled = true; orgMoving = true;
   const log = { when: new Date().toISOString(), moves: [] }, settledNow = [];
-  let ok = 0, fail = 0, skip = 0, done = 0, firstErr = '';
+  let ok = 0, fail = 0, done = 0, firstErr = '', nSame = 0, nDupe = 0;
+  /* where a photo goes: its lens folder, or that folder's _same name / _already there subfolder when the name is taken */
+  const placeIn = async (lensDir, parts, name, file) => {
+    const c = await nameClash(lensDir, name, file);
+    if (c === 'free') return { d: lensDir, parts, c };
+    const x = await clashDir(lensDir, c === 'dupe' ? DUPE_DIR : SAME_DIR, name);
+    return { d: x.d, parts: [...parts, x.sub], c };
+  };
   for (const g of plan.values()) {
     for (const it of g.items) {
       done++;
       try {
-        const dest = await dirAt(it.root, g.parts, true);
-        let exists = false; try { await dest.getFileHandle(it.name); exists = true; } catch {}
-        if (exists) { skip++; continue; }
+        const lensDir = await dirAt(it.root, g.parts, true);
+        const at = await placeIn(lensDir, g.parts, it.name, it.file || await it.handle.getFile()), dest = at.d;
+        if (at.c === 'other') nSame++; else if (at.c === 'dupe') nDupe++;
         const from = it.dir, fromRel = await it.root.resolve(from) || [];
         it.handle = await moveHandle(it.handle, from, dest, it.name);
         const movedSc = await moveCompanions(from, dest, it.name);
         it.dir = dest;
-        log.moves.push({ name: it.name, from: fromRel, to: g.parts, sidecars: movedSc }); settledNow.push({ it, parts: g.parts });
-        if (it.raw && it.raw.handle) { try { it.raw.handle = await moveHandle(it.raw.handle, from, dest, it.raw.name); const rsc = await moveCompanions(from, dest, it.raw.name); it.raw.dir = dest; it.raw.file = await it.raw.handle.getFile(); log.moves.push({ name: it.raw.name, from: fromRel, to: g.parts, sidecars: rsc }); } catch {} }
+        log.moves.push({ name: it.name, from: fromRel, to: at.parts, sidecars: movedSc }); settledNow.push({ it, parts: at.parts });
+        if (it.raw && it.raw.handle) { try { const rat = await placeIn(dest, at.parts, it.raw.name, it.raw.file || await it.raw.handle.getFile()); it.raw.handle = await moveHandle(it.raw.handle, from, rat.d, it.raw.name); const rsc = await moveCompanions(from, rat.d, it.raw.name); it.raw.dir = rat.d; it.raw.file = await it.raw.handle.getFile(); log.moves.push({ name: it.raw.name, from: fromRel, to: rat.parts, sidecars: rsc }); } catch {} }
         if (log.moves.length % 25 === 0) await saveOrgLog(it.root, log);
         try {
           const nf = await it.handle.getFile(), nk = keyOf(nf);
@@ -4223,9 +4512,11 @@ $('orgGo').onclick = async () => {
   saveCull(); saveSharp(); saveSeen();
   const root = runRoot;
   if (root && log.moves.length) await saveOrgLog(root, log);
-  if (root && settledNow.length) { for (const x of settledNow) { try { x.it.file = await x.it.handle.getFile(); } catch {} if (x.it.raw) settledNow.push({ it: x.it.raw, parts: x.parts }); } await indexSettle(root, settledNow); }
+  if (root && settledNow.length) { for (const x of settledNow) { try { x.it.file = await x.it.handle.getFile(); } catch {} if (x.it.raw && x.it.raw.dir) { const rp = await root.resolve(x.it.raw.dir).catch(() => null); settledNow.push({ it: x.it.raw, parts: rp || x.parts }); } } await indexSettle(root, settledNow); }
   if (state.orgSource) state.orgSource.items = state.orgSource.items.filter(it => !settledNow.some(x => x.it === it));
-  const doneMsg = `Moved ${ok.toLocaleString()} photo${ok === 1 ? '' : 's'}.` + (skip ? ` ${skip} skipped (a file with the same name was already there).` : '') + (fail ? ` ${fail} couldn’t be moved (${firstErr}).` : '') + (ok ? ' If these were already in Lightroom, see How to relink below the plan.' : '');
+  const doneMsg = `${ok.toLocaleString()} photo${ok === 1 ? '' : 's'} sorted.`
+    + (nSame ? ` ${nSame.toLocaleString()} had the same name as ${nSame === 1 ? 'a different photo' : 'different photos'} already there: placed in each lens folder\u2019s ${SAME_DIR} folder.` : '')
+    + (nDupe ? ` ${nDupe.toLocaleString()} ${nDupe === 1 ? 'was a copy' : 'were copies'} of photos already there: moved to ${DUPE_DIR}, for you to delete or keep.` : '') + (fail ? ` ${fail} couldn’t be moved (${firstErr}).` : '') + (ok ? ' If these were already in Lightroom, see How to relink below the plan.' : '');
   if (ok) tipNudge();
   orgMoving = false; lockIds.forEach(id => { $(id).disabled = false; }); closeBtn.disabled = false;
   $('orgGo').disabled = false;
@@ -4266,7 +4557,7 @@ $('tPeak').onclick = () => { state.show.peak = !state.show.peak; setTog('tPeak',
 $('tAf').onclick = () => {
   state.show.af = !state.show.af; setTog('tAf', state.show.af); repaintPanes();
   const it = cur();
-  if (state.show.af && it && !it.af && panes[0].ok) toast(/sony/i.test((it.meta && it.meta.Make) || '') ? 'No focus point recorded in this file' : 'Focus point is available for Sony files only');
+  if (state.show.af && it && !it.af && panes[0].ok) toast(afMissing(it));
 };
 const peakLbl = () => { $('peakLbl').textContent = `Top ${S.peakPct}% of edges`; };
 $('peakPct').value = S.peakPct; peakLbl();
@@ -4559,10 +4850,26 @@ function setFraming(v) {
   scr.classList.toggle('framing', v); $('under').classList.toggle('framing', v);
   $('frameView').hidden = !v;
   if (v && state.show.compare) setCompare(false);
-  fillFrameOpts(); renderFrame(); fitLayout();
+  fillFrameOpts(); renderFrame(); fitLayout(); if (v) loadFrameDir();
   if (!v) { layoutAll(); setZoomButtons(panes[0].ok); layoutAll(); }
 }
 $('tFrame').onclick = () => setFraming(!state.framing);
+/* Frame's own save folder (remembered separately from Export's), or the Downloads folder */
+let frameDir = null, frameDirLoaded = false;
+async function loadFrameDir() { if (!frameDirLoaded) { frameDirLoaded = true; try { frameDir = await idbKV.get('frameDest') || null; } catch {} } syncFrameDest(); }
+function syncFrameDest() {
+  const ok = canFolder(); $('fDestL').hidden = !ok; if (!ok) return;
+  const o = $('fDest').options[1]; o.hidden = !frameDir; o.textContent = frameDir ? frameDir.name : '';
+  $('fDest').value = frameDir && S.frameDest !== 'dl' ? 'dir' : 'dl';
+}
+$('fDest').onchange = async () => {
+  const v = $('fDest').value;
+  if (v === 'pick') {
+    try { const h = await window.showDirectoryPicker({ mode: 'readwrite', id: 'chimp-frame' }); frameDir = h; idbKV.set('frameDest', h); S.frameDest = 'dir'; }
+    catch (e) { toast(e && e.name === 'AbortError' ? pickHint : 'That folder can\u2019t be used. Try another.'); }
+  } else S.frameDest = v;
+  saveS(); syncFrameDest();
+};
 $('fSave').onclick = async () => {
   const it = cur(), img = panes[0].img;
   if (!it || !img) return toast('Open a photo first');
@@ -4571,8 +4878,13 @@ $('fSave').onclick = async () => {
   drawFramed(c.getContext('2d'), W, H, fsrc, frameLayout(fsrc.width, fsrc.height), fcrop());
   const blob = await new Promise(res => c.toBlob(res, 'image/jpeg', 0.9));
   const name = `${baseOf(it.name)}_framed_${S.frame.size}.jpg`;
+  let fell = '';
+  if (frameDir && S.frameDest !== 'dl' && canFolder()) {
+    try { const n = await writeInto(frameDir, name, blob); return toast(`Saved ${n} to ${frameDir.name}.`); }
+    catch { fell = ' The chosen folder couldn\u2019t be used.'; }
+  }
   const res = await saveFile(name, blob);
-  toast(res === 'saved' ? `Saved ${name}` : res === 'declined' ? 'Download cancelled' : 'Saving isn’t available in this view');
+  toast(res === 'saved' ? dlNote(name) + fell : res === 'declined' ? 'Download cancelled' : 'Saving isn’t available in this view');
 };
 /* consistent sharpness scoring, always measured at 1600 px on the long edge.
    With a focus point (Sony, straight from the camera), detail is measured in a square around it, which is what a photographer
@@ -4657,7 +4969,7 @@ async function scoreOnly(it) {
   let focus = null;
   if (it.sharp == null) {
     if (!it.meta) { try { await getMeta(it); } catch {} }
-    try { if (await sonyFocus(it)) focus = DIRECT.has(it.ext) ? afFor(it) : it.af; } catch {}
+    try { if (await getFocus(it)) focus = DIRECT.has(it.ext) ? afFor(it) : it.af; } catch {}
   }
   const img = await smallPreviewImg(it);
   if (!img) return it.sharp ?? null;
@@ -4852,7 +5164,7 @@ $('dlCsv').onclick = async () => {
   const esc = v => { const s = String(v ?? ''); return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
   const csv = '\uFEFF' + rows.map(r => r.map(esc).join(',')).join('\r\n');
   const res = await saveFile('fledgeview-photos.csv', new Blob([csv], { type: 'text/csv' }));
-  toast(res === 'saved' ? `Saved ${rows.length - 1} rows as fledgeview-photos.csv` : res === 'declined' ? 'Download cancelled' : 'Saving files isn’t available in this view. Use Copy for spreadsheet instead.');
+  toast(res === 'saved' ? `Downloaded fledgeview-photos.csv, ${rows.length - 1} rows (check your Downloads folder).` : res === 'declined' ? 'Download cancelled' : 'Saving files isn’t available in this view. Use Copy for spreadsheet instead.');
 };
 
 /* ---------- keeper analytics ---------- */
@@ -5069,9 +5381,33 @@ function cropFor(it, o, oc) {
   }
   return st;
 }
+/* ---------- full-quality raws in the desktop program: exports (and Adjust, below) work from the raw file itself, developed by
+   the program with LibRaw to match the camera's look, instead of the camera's embedded preview. Unedited raws use develop();
+   edited raws use finish(), which applies the photo's Quick finish settings, crop and straighten to the raw's 16-bit data, so
+   nothing is applied again here. If the program can't develop a file, the embedded preview is used, as on the website ---------- */
+const deskRaw = it => !!window.FV_DESKTOP && RAW.has(it.ext) && !!it.handle && (deskHas('rawDevelop') || deskHas('rawFinish'));
+let deskRawSrc = null, deskRawWarned = false;
+function deskRawFailed() {
+  if (deskRawWarned) return; deskRawWarned = true;
+  toast('This camera\u2019s raw files aren\u2019t supported yet; used the camera\u2019s preview instead.');
+}
+async function deskRawSource(it, o, opts) {
+  const rec = opts.noEdits ? null : editOf(it), fin = !!rec && !o.framed && deskHas('rawFinish');
+  const key = it.key + '|' + (fin ? stable(rec) : 'dev');
+  if (deskRawSrc && deskRawSrc.key === key) return deskRawSrc;
+  try {
+    if (!fin && !deskHas('rawDevelop')) return null;
+    const blob = fin ? await window.FV_DESKTOP.finish(it.handle, rec, { size: 'full' }) : await window.FV_DESKTOP.develop(it.handle, { size: 'full' });
+    const img = await loadImage(blob);
+    deskRawSrc = { key, it, p: { img, extracted: false }, finished: fin };
+    return deskRawSrc;
+  } catch { deskRawFailed(); return null; }
+}
 async function renderWeb(it, o, opts = {}) {
   await getMeta(it);
-  let src = lastWebSrc && lastWebSrc.it === it ? lastWebSrc : null;
+  const dsrc = opts.raw && deskRaw(it) ? await deskRawSource(it, o, opts) : null;
+  if (dsrc && dsrc.finished) opts = { ...opts, noEdits: true };   // the program already applied the edits, crop and straighten
+  let src = dsrc ? { it, p: dsrc.p } : lastWebSrc && lastWebSrc.it === it ? lastWebSrc : null;
   if (!src) {
     const p = await getPreview(it);
     if (!p) throw new Error('No viewable image');
@@ -5111,7 +5447,7 @@ async function renderWeb(it, o, opts = {}) {
     tw = shape.w;
     th = shape.h - (o.bar ? barHFor(fsFor(tw, o), o) : 0);
     if (!src.oc) { const sc = Math.min(1, 4000 / Math.max(sw, sh)); src.sc = sc; src.oc = draw(p.img, Math.max(1, Math.round(sw * sc)), Math.max(1, Math.round(sh * sc)), rot); }
-    if (on('af') && /sony/i.test((it.meta && it.meta.Make) || '')) await sonyFocus(it);
+    if (on('af') && (isSony(it) || deskHas('focusPoints'))) await getFocus(it);
     const st = cropFor(it, o, src.oc), ar = tw / th;
     let cwMax = sw, chMax = sw / ar;
     if (chMax > sh) { chMax = sh; cwMax = sh * ar; }
@@ -5203,8 +5539,8 @@ async function injectExif(blob, seg) {
   out.set([0xFF, 0xD8], 0); out.set(seg, 2); out.set(rest, 2 + seg.length);
   return new Blob([out], { type: 'image/jpeg' });
 }
-async function exportOne(it, o) {
-  const r = await renderWeb(it, o);
+async function exportOne(it, o, opts = {}) {
+  const r = await renderWeb(it, o, opts);
   let type = o.fmt === 'webp' ? 'image/webp' : 'image/jpeg';
   let blob = await new Promise(res => r.canvas.toBlob(res, type, o.q / 100));
   let ext = o.fmt === 'webp' ? 'webp' : 'jpg';
@@ -5396,7 +5732,7 @@ $('wPresetMenu').onclick = async e => {
     const data = { fledgeview: 'export-preset', version: 1, name: p.name, settings: p.s };
     const fname = p.name.replace(/[\\/:*?"<>|]+/g, '-') + '.fvpreset';
     const res = await saveFile(fname, new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
-    if (res === 'saved') toast(`Saved ${fname}`); else if (res !== 'declined') toast('Saving isn’t available in this view. Use the downloaded copy.');
+    if (res === 'saved') toast(dlNote(fname)); else if (res !== 'declined') toast('Saving isn’t available in this view. Use the downloaded copy.');
   } else if (act === 'import') { $('wPresetFile').value = ''; $('wPresetFile').click(); }
 };
 $('wPresetFile').onchange = async e => {
@@ -5571,7 +5907,8 @@ async function renderPreview(fast = false) {
     $('webInfo').textContent = `Preview: ${it.name} → ${r.canvas.width} × ${r.canvas.height} px, about ${kb > 1024 ? (kb / 1024).toFixed(1) + ' MB' : Math.round(kb) + ' KB'}.` + (o.framed ? ` Framed: ${S.frame.size} with ${S.frame.mat === 'none' ? 'no mat' : 'a ' + ($('fMat').selectedOptions[0] ? $('fMat').selectedOptions[0].textContent.toLowerCase() : S.frame.mat) + ' mat'}, ${(FR_LIB[S.frame.frame] || {}).name || S.frame.frame} ${S.frame.profile || 'flat'} frame.` : '')
       + (r.crop && r.crop.upscale ? ` Heads up: this crop is only ${Math.round(r.crop.cw)} px wide, so it will be enlarged to ${SHAPES[o.shape].w} px and may look soft.` : '')
       + (o.fmt === 'webp' && r.ext === 'jpg' ? ' This browser can’t make WebP, so JPEG is used.' : '')
-      + (raws ? ` ${raws} RAW file${raws === 1 ? '' : 's'} will export from the camera’s embedded preview; for best quality, export finished JPEGs first.` : '');
+      + (raws && !list.some(deskRaw) ? ` ${raws} RAW file${raws === 1 ? '' : 's'} will export from the camera’s embedded preview; for best quality, export finished JPEGs first. The FledgeView desktop program works from the raw file itself.` : '')
+      + (list.some(deskRaw) ? ` RAW files are developed from the raw file itself when you export; this preview uses the camera’s preview.` : '');
     iccDesc(it).then(d => {
       if (tok !== webTok || !d || !/adobe\s*rgb|pro\s*photo|romm|wide\s*gamut|display\s*p3|\bp3\b|2020|eci\s*rgb|colormatch|beta\s*rgb/i.test(d)) return;
       $('webInfo').textContent += ` This photo uses the ${d.replace(/\s*\(equivalent to.*$/i, '')} color profile. Exports are converted to sRGB, which suits screens but not print; for print copies, resize in your editor.`;
@@ -5672,6 +6009,16 @@ $('wDirInput').onchange = e => {
   e.target.value = '';
   setWebFolder(name, fs);
 };
+/* saving where people can find it: into a folder they chose (never replacing a file: "name (2).jpg"), or a download that says so */
+async function writeInto(dir, name, blob) {
+  if (await dir.queryPermission({ mode: 'readwrite' }) !== 'granted' && await dir.requestPermission({ mode: 'readwrite' }) !== 'granted') throw new Error('denied');
+  const dot = name.lastIndexOf('.'), stem = dot > 0 ? name.slice(0, dot) : name, ext = dot > 0 ? name.slice(dot) : ''; let n = name;
+  for (let i = 2; i < 200; i++) { try { await dir.getFileHandle(n); n = `${stem} (${i})${ext}`; } catch { break; } }
+  const w = await (await dir.getFileHandle(n, { create: true })).createWritable(); await w.write(blob); await w.close();
+  return n;
+}
+const dlNote = name => `Downloaded ${name} (check your Downloads folder).`;
+const pickHint = 'No folder was chosen. If you picked one and nothing happened, type its path into the folder window\u2019s address bar.';
 async function saveFile(name, blob) {
   let dl = null;
   try { dl = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch {}
@@ -5686,11 +6033,12 @@ async function saveFile(name, blob) {
   }
   return 'failed';
 }
-let webBusy = false;
+let webBusy = false, webStop = false, raws0 = 0;
 $('wOutPick').onclick = pickWebOut;
 $('wOut').onchange = e => { if (e.target.value === 'fixed' && !webOutDir) { pickWebOut(); return; } S.webOut = e.target.value; saveS(); syncWebOut(); };
 $('wSrc').addEventListener('change', () => { resetWebDone(); webGoLabel(); });
 $('webGo').onclick = async () => {
+  if (webBusy && raws0) { webStop = true; $('webGo').textContent = 'Stopping…'; return; }   // a long batch of raws can be stopped
   if (webBusy || $('webGo').classList.contains('done')) return;
   readWebForm();
   const o = S.web, all = webSources()[o.src].slice();
@@ -5711,16 +6059,18 @@ $('webGo').onclick = async () => {
       catch (e) { if (e.name === 'AbortError') return; dir = null; }
     }
   }
-  webBusy = true; $('webGo').disabled = true; $('webGo').classList.remove('done'); $('webGo').textContent = 'Exporting…';
+  raws0 = list.filter(deskRaw).length;
+  webBusy = true; $('webGo').disabled = !raws0; $('webGo').classList.remove('done'); $('webGo').textContent = raws0 ? 'Stop' : 'Exporting…';
   const used = new Set(), files = [], subs = new Map();
   const total = list.length * shapes.length;
   let ok = 0, fail = 0, n0 = 0;
   for (let i = 0; i < list.length; i++) {
     for (const sh of shapes) {
-      webStatus(`Exporting ${++n0} of ${total}…`);
+      if (webStop) break;
+      webStatus(`${deskRaw(list[i]) ? 'Developing' : 'Exporting'} ${++n0} of ${total}…`);
       try {
         const oo = sh ? effOpts(o, sh) : o;
-        const r = await exportOne(list[i], oo);
+        const r = await exportOne(list[i], oo, { raw: true });
         const base = sh ? allName(list[i], o, i, sh) : webName(list[i], o, i);
         const folder = sh && useSub ? ALL_TAG[sh] : '';
         let d = dir;
@@ -5739,27 +6089,32 @@ $('webGo').onclick = async () => {
         ok++;
       } catch { fail++; }
     }
+    if (webStop) break;
   }
-  let note = '';
+  const stopped = webStop; webStop = false; $('webGo').classList.remove('stop');
+  let note = '', dlName = '';
   if (!dir && files.length) {
     let res;
-    if (files.length === 1) res = await saveFile(files[0].name, files[0].blob);
+    if (files.length === 1) { res = await saveFile(files[0].name, files[0].blob); dlName = files[0].name; }
     else if (window.JSZip) {
       webStatus('Packing ZIP…');
       const zip = new JSZip();
       files.forEach(f => zip.file(f.name, f.blob));
       const zb = await zip.generateAsync({ type: 'blob', compression: 'STORE' });
-      res = await saveFile(isAll(o) ? 'fledgeview-all-platforms.zip' : 'fledgeview-web-export.zip', zb);
+      dlName = isAll(o) ? 'fledgeview-all-platforms.zip' : 'fledgeview-web-export.zip';
+      res = await saveFile(dlName, zb);
     } else res = 'failed';
-    if (res === 'declined') note = ' Download was cancelled.';
+    if (res === 'saved' && dlName) note = ' ' + dlNote(dlName);
+    else if (res === 'declined') note = ' Download was cancelled.';
     else if (res === 'failed') note = ' Saving files isn’t available in this view.';
   }
   webBusy = false; $('webGo').disabled = false;
-  const allGood = ok > 0 && !fail && !note;
+  const allGood = ok > 0 && !fail && !note && !stopped;
   if (allGood) { webLast = null; resumeSnap = null; $('wResume').hidden = true; saveCrops(); tipNudge(); }
   if (allGood) $('webGo').textContent = '\u2713 Exported'; else webGoLabel();
   $('webGo').classList.toggle('done', allGood);
-  webStatus((allGood ? '✓ ' : '') + (isAll(o) ? `Exported ${ok} file${ok === 1 ? '' : 's'} (${list.length} photo${list.length === 1 ? '' : 's'} × ${shapes.length} shape${shapes.length === 1 ? '' : 's'})` + (useSub ? ', in a folder for each shape' : '') : `Exported ${ok} photo${ok === 1 ? '' : 's'}`) + (dir ? ' to the folder you picked' : '') + '.' + (nSkipped ? ` Skipped ${nSkipped}.` : '') + (fail ? ` ${fail} couldn’t be exported.` : '') + note + (allGood ? ' Change any setting to export again.' : ''), allGood);
+  webStatus((allGood ? '✓ ' : '') + (isAll(o) ? `Exported ${ok} file${ok === 1 ? '' : 's'} (${list.length} photo${list.length === 1 ? '' : 's'} × ${shapes.length} shape${shapes.length === 1 ? '' : 's'})` + (useSub ? ', in a folder for each shape' : '') : `Exported ${ok} photo${ok === 1 ? '' : 's'}`) + (dir ? ` to ${dir.name}` : '') + '.' + (nSkipped ? ` Skipped ${nSkipped}.` : '') + (fail ? ` ${fail} couldn’t be exported.` : '') + note + (allGood ? ' Change any setting to export again.' : ''), allGood);
+  if (stopped) webStatus(`Stopped after ${ok} of ${total}.` + note);
 };
 
 /* ---------- quick finish: simple per-photo edits, saved as a recipe and applied on export ---------- */
@@ -5781,9 +6136,12 @@ function sharpenData(d, w, h, amt) {
     }
   }
 }
-const EDIT_KEYS = EDIT_UI.filter(a => a.length > 1).map(a => a[0]);
+/* noise reduction (set in the desktop program's Noise reduction window, applied by the program): nr amount, nrd detail,
+   nrc color, nrt where (0 whole photo, 1 background, 2 subject only), nrp protect subject. Only nr and nrc make a photo edited */
+const NR_KEYS = ['nr', 'nrd', 'nrc', 'nrt', 'nrp'], NR_AUX = new Set(['nrd', 'nrt', 'nrp']);
+const EDIT_KEYS = EDIT_UI.filter(a => a.length > 1).map(a => a[0]).concat(NR_KEYS);
 const blankEdit = () => ({ ...Object.fromEntries(EDIT_KEYS.map(k => [k, 0])), bw: 0, bwf: 'orange', bwt: 'none', crop: null, cropAr: 'orig' });
-const hasEdit = r => !!r && (EDIT_KEYS.some(k => r[k]) || !!r.bw || !!r.crop);
+const hasEdit = r => !!r && (EDIT_KEYS.some(k => r[k] && !NR_AUX.has(k)) || !!r.bw || !!r.crop);
 /* slider readouts: Straighten is stored in tenths of a degree */
 const editVal = (k, v) => k === 'rot' ? (v > 0 ? '+' : '') + (v / 10).toFixed(1) + '\u00b0' : v > 0 ? '+' + v : String(v);
 function editOf(it) { const r = it && EDITS[it.key]; return hasEdit(r) ? r : null; }
@@ -5939,7 +6297,7 @@ function viewEditsWanted() {
   return !state.editing && !state.pview && !state.framing && !state.show.quad && !state.show.compare && !state.show.peak && !state.show.blink && !!it && !!editOf(it) && !!panes[0] && !!panes[0].img;
 }
 function syncViewEdits() {
-  refreshOsd();
+  refreshOsd(); syncUndo();
   const want = viewEditsWanted();
   if (want !== !!state.viewEdits) { state.viewEdits = want; if (!state.editing) $('editView').hidden = !want; $('screen').classList.toggle('viewedits', want); if (want) editBase = null; }
   if (state.viewEdits) renderEditSoon();
@@ -5968,7 +6326,7 @@ function renderEdit() {
     const dw = Math.max(1, Math.round((vx1 - vx0) * dpr)), dh = Math.max(1, Math.round((vy1 - vy0) * dpr));
     const sx = (vx0 - ix) / p.s, sy = (vy0 - iy) / p.s, sw = (vx1 - vx0) / p.s, sh = (vy1 - vy0) / p.s;
     const t = document.createElement('canvas'); t.width = dw; t.height = dh;
-    const tx = t.getContext('2d'); tx.imageSmoothingQuality = 'high'; tx.drawImage(p.img, sx, sy, sw, sh, 0, 0, dw, dh);
+    const tx = t.getContext('2d', { willReadFrequently: true }); tx.imageSmoothingQuality = 'high'; tx.drawImage(p.img, sx, sy, sw, sh, 0, 0, dw, dh);
     const zd = tx.getImageData(0, 0, dw, dh);
     if (edited) {
       /* zoomed views show the full-resolution photo before cropping, so its brightness maps come from the view itself when the photo is cropped or straightened */
@@ -5990,13 +6348,29 @@ function renderEdit() {
     }
     disp = m;
   }
-  x.putImageData(disp, dx0, dy0);
+  /* desktop program, raw file: once the sliders have been still for half a second, show the program's 16-bit result */
+  const rawOk = edited && disp === fit && !cropMode && !straightening && !showHi && !showLo && deskHas('rawFinish') && deskRaw(cur());
+  const rk = rawOk ? cur().key + '|' + stable(r) + '|' + b.iw + 'x' + b.ih : '';
+  if (rawOk && rawView.key === rk && rawView.img) x.drawImage(rawView.img, b.ox, b.oy, b.iw, b.ih);
+  else { x.putImageData(disp, dx0, dy0); if (rawOk) rawViewSoon(cur(), r, rk); }
+  $('editRaw').hidden = !(rawOk && rawView.key === rk && rawView.img);
   if (cropMode) drawCropBox(x, b);
   else if (straightening) drawStraightenGrid(x, b);
   $('editBadge').hidden = !editBeforeOn;
   const paused = [state.show.peak && 'Peaking', state.show.blink && 'Blinkies'].filter(Boolean);
   $('editNote').hidden = !paused.length;
   if (paused.length) $('editNote').textContent = `${paused.join(' and ')} show${paused.length === 1 ? 's' : ''} when the edit drawer is closed`;
+}
+const rawView = { key: '', img: null, t: 0, want: '' };
+function rawViewSoon(it, r, key) {
+  if (rawView.want === key) return;
+  rawView.want = key; clearTimeout(rawView.t);
+  rawView.t = setTimeout(async () => {
+    try {
+      const img = await loadImage(await window.FV_DESKTOP.finish(it.handle, r, { size: 'screen' }));
+      if (rawView.want === key) { rawView.key = key; rawView.img = img; renderEditSoon(); }
+    } catch { rawView.want = ''; deskRawFailed(); }
+  }, 500);
 }
 /* RGB histogram of what's on screen, with clipping counts for the corner indicators */
 function drawEditHist(d) {
@@ -6059,31 +6433,254 @@ function setReach(T) {
   cropRect = rect; renderEditSoon();
 }
 let cropGuideHits = [];
-/* Undo for crop and straighten: each gesture (a drag, a Reach snap, an aspect change, a Straighten movement) saves the
-   state before it, per photo, for this session; Undo steps back one at a time without touching color or tone edits */
-const geomHist = new Map();
+/* ---------- print sizes: what a photo or crop can really print to, in plain numbers. One small calculation, used by the
+   crop panel and Photo info (and later by the desktop program's noise reduction window and Card check). Size = pixels ÷ ppi. ---------- */
+const PRINT_LABS = { book: 250, fine: 300, canvas: 175 };
+const PRINT_SIZES = { in: [[8, 10], [11, 14], [13, 19], [16, 20], [20, 30], [24, 36], [40, 60]], cm: [[13, 18], [20, 30], [21, 29.7, 'A4'], [30, 40], [29.7, 42, 'A3'], [40, 60], [50, 70], [60, 90]] };
+const printPrefs = () => (S.print && typeof S.print === 'object') ? S.print : (S.print = { lab: '', labPpi: 0, unit: 'auto', size: '', cw: 0, ch: 0, open: false });
+/* centimetres where the region uses them (everywhere but the US, Liberia and Myanmar), unless chosen with the in/cm buttons */
+function printUnit() {
+  const u = printPrefs().unit; if (u === 'in' || u === 'cm') return u;
+  const loc = (navigator.languages && navigator.languages[0]) || navigator.language || 'en-US';
+  return /^[a-z]+$/i.test(loc) || /-(US|LR|MM)\b/i.test(loc) ? 'in' : 'cm';
+}
+function labPpi() { const p = printPrefs(); return p.lab === 'custom' ? (+p.labPpi >= 50 ? Math.round(+p.labPpi) : 0) : (PRINT_LABS[p.lab] || 0); }
+const printLen = (px, ppi, u) => { const v = px / ppi * (u === 'cm' ? 2.54 : 1); return v < 2 ? v.toFixed(1) : String(Math.round(v)); };
+const printSize = (w, h, ppi, u = printUnit()) => `${printLen(w, ppi, u)} \u00d7 ${printLen(h, ppi, u)} ${u}`;
+function printLines(w, h) {
+  const u = printUnit(), lab = labPpi();
+  return { main: lab ? `Prints to ${printSize(w, h, lab, u)} at your lab\u2019s ${lab} ppi.` : `Book or close-up print: to ${printSize(w, h, 300, u)} (300 ppi).`,
+    more: [`Most labs\u2019 minimum: to ${printSize(w, h, 200, u)} (200 ppi)`, `Canvas or wall, seen from across the room: to ${printSize(w, h, 150, u)} (150 ppi)`] };
+}
+/* the ppi a photo gets at a chosen paper size, filling the paper (long side to long side; a different shape trims the edges) */
+function printCheck(w, h, a, b) {
+  const u = printUnit(), k = u === 'cm' ? 2.54 : 1, L = Math.max(w, h), Sh = Math.min(w, h), pl = Math.max(a, b) / k, ps = Math.min(a, b) / k;
+  const ppi = Math.floor(Math.min(L / pl, Sh / ps)), lab = labPpi(), min = lab || 200, trim = Math.abs(L / Sh - pl / ps) / (pl / ps) > 0.02;
+  return { ppi, good: ppi >= min, trim, min, lab };
+}
+/* the photo's real pixel size, upright: from the camera data when it agrees with the preview's shape, otherwise the preview's */
+function printDims(it, pw, ph) {
+  const d = it && it.meta && pixelDims(it, it.meta), up = d && ([5, 6, 7, 8].includes(it.orient) ? [d[1], d[0]] : d);
+  return up && Math.abs(up[0] / up[1] - pw / ph) < 0.03 * (pw / ph) && up[0] >= pw ? up : [pw, ph];
+}
+let printPx = null;
+function renderPrint(w, h) {
+  if (!$('ePrint')) return; printPx = [w, h];
+  const p = printPrefs(), u = printUnit(), L = printLines(w, h);
+  $('ePrLine').textContent = L.main; $('ePrM1').textContent = L.more[0]; $('ePrM2').textContent = L.more[1];
+  $('ePrIn').setAttribute('aria-pressed', String(u === 'in')); $('ePrCm').setAttribute('aria-pressed', String(u === 'cm'));
+  $('ePrCU').textContent = u;
+  let a = 0, b2 = 0, name = '';
+  if (p.size === 'custom') { a = +$('ePrW').value; b2 = +$('ePrH').value; name = a && b2 ? `${a} \u00d7 ${b2} ${u}` : ''; }
+  else if (p.size) { const z = (PRINT_SIZES[u] || []).find(z => sizeKey(z) === p.size); if (z) { a = z[0]; b2 = z[1]; name = (z[2] ? z[2] + ', ' : '') + `${z[0]} \u00d7 ${z[1]} ${u}`; } }
+  if (!(a > 0 && b2 > 0)) { $('ePrVerdict').textContent = ''; $('ePrVerdict').className = 'eprverdict'; return; }
+  const r = printCheck(w, h, a, b2), trim = r.trim ? ' The edges are trimmed to fit the paper.' : '';
+  $('ePrVerdict').textContent = r.good ? `${name}: ${r.ppi} ppi \u2713${trim}` : `${name}: ${r.ppi} ppi, below ${r.lab ? 'your lab\u2019s' : 'most labs\u2019'} ${r.min} ppi: fine viewed at a distance, but your lab may warn.${trim}`;
+  $('ePrVerdict').className = 'eprverdict ' + (r.good ? 'ok' : 'low');
+}
+const sizeKey = z => z[0] + 'x' + z[1];
+function fillPrintSizes() {
+  const p = printPrefs(), u = printUnit(), sel = $('ePrSize');
+  sel.innerHTML = '<option value="">Choose a size</option>' + PRINT_SIZES[u].map(z => `<option value="${sizeKey(z)}">${z[2] ? z[2] + ' \u00b7 ' : ''}${z[0]} \u00d7 ${z[1]} ${u}</option>`).join('') + '<option value="custom">Custom size\u2026</option>';
+  if (p.size && p.size !== 'custom' && !PRINT_SIZES[u].some(z => sizeKey(z) === p.size)) p.size = '';
+  sel.value = p.size || ''; $('ePrCustom').hidden = p.size !== 'custom';
+  if (p.size === 'custom') { $('ePrW').value = p.cw || ''; $('ePrH').value = p.ch || ''; }
+}
+function printUi() {
+  const p = printPrefs(), again = () => { saveS(); if (printPx) renderPrint(printPx[0], printPx[1]); refreshRows(); };
+  fillPrintSizes();
+  $('ePrint').classList.toggle('open', !!p.open); $('ePrLine').setAttribute('aria-expanded', String(!!p.open));
+  $('ePrLine').onclick = () => { p.open = !p.open; $('ePrint').classList.toggle('open', p.open); $('ePrLine').setAttribute('aria-expanded', String(p.open)); saveS(); };
+  $('ePrInfo').title = $('ePrNote').textContent;
+  $('ePrInfo').onclick = () => { const n = $('ePrNote'); n.hidden = !n.hidden; $('ePrInfo').setAttribute('aria-expanded', String(!n.hidden)); };
+  const setUnit = u => { if (printUnit() !== u) { const k = u === 'cm' ? 2.54 : 1 / 2.54; if (p.size === 'custom') { p.cw = +(p.cw * k).toFixed(1); p.ch = +(p.ch * k).toFixed(1); } else p.size = ''; } p.unit = u; fillPrintSizes(); again(); };
+  $('ePrIn').onclick = () => setUnit('in'); $('ePrCm').onclick = () => setUnit('cm');
+  $('ePrSize').onchange = e => { p.size = e.target.value; $('ePrCustom').hidden = p.size !== 'custom'; if (p.size === 'custom') { $('ePrW').value = p.cw || ''; $('ePrH').value = p.ch || ''; $('ePrW').focus(); } again(); };
+  const custom = () => { p.cw = +$('ePrW').value || 0; p.ch = +$('ePrH').value || 0; again(); };
+  $('ePrW').oninput = custom; $('ePrH').oninput = custom;
+  $('ePrLab').value = p.lab || ''; $('ePrLabC').hidden = p.lab !== 'custom'; $('ePrLabPpi').value = p.labPpi || '';
+  $('ePrLab').onchange = e => { p.lab = e.target.value; $('ePrLabC').hidden = p.lab !== 'custom'; if (p.lab === 'custom') $('ePrLabPpi').focus(); again(); };
+  $('ePrLabPpi').oninput = e => { p.labPpi = +e.target.value || 0; again(); };
+}
+/* ---------- Noise reduction window (desktop program only, raw files). The program does the work: estimate() measures the
+   photo once (for Auto), preview() returns a small developed area with the settings applied, subject() the protected area.
+   Areas are in full-size developed pixels (estimate's width and height). Apply saves the settings with the photo's
+   adjustments; the program's finish() applies them when exporting and in the Adjust view ---------- */
+const NR = { it: null, est: null, sc: '1', x: 0, y: 0, v: {}, preset: 'auto', t: 0, tok: 0, before: false, maskImg: null, urls: [] };
+const nrClamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function nrPresetVals(k) {
+  const e = NR.est || {}, A = +e.auto_amount || 0, C = +e.auto_color || 0, D = +e.auto_detail || 50;
+  return k === 'low' ? { nr: Math.round(nrClamp(A * 1.2, 0, 100)), nrd: 45, nrc: 80 } : k === 'severe' ? { nr: Math.round(Math.min(100, A * 1.5)), nrd: 35, nrc: 95 }
+    : k === 'color' ? { nr: 0, nrd: D, nrc: Math.round(C) } : { nr: Math.round(A), nrd: Math.round(D), nrc: Math.round(C) };
+}
+function nrScale() {
+  if (NR.sc === 'print') return 0.4;
+  if (NR.sc === 'web') { const L = Math.max(NR.est.width, NR.est.height); return nrClamp(webTarget(S.web, 2000) / L, 0.05, 1); }
+  return 1;
+}
+/* the area shown, in full-size pixels: the view's size in device pixels, divided by the scale */
+function nrArea() {
+  const r = $('nrView').getBoundingClientRect(), d = DPR(), sc = nrScale(), W = NR.est.width, H = NR.est.height;
+  const w = Math.min(W, Math.round(r.width * d / sc)), h = Math.min(H, Math.round(r.height * d / sc));
+  NR.x = nrClamp(NR.x, w / 2, W - w / 2); NR.y = nrClamp(NR.y, h / 2, H - h / 2);
+  return { x: Math.round(NR.x - w / 2), y: Math.round(NR.y - h / 2), w, h };
+}
+function nrSettings(before) {
+  const base = { ...blankEdit(), ...(EDITS[NR.it.key] || {}) }, v = NR.v;
+  return before ? { ...base, nr: 0, nrc: 0 } : { ...base, nr: v.nr, nrd: v.nrd, nrc: v.nrc, nrt: v.nrt, nrp: v.nrp };
+}
+function nrShowVals() {
+  const v = NR.v;
+  $('nrA').value = v.nr; $('nrD').value = v.nrd; $('nrC').value = v.nrc; $('nrP').value = v.nrp; $('nrT').value = String(v.nrt);
+  $('nrAv').textContent = v.nr; $('nrDv').textContent = v.nrd; $('nrCv').textContent = v.nrc; $('nrPv').textContent = v.nrp;
+  $('nrProt').hidden = v.nrt !== 1; $('nrPreset').value = NR.preset;
+}
+function nrMapDraw() {
+  const c = $('nrMap'), x = c.getContext('2d'), it = NR.it, src = it && it.cache && it.cache.canvas, W = NR.est.width, H = NR.est.height;
+  c.height = Math.round(c.width * H / W);
+  x.fillStyle = '#000'; x.fillRect(0, 0, c.width, c.height);
+  if (src) x.drawImage(src, 0, 0, c.width, c.height);
+  const a = nrArea(), k = c.width / W;
+  x.strokeStyle = '#e9a53b'; x.lineWidth = 2; x.strokeRect(a.x * k + 1, a.y * k + 1, Math.max(4, a.w * k - 2), Math.max(4, a.h * k - 2));
+}
+function nrSoon(ms = 150) { clearTimeout(NR.t); NR.t = setTimeout(nrRender, ms); }
+async function nrRender() {
+  if (!NR.it || !$('nrDlg').open) return;
+  const tok = ++NR.tok, a = nrArea(), it = NR.it;
+  nrMapDraw();
+  try {
+    const blob = await window.FV_DESKTOP.noise.preview(it.handle, a, nrSettings(NR.before), { scale: nrScale() });
+    if (tok !== NR.tok) return;
+    const u = URL.createObjectURL(blob); NR.urls.push(u); $('nrImg').src = u; $('nrBusy').hidden = true;
+    while (NR.urls.length > 3) URL.revokeObjectURL(NR.urls.shift());
+    nrMaskDraw(a);
+  } catch (e) { if (tok === NR.tok) { $('nrBusy').hidden = false; $('nrBusy').textContent = (e && e.message) || 'This photo can\u2019t be previewed.'; } }
+}
+/* Show subject: the program's grey picture (white = protected) as a light blue tint over the area, for checking only */
+function nrMaskDraw(a) {
+  const on = $('nrShowSub').checked && NR.maskImg; $('nrMask').hidden = !on; if (!on) return;
+  const m = NR.maskImg, kx = m.naturalWidth / NR.est.width, ky = m.naturalHeight / NR.est.height, c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(a.w * kx)); c.height = Math.max(1, Math.round(a.h * ky));
+  const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(m, a.x * kx, a.y * ky, a.w * kx, a.h * ky, 0, 0, c.width, c.height);
+  const id = x.getImageData(0, 0, c.width, c.height), d = id.data;
+  for (let i = 0; i < d.length; i += 4) { const g = d[i]; d[i] = 40; d[i + 1] = 120; d[i + 2] = 255; d[i + 3] = Math.round(g * 0.35); }
+  x.putImageData(id, 0, 0); $('nrMask').src = c.toDataURL();
+}
+async function openNoise() {
+  const it = cur(); if (!it || !deskHas('noise') || !deskRaw(it)) return;
+  NR.it = it; NR.est = null; NR.maskImg = null; NR.before = false; $('nrShowSub').checked = false; $('nrMask').hidden = true; $('nrTag').hidden = true;
+  $('nrFile').textContent = it.name; $('nrImg').removeAttribute('src'); $('nrBusy').hidden = false; $('nrBusy').textContent = 'Developing raw\u2026';
+  $('nrDlg').showModal();
+  try { NR.est = await window.FV_DESKTOP.noise.estimate(it.handle); }
+  catch (e) { $('nrBusy').textContent = (e && e.message) || 'This photo can\u2019t be measured.'; return; }
+  if (NR.it !== it) return;
+  if (!(NR.est.width > 0 && NR.est.height > 0)) { const d = printDims(it, it.prev ? it.prev.w : 6000, it.prev ? it.prev.h : 4000); NR.est.width = d[0]; NR.est.height = d[1]; }
+  const r = EDITS[it.key] || {};
+  /* start on the saved settings if there are any, otherwise on Auto; centre on the focus point when there is one */
+  if (r.nr || r.nrc) { NR.v = { nr: r.nr || 0, nrd: r.nrd || 50, nrc: r.nrc || 0, nrt: r.nrt || 0, nrp: r.nrp == null || (!r.nrp && r.nrt !== 1) ? 100 : r.nrp }; NR.preset = 'custom'; }
+  else { NR.v = { ...nrPresetVals('auto'), nrt: 0, nrp: 100 }; NR.preset = 'auto'; }
+  const f = await getFocus(it).catch(() => null), fp = f ? afFor(it) : null;
+  NR.x = (fp ? fp.x : 0.5) * NR.est.width; NR.y = (fp ? fp.y : 0.5) * NR.est.height;
+  { const c = (EDITS[it.key] || {}).crop; if (!fp && c) { NR.x = (c.x + c.w / 2) * NR.est.width; NR.y = (c.y + c.h / 2) * NR.est.height; } }
+  { const pc = (EDITS[it.key] || {}).crop, L = printLines(Math.round((pc ? pc.w : 1) * NR.est.width), Math.round((pc ? pc.h : 1) * NR.est.height)); $('nrPrint').textContent = L.main + (pc ? ' (as cropped)' : ''); }
+  nrShowVals(); nrRender();
+}
+$('eNr').onclick = openNoise;
+document.querySelectorAll('#nrDlg [data-sc]').forEach(b => { b.onclick = () => { NR.sc = b.dataset.sc; document.querySelectorAll('#nrDlg [data-sc]').forEach(x => x.setAttribute('aria-pressed', String(x === b))); if (NR.est) nrRender(); }; });
+$('nrPreset').onchange = e => { if (e.target.value === 'custom') return; NR.preset = e.target.value; Object.assign(NR.v, nrPresetVals(NR.preset)); nrShowVals(); nrSoon(0); };
+[['nrA', 'nr', 0], ['nrD', 'nrd', 50], ['nrC', 'nrc', 0], ['nrP', 'nrp', 100]].forEach(([id, k, def]) => {
+  $(id).oninput = e => { NR.v[k] = +e.target.value; if (k !== 'nrp') NR.preset = 'custom'; nrShowVals(); nrSoon(); };
+  $(id).ondblclick = () => { NR.v[k] = def; if (k !== 'nrp') NR.preset = 'custom'; nrShowVals(); nrSoon(0); };
+});
+$('nrT').onchange = e => { NR.v.nrt = +e.target.value; nrShowVals(); nrSoon(0); };
+$('nrShowSub').onchange = async () => {
+  if ($('nrShowSub').checked && !NR.maskImg && NR.it) { try { NR.maskImg = await loadImage(await window.FV_DESKTOP.noise.subject(NR.it.handle)); } catch { $('nrShowSub').checked = false; toast('The subject couldn\u2019t be found in this photo'); return; } }
+  if (NR.est) nrMaskDraw(nrArea());
+};
+const nrBefore = v => { if (NR.before === v || !NR.est) return; NR.before = v; $('nrTag').hidden = !v; nrRender(); };
+$('nrBefore').onpointerdown = () => nrBefore(true);
+['pointerup', 'pointerleave', 'pointercancel'].forEach(t => $('nrBefore').addEventListener(t, () => nrBefore(false)));
+$('nrDlg').addEventListener('keydown', e => { if (e.key === '\\' && !e.repeat) { e.preventDefault(); nrBefore(true); } });
+$('nrDlg').addEventListener('keyup', e => { if (e.key === '\\') nrBefore(false); });
+/* drag the large view to move around the photo; click the small map to jump */
+{ let dr = null;
+  $('nrView').addEventListener('pointerdown', e => { if (!NR.est || e.target === $('nrMap')) return; dr = { x: e.clientX, y: e.clientY, cx: NR.x, cy: NR.y }; $('nrView').classList.add('drag'); $('nrView').setPointerCapture(e.pointerId); });
+  $('nrView').addEventListener('pointermove', e => { if (!dr) return; const k = DPR() / nrScale(); NR.x = dr.cx - (e.clientX - dr.x) * k; NR.y = dr.cy - (e.clientY - dr.y) * k; nrMapDraw(); nrSoon(); });
+  const end = () => { if (!dr) return; dr = null; $('nrView').classList.remove('drag'); nrSoon(0); };
+  $('nrView').addEventListener('pointerup', end); $('nrView').addEventListener('pointercancel', end);
+  $('nrMap').addEventListener('pointerdown', e => { if (!NR.est) return; const r = $('nrMap').getBoundingClientRect(); NR.x = (e.clientX - r.left) / r.width * NR.est.width; NR.y = (e.clientY - r.top) / r.height * NR.est.height; nrSoon(0); });
+}
+$('nrReset').onclick = () => { if (!NR.est) return; NR.v = { ...nrPresetVals('auto'), nrt: 0, nrp: 100 }; NR.preset = 'auto'; nrShowVals(); nrSoon(0); };
+$('nrApply').onclick = () => {
+  const it = NR.it; if (!it || !NR.est) return;
+  pushTone(it);
+  const rr = EDITS[it.key] || blankEdit();
+  Object.assign(rr, { nr: NR.v.nr, nrd: NR.v.nrd, nrc: NR.v.nrc, nrt: NR.v.nrt, nrp: NR.v.nrp });
+  commitEdit(it, rr); saveEdits(); paintThumb(it); syncUndo(); syncViewEdits(); refreshRows(); renderEditSoon(); syncNoiseBtn();
+  $('nrDlg').close(); toast(NR.v.nr || NR.v.nrc ? 'Noise reduction applied' : 'Noise reduction turned off');
+};
+$('nrDlg').addEventListener('close', () => { NR.tok++; clearTimeout(NR.t); NR.urls.forEach(u => URL.revokeObjectURL(u)); NR.urls = []; NR.it = null; });
+/* the drawer shows the button in the program (raw files only) and a quiet line on the website */
+function syncNoiseBtn() {
+  const it = cur(), prog = deskHas('noise'), b = $('eNr');
+  b.hidden = !prog; $('eNrWeb').hidden = prog || !!window.FV_DESKTOP;
+  if (prog) { const okRaw = !!it && deskRaw(it); b.disabled = !okRaw; b.title = okRaw ? 'Reduce grain and color noise in a large window, with a live preview' : 'Noise reduction works on raw files opened from a folder';
+    const r = it && EDITS[it.key]; b.textContent = r && (r.nr || r.nrc) ? 'Noise reduction \u2713' : 'Noise reduction\u2026'; }
+}
+/* Undo, per photo, for this session. Each crop or straighten gesture (a drag, a Reach snap, an aspect change, a Straighten
+   movement) and each adjustment gesture (a slider movement, Auto, Pick neutral, black and white) saves the state before it.
+   A crop step puts back only crop, aspect and straighten; an adjust step only the color and tone settings; Reset and Paste
+   put back everything. Undo in the control panel (and Ctrl+Z) steps back through all of them, newest first, and names
+   what it will undo; the Crop panel's own Undo steps back through crop changes only. */
+const editHist = new Map();
+const TONE_KEYS = EDIT_KEYS.filter(k => k !== 'rot').concat(['bw', 'bwf', 'bwt']);
+const UNDO_NAMES = { crop: 'Undo crop', adjust: 'Undo adjust', reset: 'Undo reset', paste: 'Undo paste' };
 const fullRect = c => !c || (c.x < 0.002 && c.y < 0.002 && c.w > 0.996 && c.h > 0.996);
 function geomState(it) {
   const rr = EDITS[it.key] || {};
-  return cropMode ? { crop: fullRect(cropRect) ? null : { ...cropRect }, cropAr, rot: rr.rot || 0 } : { crop: rr.crop ? { ...rr.crop } : null, cropAr: rr.cropAr || 'orig', rot: rr.rot || 0 };
+  return cropMode && it === cur() ? { crop: fullRect(cropRect) ? null : { ...cropRect }, cropAr, rot: rr.rot || 0 } : { crop: rr.crop ? { ...rr.crop } : null, cropAr: rr.cropAr || 'orig', rot: rr.rot || 0 };
 }
-function pushGeom() {
-  const it = cur(); if (!it) return;
-  const st = geomState(it), h = geomHist.get(it.key) || [], last = h[h.length - 1];
-  if (!last || JSON.stringify(last) !== JSON.stringify(st)) { h.push(st); if (h.length > 60) h.shift(); geomHist.set(it.key, h); }
-  syncUndo();
+function toneState(it) { const r = EDITS[it.key] || {}, d = blankEdit(); return Object.fromEntries(TONE_KEYS.map(k => [k, r[k] == null ? d[k] : r[k]])); }
+function pushHist(it, k, st) {
+  if (!it) return;
+  const h = editHist.get(it.key) || [], last = h[h.length - 1];
+  if (!(last && last.k === k && JSON.stringify(last.st) === JSON.stringify(st))) { h.push({ k, st }); if (h.length > 80) h.shift(); editHist.set(it.key, h); }
+  if (it === cur()) syncUndo();
 }
-function syncUndo() { const it = cur(), h = it && geomHist.get(it.key); if ($('eCropUndo')) $('eCropUndo').disabled = !(h && h.length); }
-function undoGeom() {
-  const it = cur(); if (!it) return; const h = geomHist.get(it.key); if (!h || !h.length) return;
-  const st = h.pop(), rr = EDITS[it.key] || blankEdit();
+function pushGeom() { const it = cur(); if (it) pushHist(it, 'crop', geomState(it)); }
+function pushTone(it = cur()) { if (it) pushHist(it, 'adjust', toneState(it)); }
+function pushAll(it, why) { if (it) pushHist(it, why, { geom: geomState(it), tone: toneState(it) }); }
+function syncUndo() {
+  const it = cur(), h = (it && editHist.get(it.key)) || [], last = h[h.length - 1], b = $('undoBtn');
+  if ($('eCropUndo')) $('eCropUndo').disabled = !h.some(e => e.k === 'crop');
+  if (b) { b.disabled = !last; b.textContent = last ? UNDO_NAMES[last.k] : 'Undo'; }
+}
+function commitEdit(it, rr) { if (hasEdit(rr)) EDITS[it.key] = { ...blankEdit(), ...rr }; else delete EDITS[it.key]; }
+function restoreGeom(it, st) {
+  const rr = EDITS[it.key] || blankEdit();
   rr.rot = st.rot;
-  if (cropMode) { cropRect = st.crop ? { ...st.crop } : { x: 0, y: 0, w: 1, h: 1 }; cropAr = st.cropAr; $('eCropAr').value = cropAr; }
+  if (cropMode && it === cur()) { cropRect = st.crop ? { ...st.crop } : { x: 0, y: 0, w: 1, h: 1 }; cropAr = st.cropAr; $('eCropAr').value = cropAr; }
   else { rr.crop = st.crop; rr.cropAr = st.cropAr; }
-  if (hasEdit(rr)) EDITS[it.key] = { ...blankEdit(), ...rr }; else delete EDITS[it.key];
-  saveEdits(); paintThumb(it); editBase = null; editLoad(); syncUndo(); renderEditSoon();
+  commitEdit(it, rr);
 }
-let rotGesture = 0;
+function restoreTone(it, st) { const rr = EDITS[it.key] || blankEdit(); for (const k of TONE_KEYS) rr[k] = st[k]; commitEdit(it, rr); }
+function afterUndo(it, what) { saveEdits(); paintThumb(it); refreshRows(); editBase = null; editLoad(); syncUndo(); syncViewEdits(); renderEditSoon(); if (what) toast(what); }
+/* the Crop panel's Undo: the newest crop or straighten step, leaving color and tone alone */
+function undoGeom() {
+  const it = cur(); if (!it) return; const h = editHist.get(it.key) || [];
+  for (let i = h.length - 1; i >= 0; i--) if (h[i].k === 'crop') { const [e] = h.splice(i, 1); restoreGeom(it, e.st); afterUndo(it); return; }
+}
+/* Undo in the control panel and Ctrl+Z: the newest step of any kind */
+function undoLast() {
+  const it = cur(), h = it && editHist.get(it.key);
+  if (!h || !h.length) { toast('Nothing to undo'); return; }
+  const e = h.pop();
+  if (e.k === 'crop') restoreGeom(it, e.st);
+  else if (e.k === 'adjust') restoreTone(it, e.st);
+  else { restoreGeom(it, e.st.geom); restoreTone(it, e.st.tone); }
+  afterUndo(it, { crop: 'Crop undone', adjust: 'Adjustment undone', reset: 'Reset undone', paste: 'Paste undone' }[e.k]);
+}
+let rotGesture = 0, toneGesture = { k: null, t: 0 };
 const CROP_AR = { '1:1': 1, '4:5': 4 / 5, '5:4': 5 / 4, '3:2': 3 / 2, '2:3': 2 / 3, '16:9': 16 / 9 };
 /* the crop box's width-to-height ratio in its own fractional units (1 for Original), or null for Free */
 function cropRatio() { const b = editBase; if (cropAr === 'free' || !b) return null; if (cropAr === 'orig') return 1; return CROP_AR[cropAr] * b.ih / b.iw; }
@@ -6101,7 +6698,7 @@ function setCropMode(v) {
     const rr = EDITS[it.key] || blankEdit(), c = cropRect, full = c.x < 0.002 && c.y < 0.002 && c.w > 0.996 && c.h > 0.996;
     rr.crop = full ? null : { x: +c.x.toFixed(5), y: +c.y.toFixed(5), w: +c.w.toFixed(5), h: +c.h.toFixed(5) }; rr.cropAr = cropAr;
     if (hasEdit(rr)) EDITS[it.key] = { ...blankEdit(), ...rr }; else delete EDITS[it.key];
-    saveEdits(); paintThumb(it);
+    saveEdits(); paintThumb(it); setTimeout(refreshRows, 0);
   }
   cropMode = v; editBase = null; ecDrag = null;
   $('eCropBtn').setAttribute('aria-pressed', String(v)); $('eCropBtn').textContent = v ? 'Done' : 'Crop'; $('eCropBtn').title = v ? 'Done cropping (Enter)' : 'Crop: drag the corners or the whole box. Click Done, or press Enter, when you\u2019re finished.';
@@ -6133,10 +6730,11 @@ function drawCropBox(x, b) {
     }
   }
   /* the size the crop will be, from the full-resolution photo: pixels, megapixels, and print size at 300 ppi */
-  const pw = Math.round(c.w * b.srcW), ph = Math.round(c.h * b.srcH), mp = pw * ph / 1e6, ppi = +S.cropPpi || 300, inch = v => (v / ppi).toFixed(1);
+  const pw = Math.round(c.w * b.srcW), ph = Math.round(c.h * b.srcH), mp = pw * ph / 1e6;
   const fBase = reachBase(cur()), eq = cropEquiv(fBase, b.srcW, b.srcH, c, (EDITS[(cur() || {}).key] || {}).rot), eqTxt = eq ? `  \u00b7  \u2248 ${fmtMm(eq)}` : '';
-  const label = `${pw.toLocaleString()} \u00d7 ${ph.toLocaleString()} px  \u00b7  ${mp < 10 ? mp.toFixed(1) : Math.round(mp)} MP  \u00b7  ${inch(pw)} \u00d7 ${inch(ph)} in at ${ppi} ppi${eqTxt}`;
-  $('eCropInfo').textContent = `${pw.toLocaleString()} \u00d7 ${ph.toLocaleString()} px \u00b7 ${mp < 10 ? mp.toFixed(1) : Math.round(mp)} MP \u00b7 ${inch(pw)} \u00d7 ${inch(ph)} in at ${ppi} ppi` + (eq ? ` \u00b7 \u2248 ${fmtMm(eq)} equivalent` : '');
+  const label = `${pw.toLocaleString()} \u00d7 ${ph.toLocaleString()} px  \u00b7  ${mp < 10 ? mp.toFixed(1) : Math.round(mp)} MP${eqTxt}`;
+  $('eCropInfo').textContent = `${pw.toLocaleString()} \u00d7 ${ph.toLocaleString()} px \u00b7 ${mp < 10 ? mp.toFixed(1) : Math.round(mp)} MP` + (eq ? ` \u00b7 \u2248 ${fmtMm(eq)} equivalent` : '');
+  { const T = printDims(cur(), b.srcW, b.srcH); renderPrint(Math.round(c.w * T[0]), Math.round(c.h * T[1])); }
   $('eReach').hidden = !fBase;
   if (fBase) { $('eReach14').textContent = `+1.4\u00d7 TC \u00b7 ${fmtMm(fBase * 1.4)}`; $('eReach2').textContent = `+2\u00d7 TC \u00b7 ${fmtMm(fBase * 2)}`; }
   x.font = `600 ${Math.round(13 * d)}px system-ui, sans-serif`; x.textBaseline = 'middle';
@@ -6188,7 +6786,7 @@ $('editView').addEventListener('pointermove', e => {
 }, true);
 $('editView').addEventListener('pointerup', () => {
   /* a drag that changed the box is one Undo step */
-  if (ecDrag && ecDrag.before) { const it = cur(), now = it && geomState(it); if (now && JSON.stringify(now) !== JSON.stringify(ecDrag.before)) { const h = geomHist.get(it.key) || []; h.push(ecDrag.before); if (h.length > 60) h.shift(); geomHist.set(it.key, h); syncUndo(); } }
+  if (ecDrag && ecDrag.before) { const it = cur(), now = it && geomState(it); if (now && JSON.stringify(now) !== JSON.stringify(ecDrag.before)) { pushHist(it, 'crop', ecDrag.before); } }
   ecDrag = null;
 }, true);
 /* dragging the crop box must not start a text selection across the page */
@@ -6225,7 +6823,7 @@ function pickNeutralAt(e) {
   const sol = wbFromSample(R, G, B);
   if (!sol || Math.abs(sol.T) > 1.8 || Math.abs(sol.I) > 1.8) { toast('That spot looks strongly colored, not neutral. Pick something gray or white.'); return; }
   const tv = Math.max(-100, Math.min(100, Math.round(sol.t * 100))), tiv = Math.max(-100, Math.min(100, Math.round(sol.ti * 100)));
-  setEdit('temp', tv); setEdit('tint', tiv); editLoad(); setWbPick(false);
+  pushTone(); setEdit('temp', tv, true); setEdit('tint', tiv, true); editLoad(); setWbPick(false);
   toast(Math.abs(sol.T) > 1 || Math.abs(sol.I) > 1 ? 'Corrected as far as the sliders go. Fine-tune with Temperature and Tint.' : 'Neutral set. Fine-tune with Temperature and Tint if you like.');
 }
 $('editView').addEventListener('pointerdown', e => { if (!wbPick || e.button !== 0) return; e.preventDefault(); e.stopPropagation(); pickNeutralAt(e); }, true);
@@ -6250,12 +6848,20 @@ function buildEditSliders() {
           + '<div class="ereach" id="eReach" hidden><span class="erow">Reach: crop to match</span><div class="ereachbtns"><button class="knob ebtn" id="eReach14" title="Crop to the framing a 1.4\u00d7 teleconverter would have given">+1.4\u00d7</button><button class="knob ebtn" id="eReach2" title="Crop to the framing a 2\u00d7 teleconverter would have given">+2\u00d7</button></div>'
           + '<label class="ereachmm" title="Crop to the framing of any focal length">Custom <input type="number" id="eReachMm" min="10" max="9999" step="10" placeholder="mm"> mm</label>'
           + '<label class="chk ereachg"><input type="checkbox" id="eReachGuides"> Reach guides</label></div>'
-          + '<button class="knob ebtn" id="eCropReset">Reset crop</button><div class="ecropinfo" id="eCropInfo" aria-live="polite"></div><label class="ereachmm" title="Print size depends only on pixels and the ppi you print at; 300 is sharpest, 240 is common and fine for most prints">Print at <select id="eCropPpi"><option value="240">240</option><option value="300">300</option><option value="360">360</option></select> ppi</label></div>';
+          + '<button class="knob ebtn" id="eCropReset">Reset crop</button><div class="ecropinfo" id="eCropInfo" aria-live="polite"></div><div class="eprint" id="ePrint">'
+          + '<div class="eprhead"><span class="erow">Print</span><span class="eprunits" role="group" aria-label="Print size units"><button type="button" id="ePrIn" aria-pressed="false" title="Show print sizes in inches">in</button><button type="button" id="ePrCm" aria-pressed="false" title="Show print sizes in centimetres">cm</button></span></div>'
+          + '<div class="eprtop"><button type="button" class="eprline" id="ePrLine" aria-expanded="false" aria-controls="ePrMore" title="Click to show or hide larger print sizes"></button><button type="button" class="eprinfo" id="ePrInfo" aria-expanded="false" aria-controls="ePrNote" aria-label="About print sizes">\u24d8</button></div>'
+          + '<div class="eprmore" id="ePrMore"><div id="ePrM1"></div><div id="ePrM2"></div></div>'
+          + '<p class="eprnote" id="ePrNote" hidden>Labs differ: books usually want 250\u2013300 ppi, canvas often accepts 150\u2013175. Your lab\u2019s minimum is the one that counts.</p>'
+          + '<label class="eprrow">Will it print at <select id="ePrSize" title="Pick a print size to see the ppi this crop gives at that size"></select></label>'
+          + '<div class="eprrow" id="ePrCustom" hidden><input type="number" id="ePrW" min="1" max="999" step="any" aria-label="Print width"> \u00d7 <input type="number" id="ePrH" min="1" max="999" step="any" aria-label="Print height"> <span id="ePrCU">in</span></div>'
+          + '<div class="eprverdict" id="ePrVerdict" aria-live="polite"></div>'
+          + '<label class="eprrow eprlab">My print lab <select id="ePrLab" title="Choose once: the print sizes then use your lab\u2019s ppi"><option value="">Not set</option><option value="book">Photo book (Blurb, 250 ppi)</option><option value="fine">Fine art print (300 ppi)</option><option value="canvas">Canvas (175 ppi)</option><option value="custom">Custom\u2026</option></select></label>'
+          + '<div class="eprrow" id="ePrLabC" hidden><input type="number" id="ePrLabPpi" min="50" max="1200" step="1" aria-label="Your lab\u2019s ppi"> ppi</div></div></div>';
         box.append(w);
         $('eCropBtn').onclick = () => { if (drawerMode === 'crop') { if (cropMode) setEditing(false); else setCropMode(true); } else setCropMode(!cropMode); };
         $('eCropUndo').onclick = undoGeom;
-        $('eCropPpi').value = String(+S.cropPpi || 300);
-        $('eCropPpi').onchange = e => { S.cropPpi = +e.target.value; saveS(); renderEditSoon(); };
+        printUi();
         $('eCropAr').onchange = e => { pushGeom(); cropAr = e.target.value; fitCropAr(); renderEditSoon(); };
         $('eCropReset').onclick = () => { pushGeom(); cropRect = { x: 0, y: 0, w: 1, h: 1 }; fitCropAr(); renderEditSoon(); };
         $('eReach14').onclick = () => setReach(reachBase(cur()) * 1.4);
@@ -6272,7 +6878,7 @@ function buildEditSliders() {
           + '<div class="ebwopts" id="eBwOpts" hidden><label class="erow" for="eBwF">Filter</label><select id="eBwF" title="How colors turn into grays, like film filters. Yellow: slightly darker skies. Orange: darker skies, a good all-rounder. Red: dramatic skies. Green: lighter foliage."><option value="neutral">Neutral</option><option value="yellow">Yellow</option><option value="orange">Orange</option><option value="red">Red</option><option value="green">Green</option></select>'
           + '<label class="erow" for="eBwT">Tone</label><select id="eBwT" title="A subtle tint over the grays: warm is sepia-like, cool is selenium-like"><option value="none">None</option><option value="warm">Warm</option><option value="cool">Cool</option></select></div>';
         box.append(w);
-        const setBw = (key, val) => { const it = cur(); if (!it) return; const r = EDITS[it.key] || blankEdit(); r[key] = val; if (hasEdit(r)) EDITS[it.key] = { ...blankEdit(), ...r }; else delete EDITS[it.key]; saveEdits(); paintThumb(it); editLoad(); };
+        const setBw = (key, val) => { const it = cur(); if (!it) return; pushTone(it); const r = EDITS[it.key] || blankEdit(); r[key] = val; if (hasEdit(r)) EDITS[it.key] = { ...blankEdit(), ...r }; else delete EDITS[it.key]; saveEdits(); paintThumb(it); editLoad(); };
         $('eWbPick').onclick = () => setWbPick(!wbPick);
         $('eBw').onchange = e => setBw('bw', e.target.checked ? 1 : 0);
         $('eBwF').onchange = e => setBw('bwf', e.target.value);
@@ -6295,8 +6901,10 @@ function buildEditSliders() {
     box.append(row, inp);
   }
 }
-function setEdit(k, val) {
+function setEdit(k, val, noHist) {
   if (k === 'rot') { if (!rotGesture) pushGeom(); clearTimeout(rotGesture); rotGesture = setTimeout(() => { rotGesture = 0; }, 700); }
+  /* one Undo step per slider movement: a new step starts when another slider moves, or after a pause */
+  else if (!noHist) { const gk = (cur() || {}).key + '|' + k; if (toneGesture.k !== gk || !toneGesture.t) pushTone(); clearTimeout(toneGesture.t); toneGesture = { k: gk, t: setTimeout(() => { toneGesture.t = 0; }, 700) }; }
   const it = cur(); if (!it) return;
   const r = EDITS[it.key] || blankEdit(); r[k] = Math.round(val);
   if (hasEdit(r)) EDITS[it.key] = r; else delete EDITS[it.key];
@@ -6305,8 +6913,9 @@ function setEdit(k, val) {
   saveEdits(); paintThumb(it); renderEditSoon();
 }
 function editLoad() {
+  syncNoiseBtn();
   const r = (cur() && EDITS[cur().key]) || blankEdit();
-  for (const k of EDIT_KEYS) { const v = r[k] || 0; $('e_' + k).value = v; $('ev_' + k).textContent = editVal(k, v); $('er_' + k).hidden = !v; $('ev_' + k).classList.toggle('chg', !!v); }
+  for (const k of EDIT_KEYS) { if (NR_AUX.has(k) || k === 'nr' || k === 'nrc') continue; const v = r[k] || 0; $('e_' + k).value = v; $('ev_' + k).textContent = editVal(k, v); $('er_' + k).hidden = !v; $('ev_' + k).classList.toggle('chg', !!v); }
   $('eCropBtn').classList.toggle('has', !!r.crop); syncUndo();
   const bw = !!r.bw;
   $('eBw').checked = bw; $('eBwOpts').hidden = !bw; $('eBwF').value = r.bwf || 'orange'; $('eBwT').value = r.bwt || 'none';
@@ -6317,7 +6926,7 @@ function editLoad() {
   refreshSel();
   renderEditSoon();
 }
-function setRecipe(it, r) { if (hasEdit(r)) EDITS[it.key] = { ...blankEdit(), ...r }; else delete EDITS[it.key]; saveEdits(); paintThumb(it); }
+function setRecipe(it, r) { if (hasEdit(r)) EDITS[it.key] = { ...blankEdit(), ...r }; else delete EDITS[it.key]; saveEdits(); paintThumb(it); if (it === cur()) refreshRows(); }
 function editBefore(v) { if (editBeforeOn === v) return; editBeforeOn = v; renderEditSoon(); }
 function autoEdit() {
   if (!editBase) return null;
@@ -6375,6 +6984,14 @@ function setEditing(v, remember = true) {
 }
 $('editTab').onclick = () => openPanel('edit');
 $('cropTab').onclick = () => openPanel('crop');
+$('undoBtn').onclick = undoLast;
+/* Ctrl+Z (Cmd+Z on a Mac) is the same as Undo; text boxes keep their own undo */
+document.addEventListener('keydown', e => {
+  if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey || (e.key !== 'z' && e.key !== 'Z')) return;
+  const t = e.target;
+  if (t.closest('textarea,[contenteditable="true"],dialog') || (t.matches('input') && !/^(range|checkbox|radio|button)$/.test(t.type)) || document.querySelector('dialog[open]') || !cur()) return;
+  e.preventDefault(); undoLast();
+});
 /* ---------- selecting several thumbnails: Ctrl/Cmd-click toggles, Shift-click selects a range ---------- */
 state.sel = new Set(); state.selAnchor = null;
 function refreshSel() {
@@ -6409,20 +7026,20 @@ $('ePasteSel').onclick = () => {
   if (!list.length) return toast('Ctrl-click or Shift-click thumbnails to select photos');
   const had = list.filter(it => editOf(it)).length;
   if (had && !confirm(`${had} of the selected photo${had === 1 ? ' already has' : 's already have'} edits. Replace them?`)) return;
-  list.forEach(it => setRecipe(it, editClip)); editLoad(); refreshSel();
+  list.forEach(it => { pushAll(it, 'paste'); setRecipe(it, editClip); }); editLoad(); refreshSel();
   toast(`Edits pasted to ${list.length} photo${list.length === 1 ? '' : 's'}`);
 };
 $('editBtn').onclick = () => openPanel('edit');
 $('eDone').onclick = () => setEditing(false);
 $('eExport').onclick = () => { webSrcOnce = state.sel && state.sel.size > 1 ? 'sel' : 'current'; $('webBtn').click(); };
-$('eAuto').onclick = () => { const it = cur(), r = autoEdit(); if (!it || !r) return; const prev = EDITS[it.key]; if (prev && prev.bw) { r.bw = 1; r.bwf = prev.bwf; r.bwt = prev.bwt; r.vib = 0; } if (prev) { r.rot = prev.rot || 0; r.crop = prev.crop || null; r.cropAr = prev.cropAr || 'orig'; } setRecipe(it, r); editLoad(); };
-$('eReset').onclick = () => { const it = cur(); if (!it) return; pushGeom(); if (cropMode) { cropRect = { x: 0, y: 0, w: 1, h: 1 }; cropAr = 'orig'; $('eCropAr').value = 'orig'; } setRecipe(it, null); editLoad(); };
+$('eAuto').onclick = () => { const it = cur(), r = autoEdit(); if (!it || !r) return; pushTone(it); const prev = EDITS[it.key]; if (prev && prev.bw) { r.bw = 1; r.bwf = prev.bwf; r.bwt = prev.bwt; r.vib = 0; } if (prev) { r.rot = prev.rot || 0; r.crop = prev.crop || null; r.cropAr = prev.cropAr || 'orig'; } setRecipe(it, r); editLoad(); };
+$('eReset').onclick = () => { const it = cur(); if (!it) return; pushAll(it, 'reset'); if (cropMode) { cropRect = { x: 0, y: 0, w: 1, h: 1 }; cropAr = 'orig'; $('eCropAr').value = 'orig'; } setRecipe(it, null); editLoad(); };
 $('eCopy').onclick = () => { const r = editOf(cur()); if (!r) return toast('This photo has no edits to copy'); editClip = { ...r }; editLoad(); toast('Edits copied'); };
-$('ePaste').onclick = () => { const it = cur(); if (!it || !editClip) return; setRecipe(it, editClip); editLoad(); };
+$('ePaste').onclick = () => { const it = cur(); if (!it || !editClip) return; pushAll(it, 'paste'); setRecipe(it, editClip); editLoad(); };
 $('ePasteAll').onclick = () => {
   if (!editClip) return; const list = state.view;
   if (!confirm(`Paste these edits onto all ${list.length} photo${list.length === 1 ? '' : 's'} shown? This replaces any edits they already have.`)) return;
-  list.forEach(it => setRecipe(it, editClip)); editLoad(); toast(`Edits pasted to ${list.length} photo${list.length === 1 ? '' : 's'}`);
+  list.forEach(it => { pushAll(it, 'paste'); setRecipe(it, editClip); }); editLoad(); toast(`Edits pasted to ${list.length} photo${list.length === 1 ? '' : 's'}`);
 };
 ['mousedown', 'touchstart'].forEach(ev => $('eBefore').addEventListener(ev, e => { e.preventDefault(); editBefore(true); }));
 ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(ev => $('eBefore').addEventListener(ev, () => editBefore(false)));
@@ -6442,7 +7059,7 @@ const TIP_RULES = [
   ['#prev', 'Previous photo (←)'], ['#next', 'Next photo (→)'], ['#disp', 'Cycle what the screen shows: full info, exposure only, or the photo alone. (I)'],
   ['#zOut', 'Zoom out (−)'], ['#zIn', 'Zoom in (+)'],
   ['button[aria-label^="Rate "]', el => { const n = (el.getAttribute('aria-label').match(/\d/) || ['1'])[0]; return `Rate this photo ${n}. (${n})`; }],
-  ['#fPick', 'Mark as a pick. (P)'], ['#fRej', 'Mark as a reject. (X)'],
+  ['#fPick', 'Mark as a pick. (P)'], ['#fRej', 'Mark as a reject. (X)'], ['#fPrev', 'Previous photo (←)'], ['#fNext', 'Next photo (→)'],
   ['#rfPicks', 'Show only your picks.'], ['#rfClear', 'Show all photos again.'],
   ['#hintBtn', 'Open the keyboard shortcuts. (?)'],
   ['#eDone', 'Close the edit drawer. Your edits are kept.'],
@@ -6638,6 +7255,22 @@ function renderImpPlan() {
   const bkOn = $('impBkOn').checked;
   $('impNote').textContent = `${imp.photos.length.toLocaleString()} photos, ${fmtBytes(bytes)}${sideN ? `, plus ${sideN} sidecar file${sideN === 1 ? '' : 's'}` : ''}. Photos already in your main folder are skipped.` + (bkOn ? (imp.bk ? ` A second copy goes to ${imp.bk.name}, in the same folders.` : ' Choose a backup folder, or turn Backup off.') : '');
   $('impGo').disabled = !imp.dst || (bkOn && !imp.bk);
+  impClashCheck();
+}
+/* before copying: how many photos are already imported, and how many share a name with a different photo in the main folder */
+async function impClashCheck() {
+  const tok = imp.clashTok = {}; if (!imp.dst) return;
+  const dirs = new Map(); let same = 0, dupe = 0;
+  for (const p of imp.photos) {
+    const key = impPath(p).map(safeName).join('/');
+    if (!dirs.has(key)) { let d = null; try { d = await dirAt(imp.dst, key ? key.split('/') : [], false); } catch {} dirs.set(key, d); }
+    const c = await clashGuess(dirs.get(key), p.name, p.file ? p.file.size : 0); if (c === 'other') same++; else if (c === 'dupe') dupe++;
+    if (imp.clashTok !== tok) return;
+  }
+  if (!same && !dupe) return;
+  $('impNote').textContent = $('impNote').textContent.replace(' Photos already in your main folder are skipped.', '')
+    + (dupe ? ` ${dupe.toLocaleString()} look${dupe === 1 ? 's' : ''} already imported: ${dupe === 1 ? 'it' : 'they'}\u2019ll be skipped.` : '')
+    + (same ? ` ${same.toLocaleString()} ${same === 1 ? 'has' : 'have'} the same name as a different photo already there: ${same === 1 ? 'it' : 'they'}\u2019ll go into that folder\u2019s ${SAME_DIR} folder.` : '');
 }
 function impSetName(id, h) { $(id).textContent = h ? h.name : 'Not chosen'; $(id).classList.toggle('set', !!h); }
 function impAvailable() { return !!window.showDirectoryPicker && !framed; }
@@ -6686,15 +7319,23 @@ $('impDstBtn').onclick = async () => {
 $('impClose').onclick = () => { if (!imp.busy) $('impDlg').close(); };
 $('impDlg').addEventListener('cancel', e => { if (imp.busy) e.preventDefault(); });
 $('impStop').onclick = () => { imp.stop = true; $('impStop').disabled = true; $('impProgTxt').textContent = 'Stopping after the current file…'; };
-async function impCopy(file, dir, name) {
-  /* returns 'copied', 'exists' (same size already there), or 'conflict' (a different file has that name) */
-  try { const old = await (await dir.getFileHandle(name)).getFile(); return old.size === file.size ? 'exists' : 'conflict'; } catch {}
+async function impCopy(file, dir, name, plain = false) {
+  /* returns { fh, file, dir, sub } when copied, or 'exists' when the same photo is already there. A different photo with the same
+     name goes into a _same name subfolder. plain (sidecars): an existing file is simply left as it is */
+  let into = dir, sub = '';
+  if (plain) { try { await dir.getFileHandle(name); return 'exists'; } catch {} }
+  else {
+    const c = await nameClash(dir, name, file);
+    if (c === 'dupe') return 'exists';
+    if (c === 'other') { const x = await clashDir(dir, SAME_DIR, name); into = x.d; sub = x.sub; }
+  }
+  dir = into;
   const fh = await dir.getFileHandle(name, { create: true });
   const w = await fh.createWritable();
   await file.stream().pipeTo(w);
   const got = await fh.getFile();
   if (got.size !== file.size) { try { await dir.removeEntry(name); } catch {} throw new Error('size check failed'); }
-  return { fh, file: got };
+  return { fh, file: got, dir, sub };
 }
 $('impGo').onclick = async () => {
   if (imp.busy || !imp.src || !imp.dst || !imp.photos.length) return;
@@ -6714,7 +7355,7 @@ $('impGo').onclick = async () => {
     return d;
   };
   const one = imp.photos.reduce((sum, p) => sum + (p.file ? p.file.size : 0), 0), total = one * (bk ? 2 : 1);
-  let doneBytes = 0, copied = 0, skipped = 0, bCopied = 0, bSkipped = 0; const problems = [], opened = [], placed = [];
+  let doneBytes = 0, copied = 0, skipped = 0, bCopied = 0, bSkipped = 0, sameN = 0; const problems = [], opened = [], placed = [];
   const t0 = performance.now();
   for (let i = 0; i < imp.photos.length; i++) {
     if (imp.stop) break;
@@ -6723,9 +7364,9 @@ $('impGo').onclick = async () => {
       const parts = impPath(p), dir = await dirFor(root, parts.map(safeName));
       const res = await impCopy(p.file, dir, p.name);
       if (res === 'exists') onSkip();
-      else if (res === 'conflict') problems.push(`${label}${p.name}: a different file with this name is already in ${parts.join(' / ')}`);
-      else onCopied(res, dir);
-      for (const sc of p.sides) { try { await impCopy(await sc.handle.getFile(), dir, sc.name); } catch (e) { problems.push(`${label}${sc.name}: ${e.message || e.name}`); } }
+      else { if (res.sub && !label) sameN++; onCopied(res, res.dir); }
+      const sdir = res !== 'exists' && res.dir ? res.dir : dir;
+      for (const sc of p.sides) { try { await impCopy(await sc.handle.getFile(), sdir, sc.name, true); } catch (e) { problems.push(`${label}${sc.name}: ${e.message || e.name}`); } }
     };
     try {
       if (!p.file) throw new Error('could not be read');
@@ -6752,7 +7393,7 @@ $('impGo').onclick = async () => {
   $('impClose').disabled = $('impSrcBtn').disabled = $('impDstBtn').disabled = $('impBkBtn').disabled = $('impBkOn').disabled = false; $('impStop').hidden = true; $('impGo').disabled = false;
   const stopped = imp.stop ? ' Stopped before the end; run Import again to copy the rest.' : '';
   const bkText = bk ? ` Backup: ${bCopied.toLocaleString()} copied${bSkipped ? `, ${bSkipped.toLocaleString()} already there` : ''}.` : '';
-  $('impProgTxt').textContent = `Done. Copied ${copied.toLocaleString()} photo${copied === 1 ? '' : 's'}${skipped ? `, skipped ${skipped.toLocaleString()} already in your main folder` : ''}${problems.length ? `, ${problems.length} problem${problems.length === 1 ? '' : 's'}` : ''}.${bkText}${stopped}`;
+  $('impProgTxt').textContent = `Done. Copied ${copied.toLocaleString()} photo${copied === 1 ? '' : 's'}${sameN ? `. ${sameN.toLocaleString()} had the same name as ${sameN === 1 ? 'a different photo' : 'different photos'} already there: placed in that folder\u2019s ${SAME_DIR} folder` : ''}${skipped ? `. ${skipped.toLocaleString()} ${skipped === 1 ? 'was' : 'were'} already imported: skipped` : ''}${problems.length ? `, ${problems.length} problem${problems.length === 1 ? '' : 's'}` : ''}.${bkText}${stopped}`;
   $('impNote').textContent = problems.length ? 'Problems: ' + problems.slice(0, 5).join('; ') + (problems.length > 5 ? `; and ${problems.length - 5} more.` : '') : `Every copy was checked against the original${bk ? ', in both places' : ''}. The card was not changed.`;
   if (copied && $('impOpen').checked && !problems.length && !imp.stop) {
     $('impDlg').close();
@@ -6999,7 +7640,7 @@ $('dofUse').onclick = async () => {
 
 /* ---------- help ---------- */
 const KEYS = [
-  ['H', 'In Compare: hold this frame on the right while the arrows step through the rest; H on the left frame makes it the new held one, and H on the held frame releases it'], ['Shift + P', 'Keep this frame and reject the rest of its burst (your picks stay); Shift + U undoes it'], ['V', 'Photo view: just the photo, filling the screen (Esc returns)'], ['R', 'Crop and straighten panel'], ['← →', 'Previous or next photo'], ['↑ ↓', 'Up or down a row in the grid'], ['Home  End', 'First or last photo'],
+  ['H', 'In Compare: hold this frame on the right while the arrows step through the rest; H on the left frame makes it the new held one, and H on the held frame releases it'], ['Shift + P', 'Keep this frame and reject the rest of its burst (your picks stay); Shift + U undoes it'], ['V', 'Photo view: just the photo, filling the screen (Esc returns)'], ['R', 'Crop and straighten panel'], ['K', 'Keep the sharpest frame of the burst, reject the rest (desktop program)'], ['O', 'Open or close a collapsed burst (desktop program)'], ['Ctrl + Z', 'Undo the last crop or adjustment on this photo (Cmd + Z on a Mac)'], ['← →', 'Previous or next photo'], ['↑ ↓', 'Up or down a row in the grid'], ['Home  End', 'First or last photo'],
   ['1 – 5', 'Star rating (press again to clear)'], ['0', 'Clear stars'], ['P', 'Pick'], ['X', 'Reject'], ['U', 'Clear flag'],
   ['W', 'In Adjust: pick neutral (click something gray or white to set the white balance)'], ['Z', 'Zoom in or back to fit'], ['+  −', 'Zoom in or out'], ['B', 'Blinkies: blown highlights (red) and crushed blacks (blue)'], ['E', 'Focus peaking'], ['G', 'Composition guides in Frame mode and the export crop: thirds, golden ratio, diagonals, off'], ['J', 'In Adjust: show or hide clipping (red highlights, blue blacks)'], ['\\', 'In Adjust: hold to see the original'],
   ['A', 'Focus point'], ['C', 'Compare with the next frame'], ['Q', '4-up view: click a photo to select it, P picks it and loads the next four, ← → move four at a time'], ['I', 'Change info display'], ['F', 'Full screen'], ['?', 'This list'],
@@ -7072,6 +7713,8 @@ document.addEventListener('keydown', e => {
   else if ((k === 'e' || k === 'E') && on('peak')) $('tPeak').click();
   else if ((k === 'a' || k === 'A') && on('af')) $('tAf').click();
   else if ((k === 'c' || k === 'C') && on('bursts')) $('tCompare').click();
+  else if ((k === 'k' || k === 'K') && deskHas('bursts') && on('bursts')) keepBest(rateTarget() || cur());
+  else if ((k === 'o' || k === 'O') && bsfOn()) toggleBurst(cur());
   else if (k === 'r' || k === 'R') openPanel('crop');
   else if (on('cull') && it) {
     const t = rateTarget(), adv = !state.show.quad;
@@ -7207,8 +7850,43 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.70 beta';
+const VERSION = '0.9.75 beta';
 const RELEASES = [
+  { v: '0.9.75 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Ready for the FledgeView desktop program. In the program: focus points for Canon, Nikon, Fujifilm, OM System and Panasonic as well as Sony; raw files exported and finished from the raw file itself, so pulling exposure or highlights down brings back detail the camera\u2019s preview clipped; a Noise reduction window with a live preview, presets, and an option to clean only the background; and bursts collapsed to their sharpest frame, with K to keep the best and reject the rest.',
+      'On the website, nothing changes except a few quiet lines saying which of these live in the desktop program.',
+    ]],
+  ] },
+  { v: '0.9.74 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Print sizes in plain numbers. While you crop, the Crop panel shows how big the crop prints, for example \u201cBook or close-up print: to 29 \u00d7 19 in (300 ppi).\u201d Hover or click it for the sizes at most labs\u2019 minimum (200 ppi) and for canvas or a wall seen from across the room (150 ppi). Choose My print lab once (photo book, fine art print, canvas, or your own ppi) and the sizes use your lab\u2019s ppi. Will it print at shows the ppi for a paper size you pick, such as 8 \u00d7 10 or A4. Photo info shows the print size too, for the whole photo or its crop. Sizes are in centimetres or inches to suit your region, with in and cm buttons to switch. This replaces the Print at ppi choice.',
+      'Undo in Edit and share, beside Crop, now covers adjustments as well as crops, one step at a time for each photo, and says what it will undo: Undo crop or Undo adjust. Ctrl+Z (Cmd+Z on a Mac) does the same. Adjust now has the full width at the top of the section.',
+    ]],
+    ['Improved', [
+      'Arrows beside Pick and Reject (\u25c0 Pick Reject \u25b6), so you can rate and move to the next or previous photo without reaching up to the Info dial. Advance is now one small switch under them: click it to change between Manual and Auto.',
+      'Hovering over the photo and zooming into an edited photo are a little faster: the browser now keeps those images ready to read.',
+    ]],
+  ] },
+  { v: '0.9.73 beta', date: 'November 2026', groups: [
+    ['Fixed', [
+      'Organize and Import never leave a photo behind because its name is already taken. A different photo with the same name (a camera counter rollover, or two bodies with the same naming) goes into a _same name folder inside its destination folder, with its sidecars. An exact copy of a photo already there is skipped by Import, and moved into _already there by Organize so the source is cleared; FledgeView never deletes. The plan shows these counts first, the finished message reports them, and Organize\u2019s Undo moves them back.',
+      'Saving says where the file went. Frame has its own Save to choice (a folder FledgeView remembers, or your Downloads folder), and every download now names the file and says to check your Downloads folder: framed prints, exports, web gallery ZIPs, recipe cards, presets and spreadsheets.',
+    ]],
+  ] },
+  { v: '0.9.72 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Recipe cards can be saved to a folder you choose: Save to \u2192 Choose folder\u2026 (Chrome and Edge). FledgeView remembers the folder, saves the card and its preset straight into it, and adds (2) to a name rather than replace a file that\u2019s already there. Use Downloads goes back to downloading.',
+    ]],
+    ['Fixed', [
+      'The recipe card\u2019s Shape and Panel lists are easier to read when open: the choices now use the window\u2019s own colors instead of light grey.',
+    ]],
+  ] },
+  { v: '0.9.71 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Recipe cards for social media: the card\u2019s new Shape choice makes a ready-to-post version with the photo across the top and the settings in columns below, at the exact size each network shows without cropping: portrait 4:5 for Instagram and Facebook (1080 \u00d7 1350), square (1080 \u00d7 1080), or 9:16 for Stories and Reels (1080 \u00d7 1920). Tall photos are centred, never cropped. Each shape saves under its own name, so it doesn\u2019t replace your full-size card.',
+    ]],
+  ] },
   { v: '0.9.70 beta', date: 'November 2026', groups: [
     ['Improved', [
       'The top level of an organized folder is now an inbox. Drop photos there, click Scan again, and Organize sorts them into their lens folders, including photos you move back to the top level from a lens folder. Photos you move from one lens folder to another still stay where you put them. Open folder\u2019s New photos only choice also includes everything at the top level.',
@@ -7676,9 +8354,17 @@ if (S.seenVersion !== VERSION) { $('helpMenuBtn').classList.add('hasnew'); $('ne
 /* Ko-fi support: a menu item, a button in About, and one thank-you note after the third successful export or sort */
 const KOFI = 'https://ko-fi.com/J5Q729VR3X';
 $('tipBtn').onclick = () => window.open(KOFI, '_blank', 'noopener');
+/* the Microsoft Store version of the desktop program doesn't show the Ko-fi links (the program sets window.FV_DESKTOP.store) */
+/* the desktop program edits raws from the raw file itself, so the guide's tip about embedded previews doesn't apply there */
+if (deskHas('rawFinish')) $('rawTip').hidden = true;
+if (window.FV_DESKTOP) document.querySelectorAll('#empty .emptynote').forEach(e => e.remove());   // no browser “Upload” wording in the program
+/* sharpest-first bursts: a sort choice and the K key in the program; on the website the choice is shown greyed out, saying where it lives */
+if (deskHas('bursts')) $('keepBest').hidden = false;
+else { $('keepBest').style.display = 'none'; $('sortBsf').disabled = true; $('sortBsf').textContent = 'Sharpest-first bursts: in the FledgeView desktop program'; if (S.sort === 'bsf') { S.sort = 'burst'; $('sortSel').value = 'burst'; } }
+if (window.FV_DESKTOP && window.FV_DESKTOP.store) document.querySelectorAll('#tipBtn, .tiplink, #aboutDlg .tipbox').forEach(e => { e.style.display = 'none'; });
 $('tipGo').addEventListener('click', () => setTimeout(() => $('tipDlg').close(), 50));
 function tipNudge() {
-  if (S.tipShown) return;
+  if (S.tipShown || window.FV_DESKTOP) return;   // the desktop program skips the one-time thank-you note
   S.tipCount = (S.tipCount || 0) + 1;
   if (S.tipCount >= 3) { S.tipShown = true; setTimeout(() => { try { $('tipDlg').showModal(); } catch {} }, 1400); }
   saveS();
@@ -7712,11 +8398,14 @@ function sortView(list) {
     return list.slice().sort((a, b) => (sc(b) - sc(a)) || byOrd(a, b));
   }
   if (mode === 'sharp') return list.slice().sort((a, b) => ((b.sharp ?? -1) - (a.sharp ?? -1)) || byOrd(a, b));
-  const inList = new Set(list), seen = new Set(), out = [];
+  const inList = new Set(list), seen = new Set(), out = [], fold = mode === 'bsf';
   for (const it of list) {
     if (seen.has(it)) continue;
     if (it.burst) {
-      it.burst.members.filter(m => inList.has(m)).sort((a, b) => ((b.sharp ?? -1) - (a.sharp ?? -1)) || byOrd(a, b)).forEach(m => { seen.add(m); out.push(m); });
+      const ms = it.burst.members.filter(m => inList.has(m)).sort((a, b) => ((b.sharp ?? -1) - (a.sharp ?? -1)) || byOrd(a, b));
+      ms.forEach(m => seen.add(m));
+      /* sharpest-first bursts (desktop program): only the sharpest frame shows, unless this is the burst that's open */
+      if (fold && ms.length > 1 && state.openBurst !== it.burst.members) out.push(ms[0]); else out.push(...ms);
     } else { seen.add(it); out.push(it); }
   }
   return out;
@@ -7724,7 +8413,7 @@ function sortView(list) {
 let scoringAll = false, sortJumpTop = false;
 async function ensureScored() {
   const mode = S.sort || 'name';
-  if (scoringAll || (mode !== 'burst' && mode !== 'sharp')) return;
+  if (scoringAll || (mode !== 'burst' && mode !== 'bsf' && mode !== 'sharp')) return;
   if (metaQ.length || metaBusy) { status('Reading photo info before sorting…'); return; }
   const need = state.items.filter(it => (mode === 'sharp' || it.burst) && (it.sharp == null || !EXPO[it.key]));
   if (!need.length) return;
@@ -7734,7 +8423,7 @@ async function ensureScored() {
     if (n % 5 && n !== need.length) return;
     const left = Math.round((performance.now() - t0) / n * (need.length - n) / 1000);
     status(`Scoring sharpness to sort: ${n} of ${need.length}` + (n > 10 ? `, about ${left > 90 ? Math.round(left / 60) + ' min' : left + ' s'} left` : '') + '…');
-  }, () => (S.sort !== 'burst' && S.sort !== 'sharp'), true);
+  }, () => (S.sort !== 'burst' && S.sort !== 'bsf' && S.sort !== 'sharp'), true);
   scoringAll = false; status('');
   state.items.forEach(paintThumb);
   rebuildView(sortJumpTop ? null : cur()); sortJumpTop = false;
@@ -7820,7 +8509,7 @@ $('sortGo').onclick = () => {
   const v = (document.querySelector('#sortOpts input:checked') || {}).value || 'name';
   S.sortAsk = $('sortAsk').checked; saveS();
   $('sortDlg').close();
-  sortJumpTop = v === 'burst' || v === 'sharp';
+  sortJumpTop = v === 'burst' || v === 'bsf' || v === 'sharp';
   setSort(v);
   if (state.view.length) show(0);
 };
@@ -7996,7 +8685,8 @@ async function buildGallery() {
   for (let i = 0; i < list.length; i++) {
     $('galStatus').textContent = `Preparing photo ${i + 1} of ${list.length}…`;
     try {
-      const r = await exportOne(list[i], o);
+      if (deskRaw(list[i])) $('galStatus').textContent = `Developing photo ${i + 1} of ${list.length}…`;
+      const r = await exportOne(list[i], o, { raw: true });
       let base = baseOf(list[i].name).replace(/[\\/:*?"<>|#%]+/g, '-'), n = 2, b2 = base;
       while (used.has(b2.toLowerCase())) b2 = `${base}-${n++}`;
       used.add(b2.toLowerCase());
@@ -8030,7 +8720,7 @@ $('galZip').onclick = async () => {
       res.files.forEach(f => root.file(f.path, f.blob));
       const zb = await zip.generateAsync({ type: 'blob', compression: 'STORE' });
       const out = await saveFile(res.slug + '.zip', zb);
-      if (out === 'saved') await galDone(res, ' as ' + res.slug + '.zip');
+      if (out === 'saved') await galDone(res, ' as ' + res.slug + '.zip in your Downloads folder');
       else $('galStatus').textContent = out === 'declined' ? 'Download cancelled.' : 'Saving isn’t available in this view. Use the downloaded copy, or Save to folder.';
     }
   } finally { galBusy = false; $('galZip').disabled = $('galFolder').disabled = false; }
