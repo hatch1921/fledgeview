@@ -2453,25 +2453,6 @@ html[data-look="clean"] .loadcard .lcbar{background:rgba(255,255,255,.12)}
 .toast.show{opacity:1}
 dialog{background:var(--panel);color:var(--ink);border:1px solid var(--panel-line);border-radius:10px;width:min(640px,92vw);padding:18px 20px}
 dialog::backdrop{background:rgba(0,0,0,.45)}
-#nrDlg{width:min(1180px,96vw);max-height:94vh}
-.nrhead{display:flex;align-items:baseline;gap:12px}
-.nrbody{display:flex;gap:16px;margin-top:8px}
-.nrview{position:relative;flex:1;min-width:0;height:min(620px,68vh);background:#111;border-radius:8px;overflow:hidden;cursor:grab;touch-action:none}
-.nrview.drag{cursor:grabbing}
-.nrview img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none}
-.nrbusy{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#ddd;font-size:15px;background:rgba(0,0,0,.35)}
-.nrtag{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.65);color:#fff;font-size:13px;padding:2px 8px;border-radius:4px}
-.nrmap{position:absolute;right:10px;bottom:10px;border:1px solid rgba(255,255,255,.5);border-radius:4px;background:#000;cursor:crosshair}
-.nrside{width:270px;flex:none;display:flex;flex-direction:column;gap:9px}
-.nrlbl{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--ink-soft)}
-.nrsl{display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:13px}
-.nrsl input{grid-column:1 / -1;accent-color:var(--amber)}
-.nrsmall{font-size:12px;margin:0}
-.nrside .dtabs{display:flex;gap:4px}
-.nrside .dtabs .btn{flex:1}
-.nrside .dtabs .btn[aria-pressed="true"]{background:var(--amber);color:#1b1b1b;border-color:transparent}
-.enr{margin-top:4px}
-.enr .enote{margin:2px 0 0}
 dialog h2{font-family:var(--cond);font-weight:600;font-size:24px;margin:0 0 4px}
 dialog p{margin:0 0 10px}
 dialog textarea{width:100%;height:280px;font:13px/1.45 Consolas,"SF Mono",monospace;background:var(--page);color:var(--ink);border:1px solid var(--panel-line);border-radius:6px;padding:8px}
@@ -2797,7 +2778,6 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <div class="ehist"><canvas id="eHist" width="360" height="120" aria-label="Histogram of the edited photo"></canvas><button class="eclip lo" id="eClipLo" aria-pressed="false" title="Crushed blacks indicator. Click to turn clipping warnings on or off (J)"></button><button class="eclip hi" id="eClipHi" aria-pressed="false" title="Blown highlights indicator. Click to turn clipping warnings on or off (J)"></button><span class="eclipnote" id="eClipNote"></span></div>
         <label class="ewarn" title="Show blown highlights in red and crushed blacks in blue on the photo (J)"><input type="checkbox" id="eWarn"> Clipping warnings</label>
         <div id="eSliders"></div>
-        <div class="enr"><button class="knob ebtn wide" id="eNr" hidden title="Reduce grain and color noise in a large window, with a live preview">Noise reduction…</button><p class="enote" id="eNrWeb">Noise reduction: in the FledgeView desktop program.</p></div>
         <div class="ebtns"><button class="knob ebtn" id="eBefore" title="Hold to see the original (or hold the \\ key)">Before</button><button class="knob ebtn" id="eReset" title="Clear this photo’s edits">Reset</button></div>
         <div class="ebtns"><button class="knob ebtn" id="eCopy" title="Copy this photo’s edits">Copy</button><button class="knob ebtn" id="ePaste" title="Paste copied edits onto this photo">Paste</button></div>
         <button class="knob ebtn wide" id="ePasteSel" title="Paste copied edits onto the selected photos. Ctrl-click or Shift-click thumbnails to select.">Paste to selected</button>
@@ -3343,8 +3323,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
           <li><strong>Light:</strong> exposure, contrast, highlights, shadows, whites, and blacks. <strong>Color:</strong> temperature (blue to amber) and tint (green to magenta), shown on colored scales, plus vibrance. <strong>Detail and effects:</strong> sharpen and vignette. Double-click a slider to reset it.</li>
           <li><strong>Crop and straighten:</strong> click <strong>Crop</strong>, then drag the corners or the whole box; choose an <strong>Aspect</strong> or Free. <strong>Straighten</strong> levels a tilted horizon, showing a grid while you drag. Click <strong>Done</strong> (or press Enter) to finish. The Crop panel’s own <strong>Undo</strong> steps back through crop and straighten changes one at a time without touching your other edits. While you crop, the box shows the size you’re cropping to: pixels, megapixels, and the focal length the crop is equivalent to. <strong>Reach</strong> crops to what a 1.4× or 2× teleconverter would have framed, or to any focal length you type (Custom); <strong>Reach guides</strong> show those framings as dashed boxes you can click. In Export, the <strong>Crop reach</strong> info bar field adds the equivalent focal length on cropped photos. The crop is kept with your other edits, and Export\u2019s social shapes crop from the cropped photo.</li>
           <li><strong>Undo</strong> in the Edit and share section (beside Crop) steps back through this photo’s changes one at a time, newest first, and names what it will undo: <strong>Undo crop</strong> for a crop or straighten, <strong>Undo adjust</strong> for an adjustment (each slider movement, Auto, Pick neutral, or black and white is one step), and Undo reset or Undo paste. <kbd>Ctrl</kbd>+<kbd>Z</kbd> (<kbd>Cmd</kbd>+<kbd>Z</kbd> on a Mac) does the same. Each photo keeps its own steps until you close FledgeView.</li>
-          <li><strong>Print size</strong>, under the crop readout, says how big the crop prints: for example “Book or close-up print: to 29 × 19 in (300 ppi).” Hover or click it for two more lines: most labs’ minimum (200 ppi), and canvas or a wall seen from across the room (150 ppi). <strong>My print lab</strong> (photo book, fine art print, canvas, or Custom) makes the sizes use your lab’s ppi. <strong>Will it print at</strong> shows the ppi for a paper size you pick, with a ✓ when it meets your lab’s minimum (or 200 ppi if no lab is set); a paper of a different shape trims the edges. The ⓘ explains why labs differ. Sizes show in centimetres or inches to suit your region; the in and cm buttons switch. Photo info shows the print size too, for the whole photo or its crop.</li>
-          <li><strong>Noise reduction</strong> (desktop program, raw files): opens a large window with a live preview of part of the photo. Drag the view or click the small map to move around. <strong>Judge at</strong> 100%, Print, or Web; noise you see at 100% is much less visible in a print or online. Start from a preset (Auto, Low light, Severe noise, Color noise only), adjust Amount, Detail and Color, and choose <strong>Apply to</strong>: the entire image, the background (protecting the subject), or the subject only. <strong>Show subject</strong> tints the protected area; hold <strong>Before</strong> (or <kbd>\</kbd>) to compare. Apply saves it with the photo’s adjustments; Undo, Copy and Paste include it.</li>
+          <li><strong>Print size</strong>, under the crop readout, says how big the crop prints: for example “Book or close-up print: to 28 × 19 in (300 ppi).” Hover or click it for two more lines: most labs’ minimum (200 ppi), and canvas or a wall seen from across the room (150 ppi). <strong>My print lab</strong> (photo book, fine art print, canvas, or Custom) makes the sizes use your lab’s ppi. <strong>Will it print at</strong> shows the ppi for a paper size you pick, with a ✓ when it meets your lab’s minimum (or 200 ppi if no lab is set); a paper of a different shape trims the edges. The ⓘ explains why labs differ. Sizes show in centimetres or inches to suit your region; the in and cm buttons switch. Photo info shows the print size too, for the whole photo or its crop.</li>
           <li><strong>Saturation</strong> boosts or calms every color evenly, while <strong>Vibrance</strong> favors muted colors. <strong>Clarity</strong> adds contrast to mid-size detail, such as feathers and fur, without sharpening smooth backgrounds.</li>
           <li><strong>Pick neutral</strong> (<kbd>W</kbd>), at the top of Color: click it, then click something that should be neutral gray or white, such as a gray card, a white feather, or a cloud. Temperature and Tint are set so that spot becomes neutral, which corrects a color cast; for the most accurate skin tones, photograph a gray card in the same light and pick it. Zoom in first to pick a small spot.</li>
           <li><strong>Reset one adjustment:</strong> a changed slider shows a small <strong>↺</strong> beside its value; click it to reset just that slider (or double-click the slider or its number). The ↺ also shows at a glance which adjustments are active.</li>
@@ -3453,35 +3432,6 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
   </div>
   <p class="sub" style="margin-top:10px">The sharpness options score each photo first. For a large folder of RAW files, the first time can take a few minutes; scores are saved for next time.</p>
   <div class="end"><label class="chk" style="margin-right:auto;font-size:14px"><input type="checkbox" id="sortAsk"> Ask each time I open photos</label><button class="btn go" id="sortGo">Sort</button></div>
-</dialog>
-
-<dialog id="nrDlg" aria-labelledby="nrTitle">
-  <div class="nrhead"><h2 id="nrTitle">Noise reduction</h2><span class="sub" id="nrFile"></span></div>
-  <div class="nrbody">
-    <div class="nrview" id="nrView" title="Drag to move around the photo">
-      <img id="nrImg" alt="Preview of the selected area">
-      <img id="nrMask" alt="" hidden>
-      <div class="nrbusy" id="nrBusy" hidden>Developing raw…</div>
-      <span class="nrtag" id="nrTag" hidden>Before</span>
-      <canvas class="nrmap" id="nrMap" width="160" height="107" title="Click to choose the area to check"></canvas>
-    </div>
-    <div class="nrside">
-      <div class="nrlbl">Judge at</div>
-      <div class="dtabs" role="group" aria-label="Judge at"><button class="btn" data-sc="1" aria-pressed="true">100%</button><button class="btn" data-sc="print" aria-pressed="false">Print</button><button class="btn" data-sc="web" aria-pressed="false">Web</button></div>
-      <p class="sub nrsmall">Noise you see at 100% is much less visible in a print or online.</p>
-      <label class="nrlbl">Preset <select id="nrPreset"><option value="auto">Auto</option><option value="low">Low light</option><option value="severe">Severe noise</option><option value="color">Color noise only</option><option value="custom">Custom</option></select></label>
-      <label class="nrsl">Amount <output id="nrAv"></output><input type="range" id="nrA" min="0" max="100" step="1" title="Grain. Double-click to reset"></label>
-      <label class="nrsl">Detail <output id="nrDv"></output><input type="range" id="nrD" min="0" max="100" step="1" title="Higher keeps more fine texture. Double-click to reset"></label>
-      <label class="nrsl">Color <output id="nrCv"></output><input type="range" id="nrC" min="0" max="100" step="1" title="Color blotches. Double-click to reset"></label>
-      <label class="nrlbl">Apply to <select id="nrT"><option value="0">Entire image</option><option value="1">Background, protect subject</option><option value="2">Subject only</option></select></label>
-      <div id="nrProt" hidden><label class="nrsl">Protect subject <output id="nrPv"></output><input type="range" id="nrP" min="0" max="100" step="1" title="100 leaves the subject untouched. Double-click to reset"></label>
-        <p class="sub nrsmall">Works best on a sharp subject against a softer background.</p></div>
-      <label class="chk nrsmall"><input type="checkbox" id="nrShowSub"> Show subject</label>
-      <button class="btn" id="nrBefore" title="Hold to see the photo without noise reduction (or hold the \ key)">Hold for Before</button>
-      <p class="sub nrsmall" id="nrPrint"></p>
-    </div>
-  </div>
-  <div class="end"><button class="btn" id="nrReset" style="margin-right:auto">Reset</button><button class="btn" data-close>Cancel</button><button class="btn primary" id="nrApply">Apply</button></div>
 </dialog>
 
 <dialog id="upDlg">
@@ -5448,7 +5398,6 @@ function editKind(r) {
   if (r.rot) geo.push('Straighten ' + editVal('rot', r.rot));
   if (r.bw) tone.push('Black & white');
   for (const [k, label] of EDIT_UI) if (label && k !== 'rot' && r[k]) tone.push(label + ' ' + editVal(k, r[k]));
-  if (r.nr || r.nrc) tone.push(`Noise reduction ${r.nr || 0}/${r.nrc || 0}`);
   const label = geo.length && tone.length ? 'Cropped + edited' : geo.length ? (r.crop ? 'Cropped' : 'Straightened') : 'Edited';
   return { label, tip: [...geo, ...tone].join(' \u00b7 ') };
 }
@@ -7809,12 +7758,16 @@ function sharpenData(d, w, h, amt) {
     }
   }
 }
-/* noise reduction (set in the desktop program's Noise reduction window, applied by the program): nr amount, nrd detail,
-   nrc color, nrt where (0 whole photo, 1 background, 2 subject only), nrp protect subject. Only nr and nrc make a photo edited */
-const NR_KEYS = ['nr', 'nrd', 'nrc', 'nrt', 'nrp'], NR_AUX = new Set(['nrd', 'nrt', 'nrp']);
-const EDIT_KEYS = EDIT_UI.filter(a => a.length > 1).map(a => a[0]).concat(NR_KEYS);
+const EDIT_KEYS = EDIT_UI.filter(a => a.length > 1).map(a => a[0]);
 const blankEdit = () => ({ ...Object.fromEntries(EDIT_KEYS.map(k => [k, 0])), bw: 0, bwf: 'orange', bwt: 'none', crop: null, cropAr: 'orig' });
-const hasEdit = r => !!r && (EDIT_KEYS.some(k => r[k] && !NR_AUX.has(k)) || !!r.bw || !!r.crop);
+const hasEdit = r => !!r && (EDIT_KEYS.some(k => r[k]) || !!r.bw || !!r.crop);
+/* noise reduction was removed in 0.9.76. Settings the test builds' Noise reduction window saved (nr, nrd, nrc, nrt, nrp, nrs)
+   are dropped here, so the desktop program never applies them; a photo whose only edit was noise reduction becomes unedited */
+{ let dropped = false;
+  for (const k of Object.keys(EDITS)) { const r = EDITS[k]; if (!r || typeof r !== 'object') continue;
+    let had = false; for (const n of ['nr', 'nrd', 'nrc', 'nrt', 'nrp', 'nrs']) if (n in r) { delete r[n]; had = true; }
+    if (had) { dropped = true; if (!hasEdit(r)) delete EDITS[k]; } }
+  if (dropped) try { localStorage.setItem('chimp-edits', JSON.stringify(EDITS)); } catch {} }
 /* slider readouts: Straighten is stored in tenths of a degree */
 const editVal = (k, v) => k === 'rot' ? (v > 0 ? '+' : '') + (v / 10).toFixed(1) + '\u00b0' : v > 0 ? '+' + v : String(v);
 function editOf(it) { const r = it && EDITS[it.key]; return hasEdit(r) ? r : null; }
@@ -8107,7 +8060,7 @@ function setReach(T) {
 }
 let cropGuideHits = [];
 /* ---------- print sizes: what a photo or crop can really print to, in plain numbers. One small calculation, used by the
-   crop panel and Photo info (and later by the desktop program's noise reduction window and Card check). Size = pixels ÷ ppi. ---------- */
+   crop panel and Photo info (and later by the desktop program's Card check). Size = pixels ÷ ppi. ---------- */
 const PRINT_LABS = { book: 250, fine: 300, canvas: 175 };
 const PRINT_SIZES = { in: [[8, 10], [11, 14], [13, 19], [16, 20], [20, 30], [24, 36], [40, 60]], cm: [[13, 18], [20, 30], [21, 29.7, 'A4'], [30, 40], [29.7, 42, 'A3'], [40, 60], [50, 70], [60, 90]] };
 const printPrefs = () => (S.print && typeof S.print === 'object') ? S.print : (S.print = { lab: '', labPpi: 0, unit: 'auto', size: '', cw: 0, ch: 0, open: false });
@@ -8118,7 +8071,9 @@ function printUnit() {
   return /^[a-z]+$/i.test(loc) || /-(US|LR|MM)\b/i.test(loc) ? 'in' : 'cm';
 }
 function labPpi() { const p = printPrefs(); return p.lab === 'custom' ? (+p.labPpi >= 50 ? Math.round(+p.labPpi) : 0) : (PRINT_LABS[p.lab] || 0); }
-const printLen = (px, ppi, u) => { const v = px / ppi * (u === 'cm' ? 2.54 : 1); return v < 2 ? v.toFixed(1) : String(Math.round(v)); };
+/* a "prints to" size is the most the photo can give, so it rounds down (19.2 in is 19, never 20); the tiny allowance keeps
+   exact sizes exact (6000 px at 300 ppi is 20, not 19.999...) */
+const printLen = (px, ppi, u) => { const v = px / ppi * (u === 'cm' ? 2.54 : 1) + 1e-9; return v < 2 ? (Math.floor(v * 10) / 10).toFixed(1) : String(Math.floor(v)); };
 const printSize = (w, h, ppi, u = printUnit()) => `${printLen(w, ppi, u)} \u00d7 ${printLen(h, ppi, u)} ${u}`;
 function printLines(w, h) {
   const u = printUnit(), lab = labPpi();
@@ -8174,131 +8129,6 @@ function printUi() {
   $('ePrLab').value = p.lab || ''; $('ePrLabC').hidden = p.lab !== 'custom'; $('ePrLabPpi').value = p.labPpi || '';
   $('ePrLab').onchange = e => { p.lab = e.target.value; $('ePrLabC').hidden = p.lab !== 'custom'; if (p.lab === 'custom') $('ePrLabPpi').focus(); again(); };
   $('ePrLabPpi').oninput = e => { p.labPpi = +e.target.value || 0; again(); };
-}
-/* ---------- Noise reduction window (desktop program only, raw files). The program does the work: estimate() measures the
-   photo once (for Auto), preview() returns a small developed area with the settings applied, subject() the protected area.
-   Areas are in full-size developed pixels (estimate's width and height). Apply saves the settings with the photo's
-   adjustments; the program's finish() applies them when exporting and in the Adjust view ---------- */
-const NR = { it: null, est: null, sc: '1', x: 0, y: 0, v: {}, preset: 'auto', t: 0, tok: 0, before: false, maskImg: null, urls: [] };
-const nrClamp = (v, a, b) => Math.max(a, Math.min(b, v));
-function nrPresetVals(k) {
-  const e = NR.est || {}, A = +e.auto_amount || 0, C = +e.auto_color || 0, D = +e.auto_detail || 50;
-  return k === 'low' ? { nr: Math.round(nrClamp(A * 1.2, 0, 100)), nrd: 45, nrc: 80 } : k === 'severe' ? { nr: Math.round(Math.min(100, A * 1.5)), nrd: 35, nrc: 95 }
-    : k === 'color' ? { nr: 0, nrd: D, nrc: Math.round(C) } : { nr: Math.round(A), nrd: Math.round(D), nrc: Math.round(C) };
-}
-function nrScale() {
-  if (NR.sc === 'print') return 0.4;
-  if (NR.sc === 'web') { const L = Math.max(NR.est.width, NR.est.height); return nrClamp(webTarget(S.web, 2000) / L, 0.05, 1); }
-  return 1;
-}
-/* the area shown, in full-size pixels: the view's size in device pixels, divided by the scale */
-function nrArea() {
-  const r = $('nrView').getBoundingClientRect(), d = DPR(), sc = nrScale(), W = NR.est.width, H = NR.est.height;
-  const w = Math.min(W, Math.round(r.width * d / sc)), h = Math.min(H, Math.round(r.height * d / sc));
-  NR.x = nrClamp(NR.x, w / 2, W - w / 2); NR.y = nrClamp(NR.y, h / 2, H - h / 2);
-  return { x: Math.round(NR.x - w / 2), y: Math.round(NR.y - h / 2), w, h };
-}
-function nrSettings(before) {
-  const base = { ...blankEdit(), ...(EDITS[NR.it.key] || {}) }, v = NR.v;
-  return before ? { ...base, nr: 0, nrc: 0 } : { ...base, nr: v.nr, nrd: v.nrd, nrc: v.nrc, nrt: v.nrt, nrp: v.nrp };
-}
-function nrShowVals() {
-  const v = NR.v;
-  $('nrA').value = v.nr; $('nrD').value = v.nrd; $('nrC').value = v.nrc; $('nrP').value = v.nrp; $('nrT').value = String(v.nrt);
-  $('nrAv').textContent = v.nr; $('nrDv').textContent = v.nrd; $('nrCv').textContent = v.nrc; $('nrPv').textContent = v.nrp;
-  $('nrProt').hidden = v.nrt !== 1; $('nrPreset').value = NR.preset;
-}
-function nrMapDraw() {
-  const c = $('nrMap'), x = c.getContext('2d'), it = NR.it, src = it && it.cache && it.cache.canvas, W = NR.est.width, H = NR.est.height;
-  c.height = Math.round(c.width * H / W);
-  x.fillStyle = '#000'; x.fillRect(0, 0, c.width, c.height);
-  if (src) x.drawImage(src, 0, 0, c.width, c.height);
-  const a = nrArea(), k = c.width / W;
-  x.strokeStyle = '#e9a53b'; x.lineWidth = 2; x.strokeRect(a.x * k + 1, a.y * k + 1, Math.max(4, a.w * k - 2), Math.max(4, a.h * k - 2));
-}
-function nrSoon(ms = 150) { clearTimeout(NR.t); NR.t = setTimeout(nrRender, ms); }
-async function nrRender() {
-  if (!NR.it || !$('nrDlg').open) return;
-  const tok = ++NR.tok, a = nrArea(), it = NR.it;
-  nrMapDraw();
-  try {
-    const blob = await window.FV_DESKTOP.noise.preview(it.handle, a, nrSettings(NR.before), { scale: nrScale() });
-    if (tok !== NR.tok) return;
-    const u = URL.createObjectURL(blob); NR.urls.push(u); $('nrImg').src = u; $('nrBusy').hidden = true;
-    while (NR.urls.length > 3) URL.revokeObjectURL(NR.urls.shift());
-    nrMaskDraw(a);
-  } catch (e) { if (tok === NR.tok) { $('nrBusy').hidden = false; $('nrBusy').textContent = (e && e.message) || 'This photo can\u2019t be previewed.'; } }
-}
-/* Show subject: the program's grey picture (white = protected) as a light blue tint over the area, for checking only */
-function nrMaskDraw(a) {
-  const on = $('nrShowSub').checked && NR.maskImg; $('nrMask').hidden = !on; if (!on) return;
-  const m = NR.maskImg, kx = m.naturalWidth / NR.est.width, ky = m.naturalHeight / NR.est.height, c = document.createElement('canvas');
-  c.width = Math.max(1, Math.round(a.w * kx)); c.height = Math.max(1, Math.round(a.h * ky));
-  const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(m, a.x * kx, a.y * ky, a.w * kx, a.h * ky, 0, 0, c.width, c.height);
-  const id = x.getImageData(0, 0, c.width, c.height), d = id.data;
-  for (let i = 0; i < d.length; i += 4) { const g = d[i]; d[i] = 40; d[i + 1] = 120; d[i + 2] = 255; d[i + 3] = Math.round(g * 0.35); }
-  x.putImageData(id, 0, 0); $('nrMask').src = c.toDataURL();
-}
-async function openNoise() {
-  const it = cur(); if (!it || !deskHas('noise') || !deskRaw(it)) return;
-  NR.it = it; NR.est = null; NR.maskImg = null; NR.before = false; $('nrShowSub').checked = false; $('nrMask').hidden = true; $('nrTag').hidden = true;
-  $('nrFile').textContent = it.name; $('nrImg').removeAttribute('src'); $('nrBusy').hidden = false; $('nrBusy').textContent = 'Developing raw\u2026';
-  $('nrDlg').showModal();
-  try { NR.est = await window.FV_DESKTOP.noise.estimate(it.handle); }
-  catch (e) { $('nrBusy').textContent = (e && e.message) || 'This photo can\u2019t be measured.'; return; }
-  if (NR.it !== it) return;
-  if (!(NR.est.width > 0 && NR.est.height > 0)) { const d = printDims(it, it.prev ? it.prev.w : 6000, it.prev ? it.prev.h : 4000); NR.est.width = d[0]; NR.est.height = d[1]; }
-  const r = EDITS[it.key] || {};
-  /* start on the saved settings if there are any, otherwise on Auto; centre on the focus point when there is one */
-  if (r.nr || r.nrc) { NR.v = { nr: r.nr || 0, nrd: r.nrd || 50, nrc: r.nrc || 0, nrt: r.nrt || 0, nrp: r.nrp == null || (!r.nrp && r.nrt !== 1) ? 100 : r.nrp }; NR.preset = 'custom'; }
-  else { NR.v = { ...nrPresetVals('auto'), nrt: 0, nrp: 100 }; NR.preset = 'auto'; }
-  const f = await getFocus(it).catch(() => null), fp = f ? afFor(it) : null;
-  NR.x = (fp ? fp.x : 0.5) * NR.est.width; NR.y = (fp ? fp.y : 0.5) * NR.est.height;
-  { const c = (EDITS[it.key] || {}).crop; if (!fp && c) { NR.x = (c.x + c.w / 2) * NR.est.width; NR.y = (c.y + c.h / 2) * NR.est.height; } }
-  { const pc = (EDITS[it.key] || {}).crop, L = printLines(Math.round((pc ? pc.w : 1) * NR.est.width), Math.round((pc ? pc.h : 1) * NR.est.height)); $('nrPrint').textContent = L.main + (pc ? ' (as cropped)' : ''); }
-  nrShowVals(); nrRender();
-}
-$('eNr').onclick = openNoise;
-document.querySelectorAll('#nrDlg [data-sc]').forEach(b => { b.onclick = () => { NR.sc = b.dataset.sc; document.querySelectorAll('#nrDlg [data-sc]').forEach(x => x.setAttribute('aria-pressed', String(x === b))); if (NR.est) nrRender(); }; });
-$('nrPreset').onchange = e => { if (e.target.value === 'custom') return; NR.preset = e.target.value; Object.assign(NR.v, nrPresetVals(NR.preset)); nrShowVals(); nrSoon(0); };
-[['nrA', 'nr', 0], ['nrD', 'nrd', 50], ['nrC', 'nrc', 0], ['nrP', 'nrp', 100]].forEach(([id, k, def]) => {
-  $(id).oninput = e => { NR.v[k] = +e.target.value; if (k !== 'nrp') NR.preset = 'custom'; nrShowVals(); nrSoon(); };
-  $(id).ondblclick = () => { NR.v[k] = def; if (k !== 'nrp') NR.preset = 'custom'; nrShowVals(); nrSoon(0); };
-});
-$('nrT').onchange = e => { NR.v.nrt = +e.target.value; nrShowVals(); nrSoon(0); };
-$('nrShowSub').onchange = async () => {
-  if ($('nrShowSub').checked && !NR.maskImg && NR.it) { try { NR.maskImg = await loadImage(await window.FV_DESKTOP.noise.subject(NR.it.handle)); } catch { $('nrShowSub').checked = false; toast('The subject couldn\u2019t be found in this photo'); return; } }
-  if (NR.est) nrMaskDraw(nrArea());
-};
-const nrBefore = v => { if (NR.before === v || !NR.est) return; NR.before = v; $('nrTag').hidden = !v; nrRender(); };
-$('nrBefore').onpointerdown = () => nrBefore(true);
-['pointerup', 'pointerleave', 'pointercancel'].forEach(t => $('nrBefore').addEventListener(t, () => nrBefore(false)));
-$('nrDlg').addEventListener('keydown', e => { if (e.key === '\\' && !e.repeat) { e.preventDefault(); nrBefore(true); } });
-$('nrDlg').addEventListener('keyup', e => { if (e.key === '\\') nrBefore(false); });
-/* drag the large view to move around the photo; click the small map to jump */
-{ let dr = null;
-  $('nrView').addEventListener('pointerdown', e => { if (!NR.est || e.target === $('nrMap')) return; dr = { x: e.clientX, y: e.clientY, cx: NR.x, cy: NR.y }; $('nrView').classList.add('drag'); $('nrView').setPointerCapture(e.pointerId); });
-  $('nrView').addEventListener('pointermove', e => { if (!dr) return; const k = DPR() / nrScale(); NR.x = dr.cx - (e.clientX - dr.x) * k; NR.y = dr.cy - (e.clientY - dr.y) * k; nrMapDraw(); nrSoon(); });
-  const end = () => { if (!dr) return; dr = null; $('nrView').classList.remove('drag'); nrSoon(0); };
-  $('nrView').addEventListener('pointerup', end); $('nrView').addEventListener('pointercancel', end);
-  $('nrMap').addEventListener('pointerdown', e => { if (!NR.est) return; const r = $('nrMap').getBoundingClientRect(); NR.x = (e.clientX - r.left) / r.width * NR.est.width; NR.y = (e.clientY - r.top) / r.height * NR.est.height; nrSoon(0); });
-}
-$('nrReset').onclick = () => { if (!NR.est) return; NR.v = { ...nrPresetVals('auto'), nrt: 0, nrp: 100 }; NR.preset = 'auto'; nrShowVals(); nrSoon(0); };
-$('nrApply').onclick = () => {
-  const it = NR.it; if (!it || !NR.est) return;
-  pushTone(it);
-  const rr = EDITS[it.key] || blankEdit();
-  Object.assign(rr, { nr: NR.v.nr, nrd: NR.v.nrd, nrc: NR.v.nrc, nrt: NR.v.nrt, nrp: NR.v.nrp });
-  commitEdit(it, rr); saveEdits(); paintThumb(it); syncUndo(); syncViewEdits(); refreshRows(); renderEditSoon(); syncNoiseBtn();
-  $('nrDlg').close(); toast(NR.v.nr || NR.v.nrc ? 'Noise reduction applied' : 'Noise reduction turned off');
-};
-$('nrDlg').addEventListener('close', () => { NR.tok++; clearTimeout(NR.t); NR.urls.forEach(u => URL.revokeObjectURL(u)); NR.urls = []; NR.it = null; });
-/* the drawer shows the button in the program (raw files only) and a quiet line on the website */
-function syncNoiseBtn() {
-  const it = cur(), prog = deskHas('noise'), b = $('eNr');
-  b.hidden = !prog; $('eNrWeb').hidden = prog || !!window.FV_DESKTOP;
-  if (prog) { const okRaw = !!it && deskRaw(it); b.disabled = !okRaw; b.title = okRaw ? 'Reduce grain and color noise in a large window, with a live preview' : 'Noise reduction works on raw files opened from a folder';
-    const r = it && EDITS[it.key]; b.textContent = r && (r.nr || r.nrc) ? 'Noise reduction \u2713' : 'Noise reduction\u2026'; }
 }
 /* Undo, per photo, for this session. Each crop or straighten gesture (a drag, a Reach snap, an aspect change, a Straighten
    movement) and each adjustment gesture (a slider movement, Auto, Pick neutral, black and white) saves the state before it.
@@ -8586,9 +8416,8 @@ function setEdit(k, val, noHist) {
   saveEdits(); paintThumb(it); renderEditSoon();
 }
 function editLoad() {
-  syncNoiseBtn();
   const r = (cur() && EDITS[cur().key]) || blankEdit();
-  for (const k of EDIT_KEYS) { if (NR_AUX.has(k) || k === 'nr' || k === 'nrc') continue; const v = r[k] || 0; $('e_' + k).value = v; $('ev_' + k).textContent = editVal(k, v); $('er_' + k).hidden = !v; $('ev_' + k).classList.toggle('chg', !!v); }
+  for (const k of EDIT_KEYS) { const v = r[k] || 0; $('e_' + k).value = v; $('ev_' + k).textContent = editVal(k, v); $('er_' + k).hidden = !v; $('ev_' + k).classList.toggle('chg', !!v); }
   $('eCropBtn').classList.toggle('has', !!r.crop); syncUndo();
   const bw = !!r.bw;
   $('eBw').checked = bw; $('eBwOpts').hidden = !bw; $('eBwF').value = r.bwf || 'orange'; $('eBwT').value = r.bwt || 'none';
@@ -9523,11 +9352,16 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.75 beta';
+const VERSION = '0.9.76 beta';
 const RELEASES = [
+  { v: '0.9.76 beta', date: 'November 2026', groups: [
+    ['Fixed', [
+      'Print sizes now round down, so \u201cprints to\u201d never promises more than the photo can give: a photo 8,640 pixels long at 300 ppi prints to 28 in (it said 29).',
+    ]],
+  ] },
   { v: '0.9.75 beta', date: 'November 2026', groups: [
     ['New', [
-      'Ready for the FledgeView desktop program. In the program: focus points for Canon, Nikon, Fujifilm, OM System and Panasonic as well as Sony; raw files exported and finished from the raw file itself, so pulling exposure or highlights down brings back detail the camera\u2019s preview clipped; a Noise reduction window with a live preview, presets, and an option to clean only the background; and bursts collapsed to their sharpest frame, with K to keep the best and reject the rest.',
+      'Ready for the FledgeView desktop program. In the program: focus points for Canon, Nikon, Fujifilm, OM System and Panasonic as well as Sony; raw files exported and finished from the raw file itself, so pulling exposure or highlights down brings back detail the camera\u2019s preview clipped; and bursts collapsed to their sharpest frame, with K to keep the best and reject the rest.',
       'On the website, nothing changes except a few quiet lines saying which of these live in the desktop program.',
     ]],
   ] },
