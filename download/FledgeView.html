@@ -2453,6 +2453,15 @@ html[data-look="clean"] .loadcard .lcbar{background:rgba(255,255,255,.12)}
 .toast.show{opacity:1}
 dialog{background:var(--panel);color:var(--ink);border:1px solid var(--panel-line);border-radius:10px;width:min(640px,92vw);padding:18px 20px}
 dialog::backdrop{background:rgba(0,0,0,.45)}
+.eidlg{width:min(620px,94vw)}
+.eilist{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+.eirow{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--panel-line);border-radius:8px;cursor:pointer}
+.eirow:has(input:checked){border-color:var(--amber)}
+.eirow .einame{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.eirow select{max-width:230px}
+.eirm{background:none;border:0;color:var(--ink-soft);font-size:18px;line-height:1;cursor:pointer;padding:2px 6px;border-radius:4px}
+.eirm:hover{color:var(--ink);background:rgba(255,255,255,.08)}
+.einote{font-size:14px;line-height:1.45;color:var(--ink-soft);min-height:3em}
 dialog h2{font-family:var(--cond);font-weight:600;font-size:24px;margin:0 0 4px}
 dialog p{margin:0 0 10px}
 dialog textarea{width:100%;height:280px;font:13px/1.45 Consolas,"SF Mono",monospace;background:var(--page);color:var(--ink);border:1px solid var(--panel-line);border-radius:6px;padding:8px}
@@ -2765,6 +2774,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <div class="slabel">Edit and share</div>
         <button class="knob sharebtn eopen" id="editTab" aria-expanded="false" aria-controls="editPanel" title="Adjust: exposure, contrast, color, and more, in a panel to the right (open or close)"><span>Adjust</span></button>
         <div class="eopenrow"><button class="knob sharebtn eopen" id="cropTab" aria-expanded="false" aria-controls="editPanel" title="Crop and straighten, in a panel to the right (R)"><span>Crop</span></button><button class="knob sharebtn" id="undoBtn" disabled title="Undo the last crop or adjustment on this photo, one step at a time (Ctrl+Z)">Undo</button></div>
+        <button class="knob sharebtn" id="editInBtn" title="Edit in Photoshop, Topaz, DxO, Affinity or Luminar (Ctrl+E)">Edit in…</button>
         <button class="knob sharebtn" id="shareGal" title="Make a gallery page to email or post">Web gallery</button>
         <button class="knob sharebtn" id="shareSocial" title="Resize and crop copies for Instagram, Facebook, and the web">Social media</button>
       </div>
@@ -3267,7 +3277,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
         <ul>
           <li><strong>View:</strong> the Info dial (<kbd>I</kbd> cycles full info, exposure only, and the photo alone), zoom, and the review tools.</li>
           <li><strong>Rate:</strong> position and file name, rating icons, <strong>◀ Pick Reject ▶</strong> (the arrows move to the previous or next photo, like the arrow keys), the <strong>Advance</strong> switch under them (click to change: Auto moves to the next photo after you rate; Manual stays put), and the <strong>Show</strong> filter.</li>
-          <li><strong>Edit and share:</strong> <strong>Adjust</strong>, <strong>Crop</strong> with <strong>Undo</strong> beside it, <strong>Web gallery</strong>, and <strong>Social media</strong>.</li>
+          <li><strong>Edit and share:</strong> <strong>Adjust</strong>, <strong>Crop</strong> with <strong>Undo</strong> beside it, <strong>Edit in…</strong> (desktop program), <strong>Web gallery</strong>, and <strong>Social media</strong>.</li>
+          <li><strong>Edit in…</strong> (desktop program, <kbd>Ctrl</kbd>+<kbd>E</kbd>) sends the photo you’re on to Photoshop, Topaz, DxO, Affinity, Luminar, or any editing program you choose with <strong>Add a program</strong>. Choose once per program what it gets: the <strong>raw file</strong> (it develops the raw its own way) or a <strong>16-bit TIFF with your edits</strong> (your crop and Quick finish, with the camera data). The file goes into an <strong>_edits</strong> folder beside the photo; the original is never changed. Whatever the program saves in _edits shows up here beside the original when you come back to FledgeView. If a program saves somewhere else, set its save or export folder to _edits. Organize and Move picks and rejects leave _edits alone.</li>
         </ul>
       </section>
       <section data-g="Review tools">
@@ -3433,6 +3444,15 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
   </div>
   <p class="sub" style="margin-top:10px">The sharpness options score each photo first. For a large folder of RAW files, the first time can take a few minutes; scores are saved for next time.</p>
   <div class="end"><label class="chk" style="margin-right:auto;font-size:14px"><input type="checkbox" id="sortAsk"> Ask each time I open photos</label><button class="btn go" id="sortGo">Sort</button></div>
+</dialog>
+
+<dialog id="eiDlg" class="eidlg" aria-labelledby="eiH">
+  <h2 id="eiH">Edit in…</h2>
+  <p class="sub" id="eiFile"></p>
+  <div class="eilist" id="eiList" role="radiogroup" aria-label="Editing program"></div>
+  <p class="sub" id="eiNone" hidden>None of the editing programs FledgeView knows (Photoshop, Topaz, DxO, Affinity, Luminar) were found on this computer. Choose yours with <strong>Add a program</strong>.</p>
+  <p class="einote" id="eiNote"></p>
+  <div class="end"><button class="btn" id="eiAdd" style="margin-right:auto" title="Choose any editing program on this computer">Add a program…</button><button class="btn" data-close>Cancel</button><button class="btn go" id="eiGo">Open</button></div>
 </dialog>
 
 <dialog id="upDlg">
@@ -3667,6 +3687,7 @@ function addFiles(list, focusNew = false) {
     if (!SUPPORTED.has(ext) || seen.has(key) || f.name.startsWith('._')) continue;
     seen.add(key);
     fresh.push({ file: f, name: f.name, ext, key, handle: en.handle || null, dir: en.dir || null, zone: en.zone || null, home: en.home || null, root: en.root || null,
+      ed: en.ed || null, edHome: en.edHome || null, edRel: en.edRel || null,
       meta: null, metaP: null, orient: 1, thumb: null, el: null, cache: null, sharp: SHARP[key] ?? null, af: undefined, burst: null });
   }
   if (!fresh.length) { toast(list.length ? 'No supported photos found' : 'No files selected'); return; }
@@ -3776,7 +3797,9 @@ $('lcBtn').onclick = () => {
   if (lcMode === 'find') { walkStop = true; $('lcBtn').disabled = true; $('lcPhase').textContent = 'Stopping\u2026'; }
   else { lcHidden = true; $('loadCard').hidden = true; }
 };
-async function walkHandle(dir, out, zone = null, home = null, root = dir) {
+/* ed: inside an _edits folder, { at: the photo folder it belongs to, home: that folder's own folder for the subfolder question,
+   raws: names of that folder's raw files (their working copies in _edits stay hidden), rel: the path inside _edits } */
+async function walkHandle(dir, out, zone = null, home = null, root = dir, ed = null) {
   if (dir === root) { walkCount = 0; walkSkipped = 0; walkName = dir.name; walkStop = false; walkT0 = performance.now(); walkStack.length = 0; walkMsg(); }
   else walkStack.push(dir.name);
   try {
@@ -3789,13 +3812,21 @@ async function walkHandle(dir, out, zone = null, home = null, root = dir) {
     const batch = want.slice(i, i + 32), got = await Promise.all(batch.map(e => e.getFile().catch(() => null)));
     batch.forEach((entry, k) => {
       const file = got[k]; if (!file) { walkSkipped++; return; }
-      if (extOf(entry.name) === 'xmp') out.push({ file, dir, xmp: true }); else out.push({ file, handle: entry, dir, zone, home, root });
+      if (extOf(entry.name) === 'xmp') out.push({ file, dir, xmp: true });
+      else if (ed && !ed.rel && RAW.has(extOf(entry.name)) && ed.raws.has(entry.name.toLowerCase())) return;   // the raw's working copy for another program
+      else out.push({ file, handle: entry, dir, zone, home, root, ed: ed ? ed.at : null, edHome: ed ? ed.home : null, edRel: ed ? ed.rel + entry.name : null });
     });
     walkCount += batch.length; walkMsg();
   }
   for (const entry of dirs) {
-    const z = entry.name === '_picks' ? 'picks' : entry.name === '_rejects' ? 'rejects' : null;
     if (walkStop) return;
+    if (ed) { if (!entry.name.startsWith('.')) { try { await walkHandle(entry, out, null, null, root, { ...ed, rel: ed.rel + entry.name + '/' }); } catch { walkSkipped++; } } continue; }
+    if (entry.name === '_edits') {
+      const raws = new Set(want.filter(e => RAW.has(extOf(e.name))).map(e => e.name.toLowerCase()));
+      try { await walkHandle(entry, out, null, null, root, { at: dir, home: zone ? home : dir, raws, rel: '' }); } catch { walkSkipped++; }
+      continue;
+    }
+    const z = entry.name === '_picks' ? 'picks' : entry.name === '_rejects' ? 'rejects' : null;
     try { if (z) { if (!zone) await walkHandle(entry, out, z, dir, root); } else await walkHandle(entry, out, zone, home, root); } catch { walkSkipped++; }
   }
   } finally { if (dir !== root) walkStack.pop(); }
@@ -3804,7 +3835,7 @@ async function walkHandle(dir, out, zone = null, home = null, root = dir) {
    reading photos is the slow part, so this is asked before anything loads */
 let openScope = 'all';   // which photos the open folder shows: all, top (this folder only) or new (not yet organized)
 async function chooseScope(dir, out, forced) {
-  const photos = out.filter(e => !e.xmp), own = e => e.dir === dir || (e.zone && e.home === dir), top = photos.filter(own);
+  const photos = out.filter(e => !e.xmp), own = e => e.dir === dir || (e.zone && e.home === dir) || e.edHome === dir, top = photos.filter(own);
   openScope = 'all';
   if (top.length === photos.length) return out;
   const idx = await readIndex(dir), fresh2 = idx ? photos.filter(e => { const x = idx.files[idOf(e.file)]; return own(e) || !(x && x.s); }) : null;   // the top level is the inbox: its photos always count as new
@@ -3833,6 +3864,144 @@ async function chooseScope(dir, out, forced) {
   return pickFor(choice);
 }
 function syncScopeReset() { const b = $('scopeReset'); if (b) b.hidden = !S.openScope; }
+/* ---------- Edit in… (desktop program): send the photo to another editing program. Its file goes into an _edits folder
+   beside the photo (a copy of the original, or a 16-bit TIFF with the crop and Quick finish, chosen per program), and what the
+   other program saves in _edits shows up here beside the original, checked whenever FledgeView comes back to the front. A raw
+   file's working copy stays hidden (it's the same photo). On the website the button says where the feature lives. ---------- */
+const eiPrefs = () => (S.editIn && typeof S.editIn === 'object') ? S.editIn : (S.editIn = { last: '', send: {}, added: [] });
+let eiFound = null, eiBusy = false, eiShown = [];
+const eiWatch = new Map();   // photo folder handle -> { root, home }
+/* the raw file to send: the photo itself, or the raw of a RAW + JPEG pair */
+const eiRawOf = it => RAW.has(it.ext) ? it : (it.raw && it.raw.handle && RAW.has(extOf(it.raw.name)) ? it.raw : null);
+const eiSendOf = ed => { const v = eiPrefs().send[ed.id]; return v === 'raw' || v === 'tiff' ? v : ed.send === 'raw' ? 'raw' : 'tiff'; };
+async function eiPrograms() {
+  if (!eiFound) { try { eiFound = await window.FV_DESKTOP.editors() || []; } catch { eiFound = []; } }
+  const all = eiFound.map(e => ({ ...e }));
+  for (const a of eiPrefs().added || []) if (a && a.path && !all.some(x => x.path.toLowerCase() === a.path.toLowerCase())) all.push({ ...a, added: true });
+  return all;
+}
+const eiPicked = () => { const r = document.querySelector('#eiList input:checked'); return r ? eiShown.find(e => e.id === r.value) : null; };
+function eiExplain() {
+  const it = cur(), ed = eiPicked(), raw = it && eiRawOf(it);
+  $('eiGo').disabled = !ed || eiBusy;
+  if (!it || !ed) { $('eiNote').textContent = ''; return; }
+  const stem = (raw || it).name.replace(/\.[^.]+$/, '');
+  let t;
+  if (raw && eiSendOf(ed) === 'tiff') t = `${ed.name} gets a 16-bit TIFF with your crop and Quick finish, ${stem}-Edit.tif, in an _edits folder beside the photo. Save it there and it shows up here beside the original.`;
+  else if (raw) t = `${ed.name} gets a copy of ${raw.name} in an _edits folder beside the photo and develops it its own way, so your crop and Quick finish stay in FledgeView. What it saves in _edits shows up here beside the original.`;
+  else t = `${ed.name} gets a copy of ${it.name} in an _edits folder beside it. Save it there and it shows up here beside the original.` + (editOf(it) ? ' Your crop and Quick finish stay in FledgeView; the copy is the original photo.' : '');
+  $('eiNote').textContent = t;
+}
+async function eiRender() {
+  const it = cur(), raw = it && eiRawOf(it), list = await eiPrograms(), p = eiPrefs(), box = $('eiList');
+  eiShown = list; box.textContent = '';
+  $('eiNone').hidden = list.length > 0;
+  const pick = list.find(e => e.id === p.last) || list[0];
+  for (const ed of list) {
+    const row = document.createElement('label'); row.className = 'eirow';
+    const r = document.createElement('input'); r.type = 'radio'; r.name = 'eiProg'; r.value = ed.id; r.checked = ed === pick; r.onchange = eiExplain;
+    const nm = document.createElement('span'); nm.className = 'einame'; nm.textContent = ed.name; nm.title = ed.path;
+    row.append(r, nm);
+    if (raw) {
+      const sel = document.createElement('select'); sel.setAttribute('aria-label', `What ${ed.name} gets`);
+      sel.title = 'Choose once for this program; FledgeView remembers it';
+      for (const [v, label] of [['raw', 'Raw file'], ['tiff', '16-bit TIFF with your edits']]) { const o = document.createElement('option'); o.value = v; o.textContent = label; sel.append(o); }
+      sel.value = eiSendOf(ed);
+      sel.onchange = () => { p.send[ed.id] = sel.value; saveS(); r.checked = true; eiExplain(); };
+      row.append(sel);
+    }
+    if (ed.added) {
+      const x = document.createElement('button'); x.type = 'button'; x.className = 'eirm'; x.textContent = '\u00d7';
+      x.title = 'Remove from this list'; x.setAttribute('aria-label', `Remove ${ed.name} from this list`);
+      x.onclick = e => { e.preventDefault(); p.added = (p.added || []).filter(a => a.path !== ed.path); if (p.last === ed.id) p.last = ''; saveS(); eiRender(); };
+      row.append(x);
+    }
+    box.append(row);
+  }
+  eiExplain();
+}
+async function openEditIn() {
+  const it = cur(); if (!it) return;
+  if (!deskHas('editIn')) { toast('Edit in Photoshop, Topaz, DxO, Affinity or Luminar: in the FledgeView desktop program.'); return; }
+  const src = eiRawOf(it) || it;
+  if (!src.handle || !src.dir) { toast('Open this photo\u2019s folder with Open folder first, so its edits can be saved beside it.'); return; }
+  $('eiFile').textContent = it.raw && src === it.raw ? `${it.name} (its raw file, ${src.name})` : it.name;
+  $('eiNote').textContent = ''; $('eiList').textContent = 'Looking for editing programs\u2026'; $('eiNone').hidden = true;
+  $('eiDlg').showModal();
+  await eiRender();
+}
+$('editInBtn').onclick = openEditIn;
+if (!window.FV_DESKTOP) $('editInBtn').classList.add('dim');
+addEventListener('keydown', e => {
+  if ((e.key === 'e' || e.key === 'E') && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && deskHas('editIn') && !e.target.closest('input,textarea,select,dialog') && cur()) { e.preventDefault(); openEditIn(); }
+});
+$('eiList').addEventListener('change', eiExplain);
+$('eiAdd').onclick = async () => {
+  let ed = null; try { ed = await window.FV_DESKTOP.pickEditor(); } catch (e) { toast('Couldn\u2019t add that program: ' + (e && e.message || e)); return; }
+  if (!ed) return;
+  const p = eiPrefs(); p.added = (p.added || []).filter(a => a.path.toLowerCase() !== ed.path.toLowerCase()); p.added.push(ed);
+  const known = (eiFound || []).find(x => x.path.toLowerCase() === ed.path.toLowerCase());
+  p.last = known ? known.id : ed.id; saveS();
+  await eiRender();
+};
+$('eiGo').onclick = async () => {
+  const it = cur(), ed = eiPicked(); if (!it || !ed || eiBusy) return;
+  const raw = eiRawOf(it), src = raw || it, send = raw ? eiSendOf(ed) : 'raw';
+  eiBusy = true; $('eiGo').disabled = true; $('eiGo').textContent = send === 'tiff' ? 'Making the TIFF\u2026' : 'Copying\u2026';
+  try {
+    const r = await window.FV_DESKTOP.editIn(src.handle, ed, { send, edit: send === 'tiff' ? (editOf(it) || {}) : {} });
+    const p = eiPrefs(); p.last = ed.id; saveS();
+    eiWatch.set(src.dir, { root: it.root, home: it.zone ? it.home : src.dir });
+    $('eiDlg').close();
+    await eiRefresh(true);
+    toast(r.made === 'tiff' ? `Opening ${r.name} in ${ed.name}. Save it there, and it shows up here beside the original.`
+      : `Opening ${r.name} in ${ed.name}${r.made === 'reused' ? ', the copy already in _edits with your earlier work on it' : ''}. What it saves in _edits shows up here beside the original.`);
+  } catch (e) { toast(`Couldn\u2019t open it in ${ed.name}: ${(e && e.message) || e}`); }
+  finally { eiBusy = false; $('eiGo').textContent = 'Open'; eiExplain(); }
+};
+/* one _edits folder (and two levels of its subfolders, where some programs put their exports): files not loaded yet go into
+   `fresh`; files saved over since are shown again. Returns how many were saved over. */
+async function eiScan(dir, w, d, rel, raws, fresh) {
+  let changed = 0;
+  for await (const en of d.values()) {
+    if (en.name.startsWith('.')) continue;
+    if (en.kind === 'directory') { if (rel.split('/').length < 3) changed += await eiScan(dir, w, en, rel + en.name + '/', raws, fresh); continue; }
+    const ext = extOf(en.name);
+    if (!SUPPORTED.has(ext) || en.name.startsWith('._') || (!rel && RAW.has(ext) && raws.has(en.name.toLowerCase()))) continue;
+    let file; try { file = await en.getFile(); } catch { continue; }
+    const edRel = rel + en.name, have = state.items.find(x => x.ed === dir && x.edRel === edRel);
+    if (!have) { fresh.push({ file, handle: en, dir: d, root: w.root, ed: dir, edHome: w.home, edRel }); continue; }
+    if (have.file.lastModified === file.lastModified && have.file.size === file.size) continue;
+    const nk = keyOf(file);   // saved over in the other program: show the new version
+    if (nk !== have.key) {
+      for (const store of [CULL, EDITS, SHARP]) if (store[have.key] != null) { store[nk] = store[have.key]; delete store[have.key]; }
+      if (SEEN.has(have.key)) { SEEN.delete(have.key); SEEN.add(nk); saveSeen(); }
+      have.key = nk; saveCull(); saveEdits(); saveSharp();
+    }
+    if (have.thumb) URL.revokeObjectURL(have.thumb); if (have.thumbHi) URL.revokeObjectURL(have.thumbHi);
+    Object.assign(have, { file, handle: en, thumb: null, thumbHi: null, cache: null, meta: null, metaP: null, prev: null });
+    paintThumb(have); queueThumbs([have]); queueMeta([have]); changed++;
+    if (cur() === have) show(state.idx);
+  }
+  return changed;
+}
+/* what the other programs saved: new files in _edits are added beside their originals, files saved over are shown again */
+async function eiRefresh(quiet) {
+  for (const it of state.items) if (it.ed && !eiWatch.has(it.ed)) eiWatch.set(it.ed, { root: it.root, home: it.edHome });
+  const fresh = []; let changed = 0;
+  for (const [dir, w] of [...eiWatch]) {
+    if (!state.items.some(x => x.dir === dir || x.ed === dir)) { eiWatch.delete(dir); continue; }   // that folder was cleared
+    let edDir; try { edDir = await dir.getDirectoryHandle('_edits'); } catch { continue; }
+    const raws = new Set(state.items.filter(x => x.dir === dir && RAW.has(x.ext)).map(x => x.name.toLowerCase()));
+    for (const it of state.items) if (it.raw && it.raw.dir === dir) raws.add(it.raw.name.toLowerCase());
+    try { changed += await eiScan(dir, w, edDir, '', raws, fresh); } catch {}
+  }
+  if (fresh.length) addFiles(fresh);
+  if (!quiet && (fresh.length || changed)) setTimeout(() => toast(fresh.length ? `${fresh.length} edited photo${fresh.length === 1 ? '' : 's'} back from _edits` : `Updated ${changed} edited photo${changed === 1 ? '' : 's'} from _edits`), 80);
+}
+let eiT = 0;
+const eiSoon = () => { if (!eiWatch.size && !state.items.some(x => x.ed)) return; clearTimeout(eiT); eiT = setTimeout(() => eiRefresh(false), 400); };
+if (window.FV_DESKTOP) { addEventListener('focus', eiSoon); document.addEventListener('visibilitychange', () => { if (!document.hidden) eiSoon(); }); }
 /* ---------- Start where I left off (desktop program). While a folder is open, the program is told where the person is: the
    photo, the filter, 4-up or Photo view, and the subfolder choice (the sort is a setting, kept anyway). At launch the program
    hands back the last folder and that place; openDir reopens the folder and resumeAt puts the person back. A folder chosen
@@ -4704,6 +4873,7 @@ function essentialRows(it, m) {
   add('File', 'File name', f.name);
   if (it.raw) add('File', 'Paired raw', `${it.raw.name} (${(it.raw.file.size / 1048576).toFixed(1)} MB)`);
   if (it.zone) add('File', 'Folder', '_' + it.zone);
+  if (it.ed) add('File', 'Folder', '_edits' + (it.edRel && it.edRel.includes('/') ? '/' + it.edRel.slice(0, it.edRel.lastIndexOf('/')) : ''));
   add('File', 'File size', (f.size / 1048576).toFixed(1) + ' MB');
   return rows;
 }
@@ -5935,7 +6105,7 @@ function chooseMove(movable) {
 }
 $('moveRej').onclick = async () => {
   closeMenus();
-  const movable = state.items.filter(i => i.dir && i.handle);
+  const movable = state.items.filter(i => i.dir && i.handle && !i.ed);
   if (!movable.length) return toast(whyNoWrite());
   if (!movePlan(movable, 'both').length && !movePlan(movable, 'rejects').length && !movePlan(movable, 'picks').length) {
     const flagged = movable.filter(it => cullOf(it).f).length;
@@ -6028,7 +6198,7 @@ async function scanForOrganize(root) {
   orgScanStop = false;
   const out = []; $('orgStatus').textContent = 'Listing the folder\u2026';
   await walkHandle(root, out);
-  const photos = out.filter(en => !en.xmp && !en.zone), idx = (await readIndex(root)) || { v: 1, files: {} }, cache = new Map(), seen = new Set();
+  const photos = out.filter(en => !en.xmp && !en.zone && !en.ed), idx = (await readIndex(root)) || { v: 1, files: {} }, cache = new Map(), seen = new Set();
   const pending = [], toRead = []; let settled = 0, userMoved = 0;
   for (const en of photos) {
     const id = idOf(en.file), rel = await relOf(root, en.dir, cache), e = idx.files[id]; seen.add(id);
@@ -6057,7 +6227,7 @@ async function indexSettle(root, list) {
   for (const { it, parts } of list) { try { const f = it.file || await it.handle.getFile(); idx.files[idOf(f)] = { d: parts.join('/'), m: metaSubset(it.meta), s: 1 }; } catch {} }
   await writeIndex(root, idx);
 }
-function orgCandidates() { return state.orgSource ? state.orgSource.items : state.items.filter(it => it.dir && it.handle && it.root && !it.zone); }
+function orgCandidates() { return state.orgSource ? state.orgSource.items : state.items.filter(it => it.dir && it.handle && it.root && !it.zone && !it.ed); }
 async function orgPlan() {
   const names = $('orgNames').value, tcSub = $('orgTc').checked;
   const plan = new Map(), inPlaceList = []; let inPlace = 0;
@@ -6096,7 +6266,7 @@ async function renderOrgPlan() {
   }
   if (!rows.length) { box.innerHTML = '<div class="orgrow"><span></span></div>'; box.querySelector('span').textContent = inPlace ? `Everything in ${rootName} is already organized by lens.` : 'Nothing to organize.'; }
   $('orgGo').disabled = !rows.length;
-  const skipped = state.items.filter(it => it.zone).length;
+  const skipped = state.items.filter(it => it.zone || it.ed).length;
   const noAccess = state.items.filter(it => !(it.dir && it.handle && it.root)).length;
   $('orgNote').textContent = (noAccess ? `${noAccess.toLocaleString()} loaded photo${noAccess === 1 ? ' was' : 's were'} opened without folder access and can’t be moved; use Open folder to load them. ` : '') + (inPlace ? `${inPlace.toLocaleString()} already in the right folder. ` : '') + (skipped ? `${skipped.toLocaleString()} in _picks or _rejects folders are left where they are. ` : '') + 'Teleconverter use is detected from the focal length, so a zoom used with a TC below its longest focal length may stay in the main folder.';
   if (state.orgSource) $('orgNote').textContent = orgSourceNote();
@@ -9411,8 +9581,14 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.77 beta';
+const VERSION = '0.9.78 beta';
 const RELEASES = [
+  { v: '0.9.78 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Edit in\u2026 (desktop program): send the photo you\u2019re on to Photoshop, Topaz, DxO, Affinity, Luminar or any editing program you add. Each program gets either the raw file or a 16-bit TIFF with your crop and Quick finish, your choice per program. The file goes into an _edits folder beside the photo, and whatever the program saves there shows up here, right beside the original. Ctrl+E opens it.',
+      'Photos in _edits folders open with their folder and stay put: Organize and Move picks and rejects leave them where they are.',
+    ]],
+  ] },
   { v: '0.9.77 beta', date: 'November 2026', groups: [
     ['New', [
       'In the desktop program, Start where I left off now goes all the way back: the photo you were on, with the same filter, sort, 4-up or Photo view, and the same choice of subfolders, without asking again. Turn it off or on in the View menu.',
