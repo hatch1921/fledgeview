@@ -1889,29 +1889,28 @@ details.lic pre{white-space:pre-wrap;font-size:11.5px;line-height:1.45;max-heigh
 .ereachmm{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--lcd-dim);white-space:nowrap}
 .ereachmm input{width:74px;font:inherit;font-size:12px;color:var(--lcd);background:#1d1e21;border:1px solid rgba(255,255,255,.18);border-radius:5px;padding:2px 6px;color-scheme:dark}
 .ereachg{grid-column:1 / -1;font-size:12px}
-.ecropinfo{grid-column:1 / -1;font-size:11.5px;line-height:1.35;color:var(--lcd-dim)}
+.ecropinfo{grid-column:1 / -1;font-size:11.5px;line-height:1.35;color:var(--lcd-dim);min-height:2.7em}
 .eprint{grid-column:1 / -1;display:flex;flex-direction:column;gap:5px;margin-top:4px;padding-top:7px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:var(--lcd-dim)}
 .eprhead{display:flex;align-items:center;justify-content:space-between}
 .eprunits{display:flex;border:1px solid rgba(255,255,255,.18);border-radius:5px;overflow:hidden}
 .eprunits button{background:none;border:0;color:var(--lcd-dim);font:inherit;font-size:11px;padding:1px 7px;cursor:pointer}
 .eprunits button[aria-pressed="true"]{background:var(--lcd);color:#000}
 .eprtop{display:flex;align-items:flex-start;gap:4px}
-.eprline{flex:1;text-align:left;background:none;border:0;padding:0;font:inherit;font-size:12.5px;line-height:1.35;color:var(--lcd);cursor:pointer}
-.eprline::after{content:" \25be";color:var(--lcd-dim)}
-.eprint.open .eprline::after{content:" \25b4"}
-.eprinfo{flex:none;background:none;border:0;padding:0 2px;font-size:13px;line-height:1.2;color:var(--lcd-dim);cursor:pointer}
-.eprinfo:hover,.eprinfo[aria-expanded="true"]{color:var(--lcd)}
-.eprmore{display:none;line-height:1.4;padding-left:8px;border-left:2px solid rgba(255,255,255,.12)}
-.eprint.open .eprmore,.eprint:hover .eprmore{display:block}
+.eprline{flex:1;font-size:12.5px;line-height:1.35;color:var(--lcd);min-height:2.7em}
+.eprmore{display:block;line-height:1.4;padding-left:8px;border-left:2px solid rgba(255,255,255,.12);min-height:4.2em}
+/* the Print section never changes height: rows that come and go keep their space, the verdict has room for three lines */
+#ePrLabC[hidden]{display:flex!important;visibility:hidden}
+/* no custom size: the verdict takes the custom row's space too (23px row + 5px gap), so nothing below moves */
+#ePrCustom[hidden] + .eprverdict{height:calc(5.6em + 28px)}
+#eCropSec > .eprint{margin-top:10px}
 .eprnote{margin:0;line-height:1.4;font-size:11.5px}
 .eprrow{display:flex;align-items:center;gap:6px;white-space:nowrap}
 .eprrow select{flex:1;min-width:0;font:inherit;font-size:12px;color:var(--lcd);background:#1d1e21;border:1px solid rgba(255,255,255,.18);border-radius:5px;padding:2px 4px;color-scheme:dark}
 .eprrow select option{background:var(--panel);color:var(--ink)}
 .eprrow input{width:58px;font:inherit;font-size:12px;color:var(--lcd);background:#1d1e21;border:1px solid rgba(255,255,255,.18);border-radius:5px;padding:2px 6px;color-scheme:dark}
-.eprverdict{line-height:1.4;font-size:12px}
+.eprverdict{line-height:1.4;font-size:12px;height:5.6em;overflow:hidden}
 .eprrow.eprlab{flex-direction:column;align-items:stretch;gap:3px}
 .eprrow.eprlab select{flex:none;width:100%}
-.eprverdict:empty{display:none}
 .eprverdict.ok{color:var(--lcd)}
 .eprverdict.low{color:var(--amber)}
 html[data-look="clean"] .eprunits button[aria-pressed="true"]{background:var(--acc);color:#fff}
@@ -2470,6 +2469,7 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 .plrow .plsum{display:block;font-size:13px;color:var(--ink-soft);margin-top:2px}
 .plrow .plbtns{display:flex;gap:6px;flex:none}
 .plrow .plbtns .btn{padding:4px 10px;font-size:13px}
+.plnewrow{display:flex;justify-content:flex-start;margin:8px 0 2px}.plnewrow[hidden]{display:none}
 .pledit{border:1px solid var(--panel-line);border-radius:8px;padding:10px 12px;margin:8px 0}
 .pledit .wrow input[type=number]{width:90px}
 #plSizeN{margin-left:8px}
@@ -2789,7 +2789,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <div class="slabel">Edit and share</div>
         <button class="knob sharebtn eopen" id="editTab" aria-expanded="false" aria-controls="editPanel" title="Adjust: exposure, contrast, color, and more, in a panel to the right (open or close)"><span>Adjust</span></button>
         <div class="eopenrow"><button class="knob sharebtn eopen" id="cropTab" aria-expanded="false" aria-controls="editPanel" title="Crop and straighten, in a panel to the right (R)"><span>Crop</span></button><button class="knob sharebtn" id="undoBtn" disabled title="Undo the last crop or adjustment on this photo, one step at a time (Ctrl+Z)">Undo</button></div>
-        <button class="knob sharebtn" id="plansBtn" title="Web JPEGs, full-size JPEGs or 16-bit TIFFs from many photos at once">Plans…</button>
+        <button class="knob sharebtn" id="plansBtn" title="Export presets: web JPEGs, full-size JPEGs or 16-bit TIFFs from many photos at once">Presets…</button>
         <button class="knob sharebtn" id="editInBtn" title="Edit in Photoshop, Topaz, DxO, Affinity or Luminar (Ctrl+E)">Edit in…</button>
         <button class="knob sharebtn" id="shareGal" title="Make a gallery page to email or post">Web gallery</button>
         <button class="knob sharebtn" id="shareSocial" title="Resize and crop copies for Instagram, Facebook, and the web">Social media</button>
@@ -3295,7 +3295,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
           <li><strong>View:</strong> the Info dial (<kbd>I</kbd> cycles full info, exposure only, and the photo alone), zoom, and the review tools.</li>
           <li><strong>Rate:</strong> position and file name, rating icons, <strong>◀ Pick Reject ▶</strong> (the arrows move to the previous or next photo, like the arrow keys), the <strong>Advance</strong> switch under them (click to change: Auto moves to the next photo after you rate; Manual stays put), and the <strong>Show</strong> filter.</li>
           <li><strong>Edit and share:</strong> <strong>Adjust</strong>, <strong>Crop</strong> with <strong>Undo</strong> beside it, <strong>Edit in…</strong> (desktop program), <strong>Web gallery</strong>, and <strong>Social media</strong>.</li>
-          <li><strong>Plans…</strong> (desktop program) makes finished files from many photos at once: <strong>Web JPEGs of my picks</strong> (2048 px, sharpened for screens, without location), <strong>Full-size JPEGs of everything</strong>, or <strong>16-bit TIFFs of my picks</strong>. <strong>Copy</strong> any plan to make your own: size, quality, sharpening, camera data, which photos and the folder it goes into. Raw files are made from the raw with each photo’s Quick finish, a few at a time. The files go into a folder named for the plan (like <strong>_web</strong>) inside the folder you opened; <strong>Show folder</strong> opens it. FledgeView doesn’t open those folders as photos.</li>
+          <li><strong>Presets…</strong> in Export (desktop program) runs an <strong>export preset</strong>: finished files from many photos at once: <strong>Web JPEGs of my picks</strong> (2048 px, sharpened for screens, without location), <strong>Full-size JPEGs of everything</strong>, or <strong>16-bit TIFFs of my picks</strong>. <strong>New</strong> starts your own preset; <strong>Edit</strong> changes one (editing a built-in preset makes your own copy, so the built-ins stay as they are); <strong>Duplicate</strong> and <strong>Delete</strong> work on yours. A preset sets size, quality, sharpening, camera data, which photos and the folder it goes into. Raw files are made from the raw with each photo’s Quick finish, a few at a time. The files go into a folder named for the preset (like <strong>_web</strong>) inside the folder you opened; <strong>Show folder</strong> opens it. FledgeView doesn’t open those folders as photos.</li>
           <li><strong>Speed</strong> (desktop program, View menu): <strong>Full speed</strong> uses every core, <strong>Balanced</strong> (the default) leaves a couple free so other programs stay responsive, <strong>Light</strong> uses half. Advanced sets an exact number of cores.</li>
           <li><strong>Edit in…</strong> (desktop program, <kbd>Ctrl</kbd>+<kbd>E</kbd>) sends the photo you’re on to Photoshop, Topaz, DxO, Affinity, Luminar, or any editing program you choose with <strong>Add a program</strong>. Choose once per program what it gets: the <strong>raw file</strong> (it develops the raw its own way) or a <strong>16-bit TIFF with your edits</strong> (your crop and Quick finish, with the camera data). The file goes into an <strong>_edits</strong> folder beside the photo; the original is never changed. Whatever the program saves in _edits shows up here beside the original when you come back to FledgeView. If a program saves somewhere else, set its save or export folder to _edits. Organize and Move picks and rejects leave _edits alone.</li>
         </ul>
@@ -3354,7 +3354,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
           <li><strong>Light:</strong> exposure, contrast, highlights, shadows, whites, and blacks. <strong>Color:</strong> temperature (blue to amber) and tint (green to magenta), shown on colored scales, plus vibrance. <strong>Detail and effects:</strong> sharpen and vignette. Double-click a slider to reset it.</li>
           <li><strong>Crop and straighten:</strong> click <strong>Crop</strong>, then drag the corners or the whole box; choose an <strong>Aspect</strong> or Free. <strong>Straighten</strong> levels a tilted horizon, showing a grid while you drag. Click <strong>Done</strong> (or press Enter) to finish. The Crop panel’s own <strong>Undo</strong> steps back through crop and straighten changes one at a time without touching your other edits. While you crop, the box shows the size you’re cropping to: pixels, megapixels, and the focal length the crop is equivalent to. <strong>Reach</strong> crops to what a 1.4× or 2× teleconverter would have framed, or to any focal length you type (Custom); <strong>Reach guides</strong> show those framings as dashed boxes you can click. In Export, the <strong>Crop reach</strong> info bar field adds the equivalent focal length on cropped photos. The crop is kept with your other edits, and Export\u2019s social shapes crop from the cropped photo.</li>
           <li><strong>Undo</strong> in the Edit and share section (beside Crop) steps back through this photo’s changes one at a time, newest first, and names what it will undo: <strong>Undo crop</strong> for a crop or straighten, <strong>Undo adjust</strong> for an adjustment (each slider movement, Auto, Pick neutral, or black and white is one step), and Undo reset or Undo paste. <kbd>Ctrl</kbd>+<kbd>Z</kbd> (<kbd>Cmd</kbd>+<kbd>Z</kbd> on a Mac) does the same. Each photo keeps its own steps until you close FledgeView.</li>
-          <li><strong>Print size</strong>, under the crop readout, says how big the crop prints: for example “Book or close-up print: to 28 × 19 in (300 ppi).” Hover or click it for two more lines: most labs’ minimum (200 ppi), and canvas or a wall seen from across the room (150 ppi). <strong>My print lab</strong> (photo book, fine art print, canvas, or Custom) makes the sizes use your lab’s ppi. <strong>Will it print at</strong> shows the ppi for a paper size you pick, with a ✓ when it meets your lab’s minimum (or 200 ppi if no lab is set); a paper of a different shape trims the edges. The ⓘ explains why labs differ. Sizes show in centimetres or inches to suit your region; the in and cm buttons switch. Photo info shows the print size too, for the whole photo or its crop.</li>
+          <li><strong>Print</strong>, at the bottom of the Crop panel, says how big the crop prints: for example “Book or close-up print: to 28 × 19 in (300 ppi),” with two more lines under it: most labs’ minimum (200 ppi), and canvas or a wall seen from across the room (150 ppi). Everything in it is always shown, so the panel doesn’t jump while you crop. <strong>My print lab</strong> (photo book, fine art print, canvas, or Custom) makes the sizes use your lab’s ppi. <strong>Will it print at</strong> shows the ppi for a paper size you pick, with a ✓ when it meets your lab’s minimum (or 200 ppi if no lab is set); a paper of a different shape trims the edges. A short note explains why labs differ. Sizes show in centimetres or inches to suit your region; the in and cm buttons switch. Photo info shows the print size too, for the whole photo or its crop.</li>
           <li><strong>Saturation</strong> boosts or calms every color evenly, while <strong>Vibrance</strong> favors muted colors. <strong>Clarity</strong> adds contrast to mid-size detail, such as feathers and fur, without sharpening smooth backgrounds.</li>
           <li><strong>Pick neutral</strong> (<kbd>W</kbd>), at the top of Color: click it, then click something that should be neutral gray or white, such as a gray card, a white feather, or a cloud. Temperature and Tint are set so that spot becomes neutral, which corrects a color cast; for the most accurate skin tones, photograph a gray card in the same light and pick it. Zoom in first to pick a small spot.</li>
           <li><strong>Reset one adjustment:</strong> a changed slider shows a small <strong>↺</strong> beside its value; click it to reset just that slider (or double-click the slider or its number). The ↺ also shows at a glance which adjustments are active.</li>
@@ -3437,7 +3437,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
           <li><strong>Tips:</strong> hover over any button or slider for a short description and its shortcut. Turn them off in <strong>Help ▾ → Show tips</strong>.</li>
           <li><strong>Help ▾ → Send feedback</strong> opens an email with your version, browser, and screen size filled in, so problems are easy to track down.</li>
           <li><strong>Help ▾ → Monitor check</strong> tests whether your screen shows shadow and highlight detail properly.</li>
-          <li><strong>FledgeView is free.</strong> If it saves you time, <strong>Help ▾ → Support FledgeView</strong> leads to a tip page on Ko-fi.</li>
+          <li id="helpTip"><strong>FledgeView is free.</strong> If it saves you time, <strong>Help ▾ → Support FledgeView</strong> leads to a tip page on Ko-fi.</li>
         </ul>
       </section>
     </div>
@@ -3466,9 +3466,10 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
 </dialog>
 
 <dialog id="plansDlg" class="eidlg" aria-labelledby="plH">
-  <h2 id="plH">Plans</h2>
-  <p class="sub">Finished files from many photos at once. Raw files are made from the raw with each photo’s Quick finish. The files go into a folder named for the plan, inside the folder you opened.</p>
-  <div class="eilist" id="plList" role="radiogroup" aria-label="Plan"></div>
+  <h2 id="plH">Export presets</h2>
+  <p class="sub">Finished files from many photos at once. Raw files are made from the raw with each photo’s Quick finish. The files go into a folder named for the preset, inside the folder you opened.</p>
+  <div class="eilist" id="plList" role="radiogroup" aria-label="Export preset"></div>
+  <div class="plnewrow" id="plNewRow"><button type="button" class="btn" id="plNew" title="Start your own export preset">New preset</button></div>
   <div class="pledit" id="plEdit" hidden>
     <div class="wrow"><label for="plName">Name</label><input id="plName" type="text" autocomplete="off" maxlength="60"></div>
     <div class="wrow"><label for="plFmt">Make</label><select id="plFmt"><option value="jpeg">JPEG</option><option value="tiff">16-bit TIFF</option></select></div>
@@ -3481,7 +3482,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
     <div class="wrow"><label for="plFolder">Folder</label><input id="plFolder" type="text" autocomplete="off" maxlength="40" spellcheck="false"></div>
     <label class="chk"><input type="checkbox" id="plEdits"> Apply each photo’s Quick finish (crop and adjustments)</label>
     <p class="sub" id="plEditNote"></p>
-    <div class="end"><button class="btn" id="plEditCancel">Cancel</button><button class="btn go" id="plEditSave">Save plan</button></div>
+    <div class="end"><button class="btn" id="plEditCancel">Cancel</button><button class="btn go" id="plEditSave">Save preset</button></div>
   </div>
   <div id="plRunBox">
     <div class="wrow"><label for="plWhich">Photos</label><select id="plWhich"></select></div>
@@ -3493,7 +3494,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
 
 <dialog id="speedDlg" class="eidlg" aria-labelledby="spH">
   <h2 id="spH">Speed</h2>
-  <p class="sub">How much of this computer FledgeView uses for Quick finish, exports, Edit in and Plans. It changes straight away.</p>
+  <p class="sub">How much of this computer FledgeView uses for Quick finish, exports, Edit in and Export presets. It changes straight away.</p>
   <div class="eilist" role="radiogroup" aria-labelledby="spH">
     <label class="eirow sprow"><input type="radio" name="spMode" value="full"><span><strong>Full speed</strong><small id="spFullTxt"></small></span></label>
     <label class="eirow sprow"><input type="radio" name="spMode" value="balanced"><span><strong>Balanced</strong> (recommended)<small id="spBalTxt"></small></span></label>
@@ -4122,10 +4123,13 @@ function plRender() {
     body.append(nm, sum);
     const btns = document.createElement('span'); btns.className = 'plbtns';
     const mk = (label, title, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = label; b.title = title; b.disabled = busy; b.onclick = e => { e.preventDefault(); fn(); }; btns.append(b); };
-    mk('Copy', 'Make your own plan starting from this one', () => plEdit({ ...p, id: 'my-' + Date.now().toString(36), name: p.name + ' (my copy)', builtin: false }, true));
-    if (!PLAN_BUILTIN.includes(p)) {
-      mk('Edit', 'Change this plan', () => plEdit({ ...p }, false));
-      mk('Delete', 'Delete this plan (files it made stay where they are)', () => { pr.custom = pr.custom.filter(x => x.id !== p.id); if (pr.last === p.id) pr.last = 'web'; saveS(); plRender(); });
+    const newId = () => 'my-' + Date.now().toString(36);
+    if (PLAN_BUILTIN.includes(p)) {
+      mk('Edit', 'Make your own copy of this built-in preset and change it (the built-in stays as it is)', () => plEdit({ ...p, id: newId(), name: p.name + ' (mine)', builtin: false }, true));
+    } else {
+      mk('Edit', 'Change this preset', () => plEdit({ ...p }, false));
+      mk('Duplicate', 'Make another preset starting from this one', () => plEdit({ ...p, id: newId(), name: p.name + ' copy' }, true));
+      mk('Delete', 'Delete this preset (files it made stay where they are)', () => { pr.custom = pr.custom.filter(x => x.id !== p.id); if (pr.last === p.id) pr.last = 'web'; saveS(); plRender(); });
     }
     row.append(r, body, btns); box.append(row);
   }
@@ -4139,20 +4143,21 @@ function plEdit(p, isNew) {
   $('plQ').value = p.q || 90; $('plSharp').value = String(+p.sharp >= 0.7 ? 0.7 : +p.sharp > 0 ? 0.35 : 0);
   $('plMeta').value = p.meta || 'all'; $('plWhichDef').value = p.which === 'all' ? 'all' : 'picks'; $('plWhen').value = p.when === 'now' ? 'now' : 'after';
   $('plFolder').value = p.folder; $('plEdits').checked = p.edits !== false;
-  plEditSync(); $('plEdit').hidden = false; $('plRunBox').hidden = true; $('plGo').hidden = true; $('plName').focus(); $('plName').select();
+  plEditSync(); $('plEdit').hidden = false; $('plNewRow').hidden = true; $('plRunBox').hidden = true; $('plGo').hidden = true; $('plName').focus(); $('plName').select();
 }
 function plEditSync() {
   const tiff = $('plFmt').value === 'tiff';
   $('plQRow').hidden = tiff; $('plSharpRow').hidden = tiff; $('plSizeN').hidden = $('plSize').value !== 'custom';
-  $('plEditNote').textContent = '"From a card" is used when you choose this plan while importing a card: right after the import, or when you\u2019re done culling.';
+  $('plEditNote').textContent = '"From a card" is used when you choose this preset while importing a card: right after the import, or when you\u2019re done culling.';
 }
-function plEditClose() { plEditing = null; $('plEdit').hidden = true; $('plRunBox').hidden = false; $('plGo').hidden = false; plRender(); }
+function plEditClose() { plEditing = null; $('plEdit').hidden = true; $('plRunBox').hidden = false; $('plGo').hidden = false; $('plNewRow').hidden = false; plRender(); }
+$('plNew').onclick = () => plEdit({ id: 'my-' + Date.now().toString(36), name: 'My preset', fmt: 'jpeg', size: 2048, q: 90, sharp: 0.35, meta: 'nogps', which: 'picks', when: 'after', folder: '', edits: true }, true);
 $('plFmt').onchange = plEditSync; $('plSize').onchange = plEditSync;
 $('plEditCancel').onclick = plEditClose;
 $('plEditSave').onclick = () => {
   if (!plEditing) return;
   const pr = plPrefs(), p = plEditing.p;
-  const name = $('plName').value.trim() || 'My plan';
+  const name = $('plName').value.trim() || 'My preset';
   let folder = $('plFolder').value.trim().replace(/[\\/:*?"<>|]+/g, '').replace(/^\.+/, '');
   if (!folder) folder = '_' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30);
   if (['_picks', '_rejects', '_edits'].includes(folder.toLowerCase())) { toast(`${folder} is used by FledgeView itself; choose another folder name.`); return; }
@@ -4164,8 +4169,8 @@ $('plEditSave').onclick = () => {
   plEditClose();
 };
 async function openPlans() {
-  if (!deskHas('plans')) { toast('Plans (web JPEGs, full-size JPEGs and 16-bit TIFFs of many photos at once): in the FledgeView desktop program.'); return; }
-  if (!state.items.length) { toast('Open a folder first, then run a plan on its photos.'); return; }
+  if (!deskHas('plans')) { toast('Export presets (web JPEGs, full-size JPEGs and 16-bit TIFFs of many photos at once): in the FledgeView desktop program.'); return; }
+  if (!state.items.length) { toast('Open a folder first, then run a preset on its photos.'); return; }
   if (!plBusy) { $('plProg').hidden = true; $('plShow').hidden = true; $('plStop').hidden = true; }
   plEditClose(); spLabel();
   $('plansDlg').showModal();
@@ -4176,8 +4181,8 @@ $('plWhich').onchange = plExplain;
 $('plSpeed').onclick = () => openSpeed();
 $('plStop').onclick = () => { plStop = true; $('plStop').disabled = true; $('plProgTxt').textContent = 'Stopping after the photos already being made\u2026'; };
 $('plShow').onclick = () => { if (plOutPath) window.FV_DESKTOP.reveal(plOutPath).catch(() => toast('Couldn\u2019t open that folder.')); };
-$('plansDlg').addEventListener('cancel', e => { if (plBusy) { e.preventDefault(); toast('The plan keeps running. Stop it first, or leave this open.'); } });
-$('plClose').addEventListener('click', e => { if (plBusy) { e.preventDefault(); e.stopPropagation(); toast('The plan keeps running. Stop it first, or leave this open.'); } }, true);
+$('plansDlg').addEventListener('cancel', e => { if (plBusy) { e.preventDefault(); toast('The preset keeps running. Stop it first, or leave this open.'); } });
+$('plClose').addEventListener('click', e => { if (plBusy) { e.preventDefault(); e.stopPropagation(); toast('The preset keeps running. Stop it first, or leave this open.'); } }, true);
 const joinPath = (dir, name) => dir + (/[\\/]$/.test(dir) ? '' : dir.includes('\\') ? '\\' : '/') + name;
 $('plGo').onclick = async () => {
   const plan = plPicked(); if (!plan || plBusy) return;
@@ -4191,7 +4196,7 @@ $('plGo').onclick = async () => {
     if (plan.fmt === 'tiff' && !byProgram) { skipped++; continue; }
     jobs.push({ it, src, byProgram });
   }
-  if (!jobs.length) { toast(noFolder ? 'These photos weren\u2019t opened with Open folder, so there\u2019s nowhere to save the files.' : 'Nothing to make for this plan.'); return; }
+  if (!jobs.length) { toast(noFolder ? 'These photos weren\u2019t opened with Open folder, so there\u2019s nowhere to save the files.' : 'Nothing to make for this preset.'); return; }
   { const pr = plPrefs(); pr.used = [...new Set([...(pr.used || []), plan.folder])].slice(-50); saveS(); }
   plBusy = true; plStop = false; plRender();
   $('plGo').disabled = true; $('plStop').hidden = false; $('plStop').disabled = false; $('plShow').hidden = true; $('plProg').hidden = false;
@@ -4261,13 +4266,13 @@ async function spApply(mode, cores) {
 function spExplain() {
   const s = plSpeedNow; if (!s) return;
   const n = s.cores, bal = n >= 8 ? n - 2 : n >= 4 ? n - 1 : n;
-  $('spFullTxt').textContent = `All ${n} cores, 3 photos at a time in Plans. Fastest; other programs may feel slow while FledgeView works.`;
+  $('spFullTxt').textContent = `All ${n} cores, 3 photos at a time in Export presets. Fastest; other programs may feel slow while FledgeView works.`;
   $('spBalTxt').textContent = `${bal} of ${n} cores, 2 photos at a time, so Photoshop, Lightroom and your browser stay responsive.`;
   $('spLightTxt').textContent = `${Math.max(1, Math.floor(n / 2))} of ${n} cores, 1 photo at a time. For when you\u2019re working on something else heavy.`;
   $('spExactTxt').textContent = ` (this computer has ${n})`;
   $('spCores').max = n; if (!$('spCores').value) $('spCores').value = s.threads;
   for (const r of document.querySelectorAll('input[name=spMode]')) r.checked = r.value === s.mode;
-  $('spNow').textContent = `Now using ${s.threads} of ${n} cores, ${s.files_at_once} photo${s.files_at_once === 1 ? '' : 's'} at a time in Plans.`;
+  $('spNow').textContent = `Now using ${s.threads} of ${n} cores, ${s.files_at_once} photo${s.files_at_once === 1 ? '' : 's'} at a time in Export presets.`;
 }
 async function openSpeed() {
   if (!deskHas('speed')) return;
@@ -8613,8 +8618,8 @@ function renderPrint(w, h) {
   if (p.size === 'custom') { a = +$('ePrW').value; b2 = +$('ePrH').value; name = a && b2 ? `${a} \u00d7 ${b2} ${u}` : ''; }
   else if (p.size) { const z = (PRINT_SIZES[u] || []).find(z => sizeKey(z) === p.size); if (z) { a = z[0]; b2 = z[1]; name = (z[2] ? z[2] + ', ' : '') + `${z[0]} \u00d7 ${z[1]} ${u}`; } }
   if (!(a > 0 && b2 > 0)) { $('ePrVerdict').textContent = ''; $('ePrVerdict').className = 'eprverdict'; return; }
-  const r = printCheck(w, h, a, b2), trim = r.trim ? ' The edges are trimmed to fit the paper.' : '';
-  $('ePrVerdict').textContent = r.good ? `${name}: ${r.ppi} ppi \u2713${trim}` : `${name}: ${r.ppi} ppi, below ${r.lab ? 'your lab\u2019s' : 'most labs\u2019'} ${r.min} ppi: fine viewed at a distance, but your lab may warn.${trim}`;
+  const r = printCheck(w, h, a, b2), trim = r.trim ? ' Edges trimmed to fit the paper.' : '';
+  $('ePrVerdict').textContent = r.good ? `${name}: ${r.ppi} ppi \u2713${trim}` : `${name}: ${r.ppi} ppi, below ${r.lab ? 'your lab\u2019s' : 'most labs\u2019'} ${r.min} ppi. Fine from a distance; your lab may warn.${trim}`;
   $('ePrVerdict').className = 'eprverdict ' + (r.good ? 'ok' : 'low');
 }
 const sizeKey = z => z[0] + 'x' + z[1];
@@ -8628,10 +8633,6 @@ function fillPrintSizes() {
 function printUi() {
   const p = printPrefs(), again = () => { saveS(); if (printPx) renderPrint(printPx[0], printPx[1]); refreshRows(); };
   fillPrintSizes();
-  $('ePrint').classList.toggle('open', !!p.open); $('ePrLine').setAttribute('aria-expanded', String(!!p.open));
-  $('ePrLine').onclick = () => { p.open = !p.open; $('ePrint').classList.toggle('open', p.open); $('ePrLine').setAttribute('aria-expanded', String(p.open)); saveS(); };
-  $('ePrInfo').title = $('ePrNote').textContent;
-  $('ePrInfo').onclick = () => { const n = $('ePrNote'); n.hidden = !n.hidden; $('ePrInfo').setAttribute('aria-expanded', String(!n.hidden)); };
   const setUnit = u => { if (printUnit() !== u) { const k = u === 'cm' ? 2.54 : 1 / 2.54; if (p.size === 'custom') { p.cw = +(p.cw * k).toFixed(1); p.ch = +(p.ch * k).toFixed(1); } else p.size = ''; } p.unit = u; fillPrintSizes(); again(); };
   $('ePrIn').onclick = () => setUnit('in'); $('ePrCm').onclick = () => setUnit('cm');
   $('ePrSize').onchange = e => { p.size = e.target.value; $('ePrCustom').hidden = p.size !== 'custom'; if (p.size === 'custom') { $('ePrW').value = p.cw || ''; $('ePrH').value = p.ch || ''; $('ePrW').focus(); } again(); };
@@ -8853,7 +8854,7 @@ function buildEditSliders() {
   let box = cropBox;
   for (const [k, label, mn = -100, mx = 100] of EDIT_UI) {
     if (!label) {
-      if (k === 'Light') box = mainBox;
+      if (k === 'Light') { if ($('ePrint')) cropBox.append($('ePrint')); box = mainBox; }   // Print sits at the bottom of the Crop panel, below Straighten
       const s = document.createElement('div'); s.className = k === 'Crop and straighten' ? 'esec etitle' : 'esec'; s.textContent = k; box.append(s);
       if (k === 'Crop and straighten') {
         const w = document.createElement('div'); w.className = 'ecrop';
@@ -8864,9 +8865,9 @@ function buildEditSliders() {
           + '<label class="chk ereachg"><input type="checkbox" id="eReachGuides"> Reach guides</label></div>'
           + '<button class="knob ebtn" id="eCropReset">Reset crop</button><div class="ecropinfo" id="eCropInfo" aria-live="polite"></div><div class="eprint" id="ePrint">'
           + '<div class="eprhead"><span class="erow">Print</span><span class="eprunits" role="group" aria-label="Print size units"><button type="button" id="ePrIn" aria-pressed="false" title="Show print sizes in inches">in</button><button type="button" id="ePrCm" aria-pressed="false" title="Show print sizes in centimetres">cm</button></span></div>'
-          + '<div class="eprtop"><button type="button" class="eprline" id="ePrLine" aria-expanded="false" aria-controls="ePrMore" title="Click to show or hide larger print sizes"></button><button type="button" class="eprinfo" id="ePrInfo" aria-expanded="false" aria-controls="ePrNote" aria-label="About print sizes">\u24d8</button></div>'
+          + '<div class="eprtop"><div class="eprline" id="ePrLine"></div></div>'
           + '<div class="eprmore" id="ePrMore"><div id="ePrM1"></div><div id="ePrM2"></div></div>'
-          + '<p class="eprnote" id="ePrNote" hidden>Labs differ: books usually want 250\u2013300 ppi, canvas often accepts 150\u2013175. Your lab\u2019s minimum is the one that counts.</p>'
+          + '<p class="eprnote" id="ePrNote">Labs differ: books usually want 250\u2013300 ppi, canvas often accepts 150\u2013175. Your lab\u2019s minimum is the one that counts.</p>'
           + '<label class="eprrow">Will it print at <select id="ePrSize" title="Pick a print size to see the ppi this crop gives at that size"></select></label>'
           + '<div class="eprrow" id="ePrCustom" hidden><input type="number" id="ePrW" min="1" max="999" step="any" aria-label="Print width"> \u00d7 <input type="number" id="ePrH" min="1" max="999" step="any" aria-label="Print height"> <span id="ePrCU">in</span></div>'
           + '<div class="eprverdict" id="ePrVerdict" aria-live="polite"></div>'
@@ -9863,8 +9864,15 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.80 beta';
+const VERSION = '0.9.81 beta';
 const RELEASES = [
+  { v: '0.9.81 beta', date: 'November 2026', groups: [
+    ['Changed', [
+      'Plans are now Export presets (desktop program): the Presets\u2026 button in Export. New starts your own preset, Edit changes one (editing a built-in makes your own copy, so the built-ins stay as they are), and Duplicate and Delete work on yours. Your saved presets carry over.',
+      'Print moved to the bottom of the Crop panel, below Straighten, with everything always shown: the print size, the two lines under it, the note on labs, Will it print at and My print lab. Nothing opens or closes, so the panel no longer jumps while you crop.',
+      'The desktop program no longer shows Support FledgeView or tip notes; the website still does.',
+    ]],
+  ] },
   { v: '0.9.80 beta', date: 'November 2026', groups: [
     ['New', [
       'A new look: the FledgeView icon (an amber aperture) and name now appear at the top of the app, in About, on the website and as the desktop program\u2019s icon.',
@@ -10395,14 +10403,14 @@ if (S.seenVersion !== VERSION) { $('helpMenuBtn').classList.add('hasnew'); $('ne
 /* Ko-fi support: a menu item, a button in About, and one thank-you note after the third successful export or sort */
 const KOFI = 'https://ko-fi.com/J5Q729VR3X';
 $('tipBtn').onclick = () => window.open(KOFI, '_blank', 'noopener');
-/* the Microsoft Store version of the desktop program doesn't show the Ko-fi links (the program sets window.FV_DESKTOP.store) */
+/* the desktop program is paid for, so it shows no Ko-fi links or tip requests (the free website keeps them) */
 /* the desktop program edits raws from the raw file itself, so the guide's tip about embedded previews doesn't apply there */
 if (deskHas('rawFinish')) $('rawTip').hidden = true;
 if (window.FV_DESKTOP) document.querySelectorAll('#empty .emptynote').forEach(e => e.remove());   // no browser “Upload” wording in the program
 /* sharpest-first bursts: a sort choice and the K key in the program; on the website the choice is shown greyed out, saying where it lives */
 if (deskHas('bursts')) $('keepBest').hidden = false;
 else { $('keepBest').style.display = 'none'; $('sortBsf').disabled = true; $('sortBsf').textContent = 'Sharpest-first bursts: in the FledgeView desktop program'; if (S.sort === 'bsf') { S.sort = 'burst'; $('sortSel').value = 'burst'; } }
-if (window.FV_DESKTOP && window.FV_DESKTOP.store) document.querySelectorAll('#tipBtn, .tiplink, #aboutDlg .tipbox').forEach(e => { e.style.display = 'none'; });
+if (window.FV_DESKTOP) document.querySelectorAll('#tipBtn, .tiplink, #aboutDlg .tipbox, #helpTip').forEach(e => { e.style.display = 'none'; });
 $('tipGo').addEventListener('click', () => setTimeout(() => $('tipDlg').close(), 50));
 function tipNudge() {
   if (S.tipShown || window.FV_DESKTOP) return;   // the desktop program skips the one-time thank-you note
