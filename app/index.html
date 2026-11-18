@@ -27,7 +27,7 @@
 <style>
 :root{
   --page:#d5d6d2; --ink:#1d1f21; --ink-soft:#5a5f65; --panel:#f2f2ef; --panel-line:#cfd0cb; --row-hover:#e5e6e1; --focus:#2d6cad;
-  --body:#2a2c2f; --lcd:#f1f1ec; --lcd-dim:#9ca1a6; --amber:#e9a53b; --teal:#4fb3bf;
+  --body:#2a2c2f; --lcd:#f1f1ec; --lcd-dim:#9ca1a6; --amber:#e9a53b; --teal:#4fb3bf; --wmv:#c98a12;
   --cond:"Barlow Condensed","Arial Narrow",sans-serif;
   color-scheme:light;
   box-sizing:border-box;
@@ -36,12 +36,12 @@
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --page:#17181a; --ink:#e3e4e0; --ink-soft:#979da3; --panel:#212427; --panel-line:#34383c; --row-hover:#2b2f33; --focus:#80b3e6;
+    --page:#17181a; --ink:#e3e4e0; --ink-soft:#979da3; --panel:#212427; --panel-line:#34383c; --row-hover:#2b2f33; --focus:#80b3e6; --wmv:#f2b53b;
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --page:#17181a; --ink:#e3e4e0; --ink-soft:#979da3; --panel:#212427; --panel-line:#34383c; --row-hover:#2b2f33; --focus:#80b3e6;
+  --page:#17181a; --ink:#e3e4e0; --ink-soft:#979da3; --panel:#212427; --panel-line:#34383c; --row-hover:#2b2f33; --focus:#80b3e6; --wmv:#f2b53b;
   color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:inherit}
@@ -288,7 +288,10 @@ html[data-look="clean"] .knob.eexp{background:var(--acc)!important;color:#fff!im
 .under .gbar{border-color:rgba(255,255,255,.22)}
 .under #status{margin-left:auto;color:var(--lcd-dim);font-size:13px}
 .bigwarn{color:#000;background:var(--amber);border-radius:4px;padding:2px 9px;font-family:var(--cond);font-size:14px}
-.bar h1{font-family:var(--cond);font-weight:600;font-size:26px;margin:0;letter-spacing:.01em}
+.bar h1{font-family:var(--cond);font-weight:600;font-size:26px;margin:0;letter-spacing:.01em;display:flex;align-items:center;gap:10px;line-height:1}
+.fvicon{display:block;flex:none}.fvwm{display:block;flex:none}
+.aboutbrand{display:flex;align-items:center;gap:14px;margin:0 0 6px}
+.visually-hidden{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .actions .tgap{width:8px}
 .btn .ic{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px;margin-right:6px}
@@ -789,6 +792,17 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 .eirm{background:none;border:0;color:var(--ink-soft);font-size:18px;line-height:1;cursor:pointer;padding:2px 6px;border-radius:4px}
 .eirm:hover{color:var(--ink);background:rgba(255,255,255,.08)}
 .einote{font-size:14px;line-height:1.45;color:var(--ink-soft);min-height:3em}
+.plrow{align-items:flex-start}
+.plrow .plbody{flex:1;min-width:0}
+.plrow .plsum{display:block;font-size:13px;color:var(--ink-soft);margin-top:2px}
+.plrow .plbtns{display:flex;gap:6px;flex:none}
+.plrow .plbtns .btn{padding:4px 10px;font-size:13px}
+.pledit{border:1px solid var(--panel-line);border-radius:8px;padding:10px 12px;margin:8px 0}
+.pledit .wrow input[type=number]{width:90px}
+#plSizeN{margin-left:8px}
+.sprow small{display:block;font-size:13px;color:var(--ink-soft);margin-top:2px}
+.sprow #spCores{width:64px;margin:0 4px}
+.spadv{margin:4px 0 6px}.spadv summary{cursor:pointer;color:var(--ink-soft);font-size:14px;padding:4px 0}
 dialog h2{font-family:var(--cond);font-weight:600;font-size:24px;margin:0 0 4px}
 dialog p{margin:0 0 10px}
 dialog textarea{width:100%;height:280px;font:13px/1.45 Consolas,"SF Mono",monospace;background:var(--page);color:var(--ink);border:1px solid var(--panel-line);border-radius:6px;padding:8px}
@@ -870,7 +884,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
 <body>
 
 <header class="bar">
-  <h1>FledgeView</h1>
+  <h1><svg class="fvicon" viewBox="0 0 256 256" width="24" height="24" aria-hidden="true"><rect width="256" height="256" rx="44" fill="#17191c"/><circle cx="128" cy="128" r="104" fill="#f2b53b"/><path d="M155.7 144.0 Q156.8 199.4 72.4 217.0" fill="none" stroke="#17191c" stroke-width="15" stroke-linecap="round"/><path d="M128.0 160.0 Q80.6 188.6 23.1 124.3" fill="none" stroke="#17191c" stroke-width="15" stroke-linecap="round"/><path d="M100.3 144.0 Q51.8 117.3 78.7 35.3" fill="none" stroke="#17191c" stroke-width="15" stroke-linecap="round"/><path d="M100.3 112.0 Q99.2 56.6 183.6 39.0" fill="none" stroke="#17191c" stroke-width="15" stroke-linecap="round"/><path d="M128.0 96.0 Q175.4 67.4 232.9 131.7" fill="none" stroke="#17191c" stroke-width="15" stroke-linecap="round"/><path d="M155.7 112.0 Q204.2 138.7 177.3 220.7" fill="none" stroke="#17191c" stroke-width="15" stroke-linecap="round"/><polygon points="155.7,144.0 128.0,160.0 100.3,144.0 100.3,112.0 128.0,96.0 155.7,112.0" fill="#17191c"/></svg><svg class="fvwm" viewBox="0 0 9376 700" style="height:13px;width:auto" role="img" aria-label="FledgeView"><path d="M94 700V0H605V109H224V700ZM213 432V322H562V432ZM991 700V0H1121V590H1487V700ZM1850 700V0H2361V109H1979V591H2375V700ZM1970 398V291H2318V398ZM2781 700V0H3086Q3200 0 3286 44Q3372 88 3420 166Q3468 244 3468 350Q3468 455 3420 534Q3372 612 3286 656Q3200 700 3086 700ZM2910 590H3080Q3159 590 3216 560Q3274 530 3306 476Q3337 422 3337 350Q3337 277 3306 223Q3274 170 3216 140Q3159 110 3080 110H2910ZM4193 710Q4111 710 4043 683Q3974 657 3923 608Q3872 560 3844 494Q3816 428 3816 350Q3816 272 3844 206Q3872 140 3923 92Q3975 43 4044 17Q4113 -10 4195 -10Q4284 -10 4355 19Q4427 48 4476 104L4394 184Q4353 143 4306 123Q4258 104 4201 104Q4146 104 4099 122Q4052 140 4018 173Q3984 206 3965 251Q3947 296 3947 350Q3947 403 3965 448Q3984 493 4018 527Q4052 560 4098 578Q4145 596 4200 596Q4252 596 4301 580Q4349 563 4393 524L4467 621Q4412 665 4340 687Q4267 710 4193 710ZM4467 621 4344 604V342H4467ZM4898 700V0H5409V109H5027V591H5423V700ZM5018 398V291H5366V398ZM6077 700 6035 700 5729 0 5870 0 6077 480 6077 633 6062 633 6077 598ZM6817 700V0H6947V700ZM7396 700V0H7906V109H7525V591H7920V700ZM7515 398V291H7864V398ZM8491 700 8259 0H8393L8600 633H8533L8749 0H8869L9078 633H9013L9225 0H9348L9117 700H8979L8787 129H8824L8630 700Z" fill="currentColor"/><path d="M6105 700 6105 545 6143 633 6105 633 6105 534 6338 0 6468 0 6163 700Z" fill="var(--wmv)"/></svg></h1>
   <div class="actions">
     <button class="btn go" id="impBtn"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 21h10a2 2 0 0 0 2-2V7.5L15.5 4H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/><path d="M9 7.5v2M12 7.5v2M15 7.5v2"/></svg>Import</button>
     <button class="btn" id="openFolder"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"/></svg>Open folder</button>
@@ -950,6 +964,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <button class="mi check" id="lookCamera" aria-pressed="true">Camera</button>
         <button class="mi check" id="lookClean" aria-pressed="false">Clean</button>
         <div class="msep"></div>
+        <button class="mi" id="speedBtn" hidden title="How much of this computer FledgeView uses while it works">Speed…</button>
         <button class="mi check" id="resumeBtn" hidden aria-pressed="true" title="In the desktop program: at launch, reopen the last folder at the photo, filter and view you left">Start where I left off</button>
         <button class="mi" id="scopeReset" hidden title="Ask again which photos to open when a folder has subfolders">Ask again about subfolders</button>
         <button class="mi check" id="pairBtn" role="menuitemcheckbox" title="Show a raw file and a JPEG with the same name as one photo, viewed from the full-size JPEG">Pair RAW + JPEG</button>
@@ -1101,6 +1116,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <div class="slabel">Edit and share</div>
         <button class="knob sharebtn eopen" id="editTab" aria-expanded="false" aria-controls="editPanel" title="Adjust: exposure, contrast, color, and more, in a panel to the right (open or close)"><span>Adjust</span></button>
         <div class="eopenrow"><button class="knob sharebtn eopen" id="cropTab" aria-expanded="false" aria-controls="editPanel" title="Crop and straighten, in a panel to the right (R)"><span>Crop</span></button><button class="knob sharebtn" id="undoBtn" disabled title="Undo the last crop or adjustment on this photo, one step at a time (Ctrl+Z)">Undo</button></div>
+        <button class="knob sharebtn" id="plansBtn" title="Web JPEGs, full-size JPEGs or 16-bit TIFFs from many photos at once">Plans…</button>
         <button class="knob sharebtn" id="editInBtn" title="Edit in Photoshop, Topaz, DxO, Affinity or Luminar (Ctrl+E)">Edit in…</button>
         <button class="knob sharebtn" id="shareGal" title="Make a gallery page to email or post">Web gallery</button>
         <button class="knob sharebtn" id="shareSocial" title="Resize and crop copies for Instagram, Facebook, and the web">Social media</button>
@@ -1317,7 +1333,8 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
   <div class="end"><button class="btn" id="sessReset" title="Start counting again from now">Start a new session</button><span class="grow"></span><button class="btn" id="sessCopy">Copy summary</button><button class="btn go" data-close>Close</button></div>
 </dialog>
 <dialog id="aboutDlg" class="aboutdlg">
-  <h2>About FledgeView</h2>
+  <div class="aboutbrand"><svg class="fvicon" viewBox="0 0 256 256" width="48" height="48" aria-hidden="true"><rect x="8" y="8" width="240" height="240" rx="56" fill="#17191c"/><circle cx="128" cy="128" r="90" fill="#f2b53b"/><path d="M150.5 141.0 Q152.9 189.8 79.8 205.2" fill="none" stroke="#17191c" stroke-width="8" stroke-linecap="round"/><path d="M128.0 154.0 Q87.0 180.5 37.1 124.8" fill="none" stroke="#17191c" stroke-width="8" stroke-linecap="round"/><path d="M105.5 141.0 Q62.0 118.7 85.3 47.7" fill="none" stroke="#17191c" stroke-width="8" stroke-linecap="round"/><path d="M105.5 115.0 Q103.1 66.2 176.2 50.8" fill="none" stroke="#17191c" stroke-width="8" stroke-linecap="round"/><path d="M128.0 102.0 Q169.0 75.5 218.9 131.2" fill="none" stroke="#17191c" stroke-width="8" stroke-linecap="round"/><path d="M150.5 115.0 Q194.0 137.3 170.7 208.3" fill="none" stroke="#17191c" stroke-width="8" stroke-linecap="round"/><polygon points="150.5,141.0 128.0,154.0 105.5,141.0 105.5,115.0 128.0,102.0 150.5,115.0" fill="#17191c"/><circle cx="128" cy="128" r="90" fill="none" stroke="#d9962a" stroke-width="5"/></svg><svg class="fvwm" viewBox="0 0 9376 700" style="height:17px;width:auto" role="img" aria-label="FledgeView"><path d="M94 700V0H605V109H224V700ZM213 432V322H562V432ZM991 700V0H1121V590H1487V700ZM1850 700V0H2361V109H1979V591H2375V700ZM1970 398V291H2318V398ZM2781 700V0H3086Q3200 0 3286 44Q3372 88 3420 166Q3468 244 3468 350Q3468 455 3420 534Q3372 612 3286 656Q3200 700 3086 700ZM2910 590H3080Q3159 590 3216 560Q3274 530 3306 476Q3337 422 3337 350Q3337 277 3306 223Q3274 170 3216 140Q3159 110 3080 110H2910ZM4193 710Q4111 710 4043 683Q3974 657 3923 608Q3872 560 3844 494Q3816 428 3816 350Q3816 272 3844 206Q3872 140 3923 92Q3975 43 4044 17Q4113 -10 4195 -10Q4284 -10 4355 19Q4427 48 4476 104L4394 184Q4353 143 4306 123Q4258 104 4201 104Q4146 104 4099 122Q4052 140 4018 173Q3984 206 3965 251Q3947 296 3947 350Q3947 403 3965 448Q3984 493 4018 527Q4052 560 4098 578Q4145 596 4200 596Q4252 596 4301 580Q4349 563 4393 524L4467 621Q4412 665 4340 687Q4267 710 4193 710ZM4467 621 4344 604V342H4467ZM4898 700V0H5409V109H5027V591H5423V700ZM5018 398V291H5366V398ZM6077 700 6035 700 5729 0 5870 0 6077 480 6077 633 6062 633 6077 598ZM6817 700V0H6947V700ZM7396 700V0H7906V109H7525V591H7920V700ZM7515 398V291H7864V398ZM8491 700 8259 0H8393L8600 633H8533L8749 0H8869L9078 633H9013L9225 0H9348L9117 700H8979L8787 129H8824L8630 700Z" fill="currentColor"/><path d="M6105 700 6105 545 6143 633 6105 633 6105 534 6338 0 6468 0 6163 700Z" fill="var(--wmv)"/></svg></div>
+  <h2 class="visually-hidden">About FledgeView</h2>
   <p class="sub" style="margin-top:-2px">Light Image Viewer &amp; Exporter, by HatchApps · <span id="aboutVer"></span> · <a href="#" id="aboutNews">What’s new</a></p>
   <p>A camera-back style viewer, culler, and web exporter for photographers, made by HatchApps LLC.</p>
   <p class="sub">Your photos are read on this computer and never uploaded. Ratings and settings are kept in this browser.</p>
@@ -1605,6 +1622,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
           <li><strong>View:</strong> the Info dial (<kbd>I</kbd> cycles full info, exposure only, and the photo alone), zoom, and the review tools.</li>
           <li><strong>Rate:</strong> position and file name, rating icons, <strong>◀ Pick Reject ▶</strong> (the arrows move to the previous or next photo, like the arrow keys), the <strong>Advance</strong> switch under them (click to change: Auto moves to the next photo after you rate; Manual stays put), and the <strong>Show</strong> filter.</li>
           <li><strong>Edit and share:</strong> <strong>Adjust</strong>, <strong>Crop</strong> with <strong>Undo</strong> beside it, <strong>Edit in…</strong> (desktop program), <strong>Web gallery</strong>, and <strong>Social media</strong>.</li>
+          <li><strong>Plans…</strong> (desktop program) makes finished files from many photos at once: <strong>Web JPEGs of my picks</strong> (2048 px, sharpened for screens, without location), <strong>Full-size JPEGs of everything</strong>, or <strong>16-bit TIFFs of my picks</strong>. <strong>Copy</strong> any plan to make your own: size, quality, sharpening, camera data, which photos and the folder it goes into. Raw files are made from the raw with each photo’s Quick finish, a few at a time. The files go into a folder named for the plan (like <strong>_web</strong>) inside the folder you opened; <strong>Show folder</strong> opens it. FledgeView doesn’t open those folders as photos.</li>
+          <li><strong>Speed</strong> (desktop program, View menu): <strong>Full speed</strong> uses every core, <strong>Balanced</strong> (the default) leaves a couple free so other programs stay responsive, <strong>Light</strong> uses half. Advanced sets an exact number of cores.</li>
           <li><strong>Edit in…</strong> (desktop program, <kbd>Ctrl</kbd>+<kbd>E</kbd>) sends the photo you’re on to Photoshop, Topaz, DxO, Affinity, Luminar, or any editing program you choose with <strong>Add a program</strong>. Choose once per program what it gets: the <strong>raw file</strong> (it develops the raw its own way) or a <strong>16-bit TIFF with your edits</strong> (your crop and Quick finish, with the camera data). The file goes into an <strong>_edits</strong> folder beside the photo; the original is never changed. Whatever the program saves in _edits shows up here beside the original when you come back to FledgeView. If a program saves somewhere else, set its save or export folder to _edits. Organize and Move picks and rejects leave _edits alone.</li>
         </ul>
       </section>
@@ -1771,6 +1790,47 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
   </div>
   <p class="sub" style="margin-top:10px">The sharpness options score each photo first. For a large folder of RAW files, the first time can take a few minutes; scores are saved for next time.</p>
   <div class="end"><label class="chk" style="margin-right:auto;font-size:14px"><input type="checkbox" id="sortAsk"> Ask each time I open photos</label><button class="btn go" id="sortGo">Sort</button></div>
+</dialog>
+
+<dialog id="plansDlg" class="eidlg" aria-labelledby="plH">
+  <h2 id="plH">Plans</h2>
+  <p class="sub">Finished files from many photos at once. Raw files are made from the raw with each photo’s Quick finish. The files go into a folder named for the plan, inside the folder you opened.</p>
+  <div class="eilist" id="plList" role="radiogroup" aria-label="Plan"></div>
+  <div class="pledit" id="plEdit" hidden>
+    <div class="wrow"><label for="plName">Name</label><input id="plName" type="text" autocomplete="off" maxlength="60"></div>
+    <div class="wrow"><label for="plFmt">Make</label><select id="plFmt"><option value="jpeg">JPEG</option><option value="tiff">16-bit TIFF</option></select></div>
+    <div class="wrow"><label for="plSize">Size</label><select id="plSize"><option value="0">Full size</option><option value="1080">1080 px long edge</option><option value="2048">2048 px long edge</option><option value="3000">3000 px long edge</option><option value="4096">4096 px long edge</option><option value="custom">Other…</option></select><input id="plSizeN" type="number" min="200" max="16000" step="1" hidden aria-label="Long edge in pixels"></div>
+    <div class="wrow" id="plQRow"><label for="plQ">Quality</label><input id="plQ" type="number" min="30" max="100" step="1"></div>
+    <div class="wrow" id="plSharpRow"><label for="plSharp">Sharpen for screens</label><select id="plSharp"><option value="0">Off</option><option value="0.35">Low</option><option value="0.7">Standard</option></select></div>
+    <div class="wrow"><label for="plMeta">Camera data</label><select id="plMeta"><option value="all">Keep, with location</option><option value="nogps">Keep, without location</option><option value="none">Remove</option></select></div>
+    <div class="wrow"><label for="plWhichDef">Photos</label><select id="plWhichDef"><option value="picks">Your picks</option><option value="all">Everything</option></select></div>
+    <div class="wrow"><label for="plWhen">From a card</label><select id="plWhen"><option value="after">After I cull</option><option value="now">Right after the import</option></select></div>
+    <div class="wrow"><label for="plFolder">Folder</label><input id="plFolder" type="text" autocomplete="off" maxlength="40" spellcheck="false"></div>
+    <label class="chk"><input type="checkbox" id="plEdits"> Apply each photo’s Quick finish (crop and adjustments)</label>
+    <p class="sub" id="plEditNote"></p>
+    <div class="end"><button class="btn" id="plEditCancel">Cancel</button><button class="btn go" id="plEditSave">Save plan</button></div>
+  </div>
+  <div id="plRunBox">
+    <div class="wrow"><label for="plWhich">Photos</label><select id="plWhich"></select></div>
+    <p class="einote" id="plNote"></p>
+    <div class="impprog" id="plProg" hidden><div class="impbar"><span id="plBar"></span></div><div class="sub" id="plProgTxt"></div></div>
+  </div>
+  <div class="end"><button class="btn" id="plSpeed" style="margin-right:auto" title="How much of this computer FledgeView uses">Speed</button><button class="btn" id="plShow" hidden>Show folder</button><button class="btn" id="plStop" hidden>Stop</button><button class="btn" data-close id="plClose">Close</button><button class="btn go" id="plGo">Run</button></div>
+</dialog>
+
+<dialog id="speedDlg" class="eidlg" aria-labelledby="spH">
+  <h2 id="spH">Speed</h2>
+  <p class="sub">How much of this computer FledgeView uses for Quick finish, exports, Edit in and Plans. It changes straight away.</p>
+  <div class="eilist" role="radiogroup" aria-labelledby="spH">
+    <label class="eirow sprow"><input type="radio" name="spMode" value="full"><span><strong>Full speed</strong><small id="spFullTxt"></small></span></label>
+    <label class="eirow sprow"><input type="radio" name="spMode" value="balanced"><span><strong>Balanced</strong> (recommended)<small id="spBalTxt"></small></span></label>
+    <label class="eirow sprow"><input type="radio" name="spMode" value="light"><span><strong>Light</strong><small id="spLightTxt"></small></span></label>
+  </div>
+  <details class="spadv"><summary>Advanced</summary>
+    <label class="eirow sprow"><input type="radio" name="spMode" value="exact"><span>Use exactly <input id="spCores" type="number" min="1" step="1" aria-label="Number of cores"> cores<small id="spExactTxt"></small></span></label>
+  </details>
+  <p class="einote" id="spNow"></p>
+  <div class="end"><button class="btn go" data-close>Done</button></div>
 </dialog>
 
 <dialog id="eiDlg" class="eidlg" aria-labelledby="eiH">
@@ -2148,6 +2208,7 @@ async function walkHandle(dir, out, zone = null, home = null, root = dir, ed = n
   for (const entry of dirs) {
     if (walkStop) return;
     if (ed) { if (!entry.name.startsWith('.')) { try { await walkHandle(entry, out, null, null, root, { ...ed, rel: ed.rel + entry.name + '/' }); } catch { walkSkipped++; } } continue; }
+    if (planFolders().has(entry.name)) continue;   // a plan's finished files (web JPEGs and the like), not photos to cull
     if (entry.name === '_edits') {
       const raws = new Set(want.filter(e => RAW.has(extOf(e.name))).map(e => e.name.toLowerCase()));
       try { await walkHandle(entry, out, null, null, root, { at: dir, home: zone ? home : dir, raws, rel: '' }); } catch { walkSkipped++; }
@@ -2329,6 +2390,227 @@ async function eiRefresh(quiet) {
 let eiT = 0;
 const eiSoon = () => { if (!eiWatch.size && !state.items.some(x => x.ed)) return; clearTimeout(eiT); eiT = setTimeout(() => eiRefresh(false), 400); };
 if (window.FV_DESKTOP) { addEventListener('focus', eiSoon); document.addEventListener('visibilitychange', () => { if (!document.hidden) eiSoon(); }); }
+/* ---------- Plans (desktop program): finished files from many photos at once. Raw files and camera JPEGs are made by
+   the program (developed, Quick finish, resized, sharpened, written straight to disk with the camera data), a few at a
+   time as Speed allows; other formats go through the web export for JPEG plans. Files go into a folder named for the
+   plan inside the folder that was opened; FledgeView skips those folders when opening photos. ---------- */
+const PLAN_BUILTIN = [
+  { id: 'web', name: 'Web JPEGs of my picks', fmt: 'jpeg', size: 2048, q: 85, sharp: 0.7, meta: 'nogps', edits: true, which: 'picks', when: 'after', folder: '_web' },
+  { id: 'jpeg', name: 'Full-size JPEGs of everything', fmt: 'jpeg', size: 0, q: 92, sharp: 0, meta: 'all', edits: true, which: 'all', when: 'now', folder: '_jpeg' },
+  { id: 'tiff', name: '16-bit TIFFs of my picks', fmt: 'tiff', size: 0, q: 0, sharp: 0, meta: 'all', edits: true, which: 'picks', when: 'after', folder: '_tiff' },
+];
+const plPrefs = () => (S.plans && typeof S.plans === 'object') ? S.plans : (S.plans = { custom: [], last: 'web' });
+const plAll = () => [...PLAN_BUILTIN, ...(plPrefs().custom || [])];
+/* every folder a plan has made files in stays recognized, even after that plan is deleted or renamed */
+function planFolders() { const pr = plPrefs(), f = new Set(PLAN_BUILTIN.map(p => p.folder)); for (const p of pr.custom || []) if (p.folder) f.add(p.folder); for (const x of pr.used || []) f.add(x); return f; }
+function planSummary(p) {
+  const parts = [p.fmt === 'tiff' ? '16-bit TIFF' : 'JPEG', p.size ? `${p.size} px long edge` : 'full size'];
+  if (p.fmt !== 'tiff') { parts.push(`quality ${p.q}`); if (+p.sharp > 0) parts.push(+p.sharp >= 0.7 ? 'sharpened for screens' : 'lightly sharpened'); }
+  parts.push(p.meta === 'none' ? 'no camera data' : p.meta === 'nogps' ? 'camera data without location' : 'camera data');
+  if (!p.edits) parts.push('without Quick finish');
+  parts.push(p.which === 'all' ? 'everything' : 'your picks', `into ${p.folder}`);
+  return parts.join(' \u00b7 ');
+}
+let plBusy = false, plStop = false, plEditing = null, plOutPath = null, plSpeedNow = null;
+const plPicked = () => { const r = document.querySelector('#plList input:checked'); return r ? plAll().find(p => p.id === r.value) : null; };
+function plSources() {
+  return { picks: state.items.filter(i => cullOf(i).f === 1), all: state.items, sel: state.sel ? state.view.filter(i => state.sel.has(i.key)) : [] };
+}
+function plSyncWhich() {
+  const p = plPicked(), src = plSources(), sel = $('plWhich'), keep = sel.value;
+  sel.textContent = '';
+  for (const [v, label] of [['picks', 'Your picks'], ['all', 'Everything open'], ['sel', 'Selected']]) {
+    if (v === 'sel' && !src.sel.length) continue;
+    const o = document.createElement('option'); o.value = v; o.textContent = `${label} (${src[v].length.toLocaleString()})`; sel.append(o);
+  }
+  sel.value = plBusy && keep ? keep : (p && p.which === 'all' ? 'all' : src.picks.length ? 'picks' : 'all');
+  if (!sel.value) sel.value = 'all';
+  plExplain();
+}
+function plExplain() {
+  const p = plPicked(); if (!p || plBusy) { if (!p) $('plNote').textContent = ''; return; }
+  const list = plSources()[$('plWhich').value] || [], noFolder = list.filter(it => !it.root).length;
+  let t = list.length ? `${planSummary(p)}.` : 'No photos to make files from: pick some first, or choose Everything open.';
+  if (noFolder) t += ` ${noFolder.toLocaleString()} weren\u2019t opened with Open folder, so they\u2019ll be skipped.`;
+  if (p.fmt === 'tiff') { const other = list.filter(it => !RAW.has((eiRawOf(it) || it).ext) && !['jpg', 'jpeg'].includes(it.ext)).length; if (other) t += ` TIFFs are made from raw files and JPEGs; ${other.toLocaleString()} other file${other === 1 ? '' : 's'} will be skipped.`; }
+  $('plNote').textContent = t;
+  $('plGo').disabled = !list.length;
+}
+function plRender() {
+  const box = $('plList'), pr = plPrefs(), all = plAll(), busy = plBusy; box.textContent = '';
+  const pick = all.find(p => p.id === pr.last) || all[0];
+  for (const p of all) {
+    const row = document.createElement('label'); row.className = 'eirow plrow';
+    const r = document.createElement('input'); r.type = 'radio'; r.name = 'plProg'; r.value = p.id; r.checked = p === pick; r.disabled = busy;
+    r.onchange = () => { pr.last = p.id; saveS(); plSyncWhich(); };
+    const body = document.createElement('span'); body.className = 'plbody';
+    const nm = document.createElement('strong'); nm.textContent = p.name;
+    const sum = document.createElement('small'); sum.className = 'plsum'; sum.textContent = planSummary(p);
+    body.append(nm, sum);
+    const btns = document.createElement('span'); btns.className = 'plbtns';
+    const mk = (label, title, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = label; b.title = title; b.disabled = busy; b.onclick = e => { e.preventDefault(); fn(); }; btns.append(b); };
+    mk('Copy', 'Make your own plan starting from this one', () => plEdit({ ...p, id: 'my-' + Date.now().toString(36), name: p.name + ' (my copy)', builtin: false }, true));
+    if (!PLAN_BUILTIN.includes(p)) {
+      mk('Edit', 'Change this plan', () => plEdit({ ...p }, false));
+      mk('Delete', 'Delete this plan (files it made stay where they are)', () => { pr.custom = pr.custom.filter(x => x.id !== p.id); if (pr.last === p.id) pr.last = 'web'; saveS(); plRender(); });
+    }
+    row.append(r, body, btns); box.append(row);
+  }
+  plSyncWhich();
+}
+function plEdit(p, isNew) {
+  plEditing = { p, isNew };
+  $('plName').value = p.name; $('plFmt').value = p.fmt;
+  const std = ['0', '1080', '2048', '3000', '4096'].includes(String(p.size || 0));
+  $('plSize').value = std ? String(p.size || 0) : 'custom'; $('plSizeN').value = p.size || 2048; $('plSizeN').hidden = std;
+  $('plQ').value = p.q || 90; $('plSharp').value = String(+p.sharp >= 0.7 ? 0.7 : +p.sharp > 0 ? 0.35 : 0);
+  $('plMeta').value = p.meta || 'all'; $('plWhichDef').value = p.which === 'all' ? 'all' : 'picks'; $('plWhen').value = p.when === 'now' ? 'now' : 'after';
+  $('plFolder').value = p.folder; $('plEdits').checked = p.edits !== false;
+  plEditSync(); $('plEdit').hidden = false; $('plRunBox').hidden = true; $('plGo').hidden = true; $('plName').focus(); $('plName').select();
+}
+function plEditSync() {
+  const tiff = $('plFmt').value === 'tiff';
+  $('plQRow').hidden = tiff; $('plSharpRow').hidden = tiff; $('plSizeN').hidden = $('plSize').value !== 'custom';
+  $('plEditNote').textContent = '"From a card" is used when you choose this plan while importing a card: right after the import, or when you\u2019re done culling.';
+}
+function plEditClose() { plEditing = null; $('plEdit').hidden = true; $('plRunBox').hidden = false; $('plGo').hidden = false; plRender(); }
+$('plFmt').onchange = plEditSync; $('plSize').onchange = plEditSync;
+$('plEditCancel').onclick = plEditClose;
+$('plEditSave').onclick = () => {
+  if (!plEditing) return;
+  const pr = plPrefs(), p = plEditing.p;
+  const name = $('plName').value.trim() || 'My plan';
+  let folder = $('plFolder').value.trim().replace(/[\\/:*?"<>|]+/g, '').replace(/^\.+/, '');
+  if (!folder) folder = '_' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30);
+  if (['_picks', '_rejects', '_edits'].includes(folder.toLowerCase())) { toast(`${folder} is used by FledgeView itself; choose another folder name.`); return; }
+  const size = $('plSize').value === 'custom' ? Math.min(16000, Math.max(200, Math.round(+$('plSizeN').value) || 2048)) : +$('plSize').value;
+  Object.assign(p, { name, fmt: $('plFmt').value, size, q: Math.min(100, Math.max(30, Math.round(+$('plQ').value) || 90)), sharp: +$('plSharp').value,
+    meta: $('plMeta').value, which: $('plWhichDef').value, when: $('plWhen').value, folder, edits: $('plEdits').checked });
+  delete p.builtin;
+  pr.custom = (pr.custom || []).filter(x => x.id !== p.id); pr.custom.push(p); pr.last = p.id; saveS();
+  plEditClose();
+};
+async function openPlans() {
+  if (!deskHas('plans')) { toast('Plans (web JPEGs, full-size JPEGs and 16-bit TIFFs of many photos at once): in the FledgeView desktop program.'); return; }
+  if (!state.items.length) { toast('Open a folder first, then run a plan on its photos.'); return; }
+  if (!plBusy) { $('plProg').hidden = true; $('plShow').hidden = true; $('plStop').hidden = true; }
+  plEditClose(); spLabel();
+  $('plansDlg').showModal();
+}
+$('plansBtn').onclick = openPlans;
+if (!window.FV_DESKTOP) $('plansBtn').classList.add('dim');
+$('plWhich').onchange = plExplain;
+$('plSpeed').onclick = () => openSpeed();
+$('plStop').onclick = () => { plStop = true; $('plStop').disabled = true; $('plProgTxt').textContent = 'Stopping after the photos already being made\u2026'; };
+$('plShow').onclick = () => { if (plOutPath) window.FV_DESKTOP.reveal(plOutPath).catch(() => toast('Couldn\u2019t open that folder.')); };
+$('plansDlg').addEventListener('cancel', e => { if (plBusy) { e.preventDefault(); toast('The plan keeps running. Stop it first, or leave this open.'); } });
+$('plClose').addEventListener('click', e => { if (plBusy) { e.preventDefault(); e.stopPropagation(); toast('The plan keeps running. Stop it first, or leave this open.'); } }, true);
+const joinPath = (dir, name) => dir + (/[\\/]$/.test(dir) ? '' : dir.includes('\\') ? '\\' : '/') + name;
+$('plGo').onclick = async () => {
+  const plan = plPicked(); if (!plan || plBusy) return;
+  const all = plSources()[$('plWhich').value] || [];
+  const jobs = [], used = new Set(); let skipped = 0, noFolder = 0;
+  const outs = new Map();   // root handle -> { path, dir handle }
+  for (const it of all) {
+    const src = eiRawOf(it) || it;
+    if (!it.root || !src.handle) { noFolder++; continue; }
+    const byProgram = RAW.has(src.ext) || ['jpg', 'jpeg'].includes(src.ext);
+    if (plan.fmt === 'tiff' && !byProgram) { skipped++; continue; }
+    jobs.push({ it, src, byProgram });
+  }
+  if (!jobs.length) { toast(noFolder ? 'These photos weren\u2019t opened with Open folder, so there\u2019s nowhere to save the files.' : 'Nothing to make for this plan.'); return; }
+  { const pr = plPrefs(); pr.used = [...new Set([...(pr.used || []), plan.folder])].slice(-50); saveS(); }
+  plBusy = true; plStop = false; plRender();
+  $('plGo').disabled = true; $('plStop').hidden = false; $('plStop').disabled = false; $('plShow').hidden = true; $('plProg').hidden = false;
+  $('plBar').style.width = '0%'; $('plProgTxt').textContent = 'Starting\u2026';
+  let speed = { files_at_once: 2 }; try { speed = await window.FV_DESKTOP.speed(); } catch {}
+  const ext = plan.fmt === 'tiff' ? '.tif' : '.jpg', t0 = performance.now();
+  let next = 0, done = 0, made = 0; const failed = [];
+  const nameFor = src => { const stem = src.name.replace(/\.[^.]+$/, ''); let n = stem, k = 2; while (used.has((n + ext).toLowerCase())) n = `${stem}-${k++}`; used.add((n + ext).toLowerCase()); return n + ext; };
+  const outFor = async it => {
+    let o = outs.get(it.root);
+    if (!o) { const base = await window.FV_DESKTOP.pathOf(it.root); if (!base) throw new Error('can\u2019t find the opened folder on disk'); o = { path: joinPath(base, plan.folder), dir: await it.root.getDirectoryHandle(plan.folder, { create: true }) }; outs.set(it.root, o); }
+    return o;
+  };
+  const progress = () => {
+    const el = (performance.now() - t0) / 1000, left = done ? el / done * (jobs.length - done) : 0;
+    $('plBar').style.width = (done / jobs.length * 100).toFixed(1) + '%';
+    $('plProgTxt').textContent = `${done.toLocaleString()} of ${jobs.length.toLocaleString()}` + (done && done < jobs.length ? ` \u00b7 about ${fmtTime(left)} left` : '') + ` \u00b7 ${speed.files_at_once || 1} at a time`;
+  };
+  const worker = async () => {
+    for (;;) {
+      if (plStop || next >= jobs.length) break;   // plStop is set by the Stop button while this runs
+      const j = jobs[next++];
+      try {
+        const o = await outFor(j.it), name = nameFor(j.src);
+        await getMeta(j.it);
+        if (j.byProgram) {
+          await window.FV_DESKTOP.planRender(j.src.handle, { out: joinPath(o.path, name), fmt: plan.fmt, size: plan.size, quality: plan.q, sharpen: plan.sharp,
+            edit: plan.edits ? (editOf(j.it) || {}) : {}, orient: j.src === j.it ? (j.it.orient || 1) : 1, meta: plan.meta });
+        } else {
+          const wo = { ...S.web, shape: 'orig', size: plan.size ? 'custom' : 'orig', custom: plan.size || 2000, fmt: 'jpeg', q: plan.q, sharp: String(plan.sharp || 0), bar: false, meta: plan.meta, framed: false, text: '' };
+          const r = await exportOne(j.it, wo, { raw: false, noEdits: !plan.edits });
+          const w = await (await o.dir.getFileHandle(name, { create: true })).createWritable(); await w.write(r.blob); await w.close();
+        }
+        made++;
+        plOutPath = o.path;
+      } catch (e) { failed.push(`${j.src.name}: ${(e && e.message) || e}`); }
+      done++; progress();
+    }
+  };
+  progress();
+  await Promise.all(Array.from({ length: Math.max(1, Math.min(speed.files_at_once || 1, jobs.length)) }, worker));
+  plBusy = false;
+  const secs = (performance.now() - t0) / 1000;
+  $('plStop').hidden = true; $('plGo').disabled = false; $('plShow').hidden = !made;
+  $('plBar').style.width = '100%';
+  let t = plStop ? `Stopped. Made ${made.toLocaleString()} of ${jobs.length.toLocaleString()} in ${fmtTime(secs)}.` : `Made ${made.toLocaleString()} ${plan.fmt === 'tiff' ? 'TIFF' : 'JPEG'}${made === 1 ? '' : 's'} in ${plan.folder}, in ${fmtTime(secs)}.`;
+  if (skipped) t += ` Skipped ${skipped.toLocaleString()} that aren\u2019t raw files or JPEGs.`;
+  if (noFolder) t += ` Skipped ${noFolder.toLocaleString()} not opened with Open folder.`;
+  if (failed.length) { t += ` ${failed.length.toLocaleString()} couldn\u2019t be made (${failed.slice(0, 2).join('; ')}${failed.length > 2 ? '\u2026' : ''}).`; console.warn('Plan failures', failed); }
+  $('plProgTxt').textContent = t;
+  plRender();
+  if (!$('plansDlg').open) toast(t);
+};
+
+/* ---------- Speed (desktop program): how much of the computer FledgeView uses. Saved; sent to the program at start. ---------- */
+const spPrefs = () => (S.speed && typeof S.speed === 'object') ? S.speed : { mode: 'balanced', cores: null };
+function spLabel() {
+  const s = plSpeedNow, names = { full: 'Full speed', balanced: 'Balanced', light: 'Light', exact: 'Custom' };
+  const t = s ? `Speed: ${names[s.mode] || 'Balanced'}` : 'Speed';
+  $('plSpeed').textContent = t; $('speedBtn').textContent = t + '\u2026';
+}
+async function spApply(mode, cores) {
+  try { plSpeedNow = await window.FV_DESKTOP.setSpeed(mode, cores); } catch { return; }
+  S.speed = { mode: plSpeedNow.mode, cores: plSpeedNow.mode === 'exact' ? plSpeedNow.threads : null }; saveS();
+  spLabel(); spExplain();
+}
+function spExplain() {
+  const s = plSpeedNow; if (!s) return;
+  const n = s.cores, bal = n >= 8 ? n - 2 : n >= 4 ? n - 1 : n;
+  $('spFullTxt').textContent = `All ${n} cores, 3 photos at a time in Plans. Fastest; other programs may feel slow while FledgeView works.`;
+  $('spBalTxt').textContent = `${bal} of ${n} cores, 2 photos at a time, so Photoshop, Lightroom and your browser stay responsive.`;
+  $('spLightTxt').textContent = `${Math.max(1, Math.floor(n / 2))} of ${n} cores, 1 photo at a time. For when you\u2019re working on something else heavy.`;
+  $('spExactTxt').textContent = ` (this computer has ${n})`;
+  $('spCores').max = n; if (!$('spCores').value) $('spCores').value = s.threads;
+  for (const r of document.querySelectorAll('input[name=spMode]')) r.checked = r.value === s.mode;
+  $('spNow').textContent = `Now using ${s.threads} of ${n} cores, ${s.files_at_once} photo${s.files_at_once === 1 ? '' : 's'} at a time in Plans.`;
+}
+async function openSpeed() {
+  if (!deskHas('speed')) return;
+  try { plSpeedNow = await window.FV_DESKTOP.speed(); } catch {}
+  spExplain(); $('speedDlg').showModal();
+}
+for (const r of document.querySelectorAll('input[name=spMode]')) r.addEventListener('change', () => { if (r.checked) spApply(r.value, r.value === 'exact' ? +$('spCores').value : null); });
+$('spCores').addEventListener('change', () => { const r = document.querySelector('input[name=spMode][value=exact]'); r.checked = true; spApply('exact', +$('spCores').value); });
+$('speedBtn').onclick = () => { closeMenus(); openSpeed(); };
+setTimeout(() => {   // after the page has loaded: send the saved choice to the program
+  if (!deskHas('speed')) return;
+  $('speedBtn').hidden = false;
+  const p = spPrefs();
+  spApply(p.mode || 'balanced', p.mode === 'exact' ? p.cores : null);
+}, 0);
+
 /* ---------- Start where I left off (desktop program). While a folder is open, the program is told where the person is: the
    photo, the filter, 4-up or Photo view, and the subfolder choice (the sort is a setting, kept anyway). At launch the program
    hands back the last folder and that place; openDir reopens the folder and resumeAt puts the person back. A folder chosen
@@ -7908,8 +8190,20 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.78 beta';
+const VERSION = '0.9.80 beta';
 const RELEASES = [
+  { v: '0.9.80 beta', date: 'November 2026', groups: [
+    ['New', [
+      'A new look: the FledgeView icon (an amber aperture) and name now appear at the top of the app, in About, on the website and as the desktop program\u2019s icon.',
+    ]],
+  ] },
+  { v: '0.9.79 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Plans\u2026 (desktop program): finished files from many photos at once. Three ready to use (web JPEGs of your picks, full-size JPEGs of everything, 16-bit TIFFs of your picks), or copy one and make it your own: size, quality, sharpening, camera data, which photos and the folder name. Raw files are made from the raw with each photo\u2019s Quick finish, several at a time, into a folder named for the plan.',
+      'Speed (desktop program, View menu): Full speed, Balanced or Light, for how much of your computer FledgeView uses while it works. Balanced, the default, leaves a couple of cores free so your other programs stay responsive.',
+      'Faster raw files in the desktop program: Quick finish, exports and Edit in now use all the cores Speed allows, web-size files are made from a half-size develop, and Sony A1 II raws come out at the camera\u2019s own 8640 \u00d7 5760 frame with its colors (they had a black border and took twice as long).',
+    ]],
+  ] },
   { v: '0.9.78 beta', date: 'November 2026', groups: [
     ['New', [
       'Edit in\u2026 (desktop program): send the photo you\u2019re on to Photoshop, Topaz, DxO, Affinity, Luminar or any editing program you add. Each program gets either the raw file or a 16-bit TIFF with your crop and Quick finish, your choice per program. The file goes into an _edits folder beside the photo, and whatever the program saves there shows up here, right beside the original. Ctrl+E opens it.',
