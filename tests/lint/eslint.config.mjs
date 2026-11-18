@@ -1,0 +1,3 @@
+import globals from "globals";
+export default [{ files: ["app.js","gal.js"], languageOptions: { ecmaVersion: 2023, sourceType: "script", globals: { ...globals.browser, exifr: "readonly", JSZip: "readonly", UTIF: "readonly" } },
+  rules: { "no-undef": "error", "no-unused-vars": ["warn", { args: "none", caughtErrors: "none" }], "no-dupe-keys": "error", "no-redeclare": "error", "no-unreachable": "error", "no-self-assign": "error", "no-dupe-else-if": "error", "no-duplicate-case": "error", "no-func-assign": "error", "no-const-assign": "error", "use-isnan": "error", "valid-typeof": "error", "no-use-before-define": ["error", { functions: false, classes: false, variables: false }] } }];

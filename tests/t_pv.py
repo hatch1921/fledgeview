@@ -1,0 +1,51 @@
+from playwright.sync_api import sync_playwright
+import glob
+with sync_playwright() as p:
+    b = p.chromium.launch(executable_path='/opt/pw-browsers/chromium-1194/chrome-linux/chrome')
+    for look in ('Camera', 'Clean'):
+        pg = b.new_page(viewport={'width': 1600, 'height': 900}, color_scheme='dark'); errs = []
+        pg.on('pageerror', lambda e: errs.append(str(e)))
+        pg.route('**/exifr@7.1.3/dist/full.umd.js', lambda r: r.fulfill(path='/tmp/libs/exifr-7.1.3/dist/full.umd.js', content_type='application/javascript'))
+        pg.route('**/jszip.min.js', lambda r: r.fulfill(path='/tmp/libs/jszip-3.10.1/dist/jszip.min.js', content_type='application/javascript'))
+        pg.route('https://fonts.**', lambda r: r.abort())
+        pg.goto('file:///mnt/user-data/outputs/fledgeview.html'); pg.wait_for_timeout(700)
+        pg.evaluate(f"document.getElementById('guideDlg').close(); document.getElementById('look{look}').click()")
+        pg.set_input_files('#fileInput', sorted(glob.glob('/tmp/demo/photos/A120*.jpg'))[:5]); pg.wait_for_timeout(2000)
+        names = pg.evaluate("[...document.querySelectorAll('#strip .th')].map(b => b.getAttribute('aria-label'))")
+        # give the third photo an edit so Photo view should show it edited
+        pg.click(f'#strip [aria-label="{names[2]}"]'); pg.wait_for_timeout(500); pg.click('#editTab'); pg.wait_for_timeout(600)
+        pg.evaluate("(() => { const i = document.getElementById('e_exp'); i.value = 60; i.dispatchEvent(new Event('input')); })()"); pg.wait_for_timeout(300)
+        pg.click('#eDone'); pg.wait_for_timeout(300)
+        pg.click(f'#strip [aria-label="{names[1]}"]'); pg.wait_for_timeout(700)
+        pg.click('#pvBtn'); pg.wait_for_timeout(900)
+        scr = pg.evaluate("(() => { const r = document.getElementById('screen').getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)]; })()")
+        print(look, '| screen fills window:', scr == [0, 0, 1600, 900], scr, '| info hidden:', pg.evaluate("getComputedStyle(document.getElementById('osd')).display === 'none'"))
+        if look == 'Camera': pg.screenshot(path='/tmp/pv1.png')
+        pg.keyboard.press('ArrowRight'); pg.wait_for_timeout(900)
+        print('   moved to', pg.evaluate("document.querySelector('#readout .rname').textContent"), '| shown edited:', pg.evaluate("!document.getElementById('editView').hidden"))
+        pg.keyboard.press('4'); pg.wait_for_timeout(100)
+        print('   rating flash:', pg.evaluate("document.getElementById('pvFlash').hidden ? '(none)' : document.getElementById('pvFlash').textContent"))
+        pg.keyboard.press('q'); pg.wait_for_timeout(200)
+        print('   4-up ignored:', not pg.evaluate("document.getElementById('tQuad').getAttribute('aria-pressed') === 'true'"))
+        pg.keyboard.press('i'); pg.wait_for_timeout(200)
+        print('   I shows info:', pg.evaluate("getComputedStyle(document.getElementById('osd')).display !== 'none'"))
+        pg.click('#pvNext'); pg.wait_for_timeout(800)
+        last = pg.evaluate("document.querySelector('#readout .rname').textContent")
+        print('   next arrow ->', last, '| edit view off for unedited photo:', pg.evaluate("document.getElementById('editView').hidden"))
+        pg.mouse.move(800, 450); pg.wait_for_timeout(2900)
+        print('   controls fade when idle:', pg.evaluate("document.body.classList.contains('pvidle')"))
+        pg.keyboard.press('Escape'); pg.wait_for_timeout(700)
+        print('   back in the tool:', not pg.evaluate("document.body.classList.contains('pview')"), '| same photo:', pg.evaluate("document.querySelector('#readout .rname').textContent") == last,
+              '| toolbar back:', pg.evaluate("!!document.querySelector('.bar').offsetParent"), '| drawer state restored (closed):', not pg.evaluate("document.getElementById('editDrawer').classList.contains('open')"), '| errors:', errs)
+        pg.close()
+    for w in (1366, 1920):
+        for look in ('Camera', 'Clean'):
+            pg = b.new_page(viewport={'width': w, 'height': 800}, color_scheme='dark')
+            pg.route('**/exifr@7.1.3/dist/full.umd.js', lambda r: r.fulfill(path='/tmp/libs/exifr-7.1.3/dist/full.umd.js', content_type='application/javascript'))
+            pg.route('https://fonts.**', lambda r: r.abort())
+            pg.goto('file:///mnt/user-data/outputs/fledgeview.html'); pg.wait_for_timeout(600)
+            pg.evaluate(f"document.getElementById('guideDlg').close(); document.getElementById('look{look}').click()"); pg.wait_for_timeout(300)
+            tops = pg.evaluate("[...new Set(['impBtn','pvBtn','fullBtn'].map(id => Math.round(document.getElementById(id).getBoundingClientRect().top)))]")
+            print('toolbar', w, look, '| one line:', len(tops) == 1)
+            pg.close()
+    b.close()

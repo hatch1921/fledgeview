@@ -1,0 +1,43 @@
+from playwright.sync_api import sync_playwright
+from PIL import Image, ImageStat
+import io
+with sync_playwright() as p:
+    b = p.chromium.launch(executable_path='/opt/pw-browsers/chromium-1194/chrome-linux/chrome', ignore_default_args=['--hide-scrollbars'])
+    ctx = b.new_context(viewport={'width':1700,'height':1050}, color_scheme='dark', accept_downloads=True); pg = ctx.new_page(); errs=[]
+    pg.on('pageerror', lambda e: errs.append(str(e)))
+    pg.on('dialog', lambda d: d.accept())
+    pg.route('**/exifr@7.1.3/dist/full.umd.js', lambda r: r.fulfill(path='/tmp/libs/exifr-7.1.3/dist/full.umd.js', content_type='application/javascript'))
+    pg.route('**/jszip.min.js', lambda r: r.fulfill(path='/tmp/libs/jszip-3.10.1/dist/jszip.min.js', content_type='application/javascript'))
+    pg.route('https://fonts.**', lambda r: r.abort())
+    pg.goto('file:///mnt/user-data/outputs/fledgeview.html'); pg.wait_for_timeout(800)
+    pg.evaluate("window.showDirectoryPicker = undefined; document.getElementById('guideDlg').close()")
+    pg.set_input_files('#fileInput', ['/tmp/demo/photos/DSC03172.jpg', '/tmp/demo/photos/A1209362.jpg', '/tmp/demo/photos/A1208483.jpg']); pg.wait_for_timeout(2000)
+    def export_mean():
+        pg.click('#shareSocial'); pg.wait_for_timeout(500); pg.select_option('#wSrc', 'current'); pg.select_option('#wShape', 'orig'); pg.wait_for_timeout(900)
+        with pg.expect_download() as d: pg.click('#webGo')
+        im = Image.open(d.value.path()).convert('RGB'); pg.click('#webDlg [data-close]'); pg.wait_for_timeout(300)
+        return [round(x, 1) for x in ImageStat.Stat(im.crop((0, 0, im.width, int(im.height*0.85)))).mean]
+    before = export_mean()
+    pg.click('#editBtn'); pg.wait_for_timeout(800)
+    print('edit mode:', pg.evaluate("[!document.getElementById('editPanel').hidden, !document.getElementById('editView').hidden, document.querySelectorAll('.controls .csec:not([hidden])').length]"))
+    pg.screenshot(path='/tmp/edit0.png')
+    def slide(k, v): pg.evaluate(f"(() => {{ const i = document.getElementById('e_{k}'); i.value = {v}; i.dispatchEvent(new Event('input')); }})()")
+    slide('exp', 35); slide('temp', 40); slide('sh', 50); slide('vig', -50); pg.wait_for_timeout(500)
+    pg.screenshot(path='/tmp/edit1.png')
+    print('edited badge on thumb:', pg.evaluate("!!document.querySelector('#strip .th[aria-label=\"DSC03172.jpg\"] .ed')"))
+    pg.click('#eDone'); pg.wait_for_timeout(500)
+    after = export_mean()
+    print('export mean RGB before edits:', before, '| after edits:', after)
+    pg.click('#editBtn'); pg.wait_for_timeout(500); pg.click('#eCopy'); pg.keyboard.press('ArrowRight'); pg.wait_for_timeout(1200)
+    print('next photo starts unedited:', pg.evaluate("document.getElementById('e_exp').value"))
+    pg.click('#ePaste'); pg.wait_for_timeout(300)
+    print('after paste exp =', pg.evaluate("document.getElementById('e_exp').value"))
+    pg.click('#eAuto'); pg.wait_for_timeout(400)
+    print('auto values:', pg.evaluate("Object.fromEntries([...document.querySelectorAll('#eSliders input')].map(i=>[i.dataset.k,+i.value]))"))
+    pg.click('#eReset'); pg.wait_for_timeout(300)
+    print('after reset, edited badge:', pg.evaluate("!!document.querySelector('#strip .th[aria-label=\"A1209362.jpg\"] .ed')"))
+    pg.click('#eDone'); pg.wait_for_timeout(300)
+    pg.click('#strip [aria-label="DSC03172.jpg"]'); pg.wait_for_timeout(800); pg.click('#tFrame'); pg.wait_for_timeout(800)
+    pg.locator('#screen').screenshot(path='/tmp/edit_frame.png'); pg.click('#tFrame')
+    print('errors:', errs)
+    b.close()

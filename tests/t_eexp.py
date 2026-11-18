@@ -1,0 +1,31 @@
+from playwright.sync_api import sync_playwright
+import glob
+with sync_playwright() as p:
+    b = p.chromium.launch(executable_path='/opt/pw-browsers/chromium-1194/chrome-linux/chrome')
+    for w, h in [(1920, 1080), (1366, 768)]:
+        pg = b.new_page(viewport={'width': w, 'height': h}, color_scheme='dark'); errs=[]
+        pg.on('pageerror', lambda e: errs.append(str(e)))
+        pg.route('**/exifr@7.1.3/dist/full.umd.js', lambda r: r.fulfill(path='/tmp/libs/exifr-7.1.3/dist/full.umd.js', content_type='application/javascript'))
+        pg.route('**/jszip.min.js', lambda r: r.fulfill(path='/tmp/libs/jszip-3.10.1/dist/jszip.min.js', content_type='application/javascript'))
+        pg.route('https://fonts.**', lambda r: r.abort())
+        pg.goto('file:///mnt/user-data/outputs/fledgeview.html'); pg.wait_for_timeout(800)
+        pg.evaluate("document.getElementById('guideDlg').close()")
+        pg.set_input_files('#fileInput', sorted(glob.glob('/tmp/demo/photos/A1206*.jpg'))[:6]); pg.wait_for_timeout(2000)
+        names = pg.evaluate("[...document.querySelectorAll('#strip .th')].map(b => b.getAttribute('aria-label'))")
+        pg.click(f'#strip [aria-label="{names[1]}"]'); pg.wait_for_timeout(600)
+        pg.click('#editTab'); pg.wait_for_timeout(800)
+        pg.locator('#eExport').scroll_into_view_if_needed()
+        vis = pg.evaluate("(() => { const r = document.getElementById('eExport').getBoundingClientRect(); return r.bottom <= innerHeight && r.top >= 0; })()")
+        pg.click('#eExport'); pg.wait_for_timeout(600)
+        one = pg.evaluate("[document.getElementById('webDlg').open, document.getElementById('wSrc').selectedOptions[0].textContent]")
+        pg.click('#webDlg [data-close]'); pg.wait_for_timeout(300)
+        pg.click(f'#strip [aria-label="{names[3]}"]', modifiers=['Control']); pg.click(f'#strip [aria-label="{names[4]}"]', modifiers=['Control']); pg.wait_for_timeout(200)
+        pg.click('#eExport'); pg.wait_for_timeout(600)
+        many = pg.evaluate("document.getElementById('wSrc').selectedOptions[0].textContent")
+        if w == 1366: pg.screenshot(path='/tmp/eexp_dlg.png')
+        pg.click('#webDlg [data-close]'); pg.keyboard.press('Escape'); pg.wait_for_timeout(300)
+        pg.click('#webBtn'); pg.wait_for_timeout(500)
+        later = pg.evaluate("[...document.getElementById('wSrc').options].map(o => o.textContent)")
+        print(w, '| reachable after scrolling the drawer:', vis, '| one photo ->', one, '| with selection ->', many, '| toolbar Export choices:', later, '| errors:', errs)
+        pg.close()
+    b.close()

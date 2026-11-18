@@ -1,0 +1,37 @@
+from playwright.sync_api import sync_playwright
+from PIL import Image
+import io
+with sync_playwright() as p:
+    b = p.chromium.launch(executable_path='/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args=['--no-proxy-server'])
+    pg = b.new_page(viewport={'width': 2560, 'height': 1440}, color_scheme='dark'); errs = []
+    pg.on('pageerror', lambda e: errs.append(str(e)))
+    pg.goto('http://127.0.0.1:8790/app/'); pg.wait_for_timeout(900)
+    pg.evaluate("(() => { document.querySelectorAll('dialog[open]').forEach(d => d.close()); document.getElementById('lookClean').click(); })()")
+    pg.set_input_files('#fileInput', ['/tmp/vid/Wildlife/2026-09-04/A1206951.jpg', '/tmp/vid/Wildlife/2026-09-04/A1208483.jpg', '/mnt/user-data/uploads/A1200001.ARW']); pg.wait_for_timeout(3500)
+    pg.click('#strip [aria-label="A1206951.jpg"]'); pg.wait_for_timeout(1200)
+    box = lambda sel: pg.evaluate(f"(() => {{ const e = document.querySelector('{sel}'); if (!e || !e.offsetParent) return null; const r = e.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; }})()")
+    pg.click('#dofBtn'); pg.wait_for_timeout(1500)
+    print('Lens tools open | no pop-up:', not pg.evaluate("document.getElementById('dofDlg').open"), '| screen:', box('#screen'), '| calculator:', box('#dofFrame'), '| panel:', box('#editPanel'), '| note:', pg.evaluate("document.getElementById('dofNote').textContent")[:70])
+    shots = [Image.open(io.BytesIO(pg.screenshot())).resize((1280, 720))]
+    pg.click('#dofTabFov'); pg.wait_for_timeout(1500)
+    print('Field of view | frames canvas:', box('#fovRect'), '| angle inset:', box('#fovFan'), '| note:', pg.evaluate("document.getElementById('fovNote').textContent")[:60])
+    shots.append(Image.open(io.BytesIO(pg.screenshot())).resize((1280, 720)))
+    pg.keyboard.press('ArrowRight'); pg.wait_for_timeout(1800)
+    print('moved to the next photo ->', pg.evaluate("document.getElementById('fovNote').textContent")[:40])
+    pg.click('#dofTabDof'); pg.wait_for_timeout(1000); print('Depth of field follows too ->', pg.evaluate("document.getElementById('dofNote').textContent")[:50])
+    pg.keyboard.press('Escape'); pg.wait_for_timeout(600); print('Esc closes:', not pg.evaluate("!document.getElementById('lensView').hidden"))
+    pg.click('#cropTab'); pg.wait_for_timeout(800); pg.click('#dofBtn'); pg.wait_for_timeout(900)
+    print('Crop -> Lens tools: lens shown', pg.evaluate("!document.getElementById('lensView').hidden"), '| crop mode left:', not pg.evaluate("document.getElementById('editView').classList.contains('cropping')"))
+    pg.click('#eLensClose'); pg.wait_for_timeout(500); print('Close button closes:', pg.evaluate("document.getElementById('lensView').hidden"))
+    pg.click('#dofBtn'); pg.wait_for_timeout(800); pg.click('#pvBtn'); pg.wait_for_timeout(1000)
+    print('Photo view from Lens tools:', pg.evaluate("document.body.classList.contains('pview')"), '| lens closed:', pg.evaluate("document.getElementById('lensView').hidden")); pg.keyboard.press('Escape'); pg.wait_for_timeout(600)
+    print('page fits:', pg.evaluate("document.documentElement.scrollHeight <= innerHeight"), '| errors:', errs)
+    s = Image.new('RGB', (2570, 720), 'white'); s.paste(shots[0], (0, 0)); s.paste(shots[1], (1290, 0)); s.save('/tmp/lensws.png')
+    pg.close()
+    pg = b.new_page(viewport={'width': 1366, 'height': 768}, color_scheme='dark')
+    pg.goto('http://127.0.0.1:8790/app/'); pg.wait_for_timeout(900); pg.evaluate("document.querySelectorAll('dialog[open]').forEach(d => d.close())")
+    pg.set_input_files('#fileInput', ['/tmp/vid/Wildlife/2026-09-04/A1206951.jpg']); pg.wait_for_timeout(1500)
+    pg.click('#dofBtn'); pg.wait_for_timeout(900); pg.click('#dofTabFov'); pg.wait_for_timeout(1200)
+    print('laptop: panel', box('#editPanel'), 'fits:', pg.evaluate("(() => { const r = document.getElementById('editPanel').getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight && r.right <= innerWidth; })()"), '| page fits:', pg.evaluate("document.documentElement.scrollHeight <= innerHeight"))
+    pg.screenshot(path='/tmp/lensws_laptop.png')
+    b.close()
