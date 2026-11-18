@@ -941,6 +941,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <button class="mi check" id="lookCamera" aria-pressed="true">Camera</button>
         <button class="mi check" id="lookClean" aria-pressed="false">Clean</button>
         <div class="msep"></div>
+        <button class="mi check" id="resumeBtn" hidden aria-pressed="true" title="In the desktop program: at launch, reopen the last folder at the photo, filter and view you left">Start where I left off</button>
         <button class="mi" id="scopeReset" hidden title="Ask again which photos to open when a folder has subfolders">Ask again about subfolders</button>
         <button class="mi check" id="pairBtn" role="menuitemcheckbox" title="Show a raw file and a JPEG with the same name as one photo, viewed from the full-size JPEG">Pair RAW + JPEG</button>
         <button class="mi" id="featBtn">Features</button>
@@ -2023,7 +2024,7 @@ function addFiles(list, focusNew = false) {
   state.items.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
   setLoadedButtons(true);
   toast(`Added ${fresh.length} photo${fresh.length === 1 ? '' : 's'}`);
-  if (!focusNew && fresh.length >= 10 && S.sortAsk !== false) setTimeout(openSortDlg, 350);
+  if (!focusNew && !resumeRun && fresh.length >= 10 && S.sortAsk !== false) setTimeout(openSortDlg, 350);
   rebuildView(keep);
   refreshFilterOptions();
   queueThumbs(fresh);
@@ -2128,15 +2129,18 @@ async function walkHandle(dir, out, zone = null, home = null, root = dir) {
 }
 /* a folder with subfolders: open just its own photos, only what isn't organized yet, or everything. Listing names is quick;
    reading photos is the slow part, so this is asked before anything loads */
-async function chooseScope(dir, out) {
+let openScope = 'all';   // which photos the open folder shows: all, top (this folder only) or new (not yet organized)
+async function chooseScope(dir, out, forced) {
   const photos = out.filter(e => !e.xmp), own = e => e.dir === dir || (e.zone && e.home === dir), top = photos.filter(own);
+  openScope = 'all';
   if (top.length === photos.length) return out;
   const idx = await readIndex(dir), fresh2 = idx ? photos.filter(e => { const x = idx.files[idOf(e.file)]; return own(e) || !(x && x.s); }) : null;   // the top level is the inbox: its photos always count as new
   const keep = list => { const dirs = new Set(list.map(e => e.dir)); return [...list, ...out.filter(e => e.xmp && dirs.has(e.dir))]; };
   const pickFor = c => c === 'top' ? keep(top) : c === 'new' && fresh2 ? keep(fresh2) : out;
   const countFor = c => c === 'top' ? top.length : c === 'new' ? (fresh2 ? fresh2.length : 0) : photos.length;
   let why = '';
-  if (S.openScope) { if (countFor(S.openScope) > 0) return pickFor(S.openScope); why = `Your saved choice, ${S.openScope === 'top' ? 'This folder only' : 'New photos only'}, finds no photos here. `; }
+  if (forced && countFor(forced) > 0) { openScope = forced; return pickFor(forced); }
+  if (S.openScope) { if (countFor(S.openScope) > 0) { openScope = S.openScope; return pickFor(S.openScope); } why = `Your saved choice, ${S.openScope === 'top' ? 'This folder only' : 'New photos only'}, finds no photos here. `; }
   const subs = new Set(photos.filter(e => !own(e)).map(e => e.dir)).size;
   $('scopeSub').textContent = why + `${dir.name} has ${photos.length.toLocaleString()} photos: ${top.length.toLocaleString()} in the folder itself and ${(photos.length - top.length).toLocaleString()} in ${subs.toLocaleString()} subfolder${subs === 1 ? '' : 's'}. Reading photos takes time, so open only what you need.`;
   $('scTop').textContent = top.length ? `${top.length.toLocaleString()} photo${top.length === 1 ? '' : 's'}, not the subfolders` : 'None here: every photo is in a subfolder';
@@ -2152,9 +2156,59 @@ async function chooseScope(dir, out) {
   });
   if (!choice) return null;
   if ($('scopeRemember').checked) { S.openScope = choice; saveS(); syncScopeReset(); }
+  openScope = choice;
   return pickFor(choice);
 }
 function syncScopeReset() { const b = $('scopeReset'); if (b) b.hidden = !S.openScope; }
+/* ---------- Start where I left off (desktop program). While a folder is open, the program is told where the person is: the
+   photo, the filter, 4-up or Photo view, and the subfolder choice (the sort is a setting, kept anyway). At launch the program
+   hands back the last folder and that place; openDir reopens the folder and resumeAt puts the person back. A folder chosen
+   with Open folder starts fresh (the program clears the place when the folder changes). ---------- */
+let resumeRun = null, deskLast = '';
+function deskRemember() {
+  const D = window.FV_DESKTOP; if (!D || !D.remember || resumeRun || !state.roots.size) return;
+  const it = cur(); if (!it || !it.root) return;
+  const st = { file: it.key, name: it.name, filter: state.filter || 'all', pview: !!state.pview, quad: !!state.show.quad, scope: openScope };
+  const j = JSON.stringify(st); if (j === deskLast) return;
+  deskLast = j; D.remember(st);
+}
+/* back to where the person was; returns true when it found the photo */
+function resumeAt(rs) {
+  const has = v => [...$('filterSel').options].some(o => o.value === v);
+  if (rs.filter && rs.filter !== 'all' && has(rs.filter) && on('cull')) setFilter(rs.filter);
+  const find = () => { let i = rs.file ? state.view.findIndex(it => it.key === rs.file) : -1; if (i < 0 && rs.name) i = state.view.findIndex(it => it.name === rs.name); return i; };
+  let i = find();
+  /* the photo is still there but the filter now hides it (it's no longer a pick, say): show all rather than a different photo */
+  if (i < 0 && state.filter !== 'all' && state.items.some(it => it.key === rs.file || it.name === rs.name)) { setFilter('all'); i = find(); }
+  if (i >= 0) show(i);
+  if (rs.quad && i >= 0) setQuad(true, true);
+  if (rs.pview && i >= 0) setTimeout(() => setPhotoView(true), 400);
+  const it = i >= 0 ? state.view[i] : null;
+  setTimeout(() => toast(it ? `Back where you left off: ${it.name}` : 'Your last folder is open again. The photo you were on isn\u2019t in it anymore.'), 60);
+  return true;
+}
+if (window.FV_DESKTOP && window.FV_DESKTOP.remember) {
+  setInterval(deskRemember, 1500);
+  addEventListener('pagehide', deskRemember); addEventListener('beforeunload', deskRemember);
+}
+if (window.FV_DESKTOP && window.FV_DESKTOP.resume && !framed) {
+  /* ask for the last folder at load, before the program's own fallback (pressing Open folder) would run */
+  addEventListener('load', () => setTimeout(async () => {
+    let rs = null;
+    try { rs = await window.FV_DESKTOP.resume(); } catch { rs = null; }
+    if (!rs || !rs.handle || state.items.length) return;
+    resumeRun = rs;
+    try { await openDir(rs.handle, rs); }
+    catch (e) { status(''); lcHide(); toast(`Couldn\u2019t reopen your last folder (${e.message || e.name}). Use Open folder.`); }
+    finally { resumeRun = null; }
+  }, 300));
+}
+{ const b = $('resumeBtn'), D = window.FV_DESKTOP;
+  if (b && D && D.resumeOn && D.setResume) {
+    const sync = () => b.setAttribute('aria-pressed', String(D.resumeOn()));
+    b.hidden = false; sync();
+    b.onclick = () => { D.setResume(!D.resumeOn()); sync(); toast(D.resumeOn() ? 'Next time, FledgeView opens where you left off.' : 'Next time, FledgeView starts empty.'); };
+  } }
 let pickT0 = 0;
 $('openFolder').onclick = async () => {
   if (window.showDirectoryPicker && !framed) {
@@ -2163,17 +2217,7 @@ $('openFolder').onclick = async () => {
          refuses view-only access silently, cancelling the request after a folder is chosen */
       pickT0 = performance.now();
       const dir = await window.showDirectoryPicker({ mode: 'readwrite', id: 'chimp' });
-      let out = []; await walkHandle(dir, out); status(''); lcHide();
-      if (walkStop) { walkStop = false; if (!state.items.length) setEmpty(); toast(`Stopped. Nothing was opened from ${dir.name}.`); return; }
-      const skippedNote = walkSkipped ? ` ${walkSkipped.toLocaleString()} file${walkSkipped === 1 ? '' : 's'} couldn\u2019t be read (in use by another program, or online-only) and ${walkSkipped === 1 ? 'was' : 'were'} skipped.` : '';
-      if (!state.items.length) setEmpty();
-      if (!out.some(e => !e.xmp)) { toast(`No photos FledgeView can open were found in ${dir.name} or its subfolders.${skippedNote}`); return; }
-      out = await chooseScope(dir, out); if (!out) { if (!state.items.length) setEmpty(); return; }
-      if (skippedNote) setTimeout(() => toast(skippedNote.trim()), 2500);
-      if (state.items.length && out.length) $('clearAll').click();
-      state.roots.add(dir);
-      addFiles(out);
-      if (out.length) setTimeout(() => toast(`Opened ${out.length} photo${out.length === 1 ? '' : 's'} with folder access. Move picks and rejects and Write ratings are available.`), 50);
+      await openDir(dir);
       return;
     } catch (e) {
       status(''); lcHide();
@@ -2186,6 +2230,21 @@ $('openFolder').onclick = async () => {
   }
   openFolderInput();
 };
+/* reads a chosen folder and opens its photos. rs (desktop program, at launch): where the person left off, from FV_DESKTOP.resume() */
+async function openDir(dir, rs) {
+      let out = []; await walkHandle(dir, out); status(''); lcHide();
+      if (walkStop) { walkStop = false; if (!state.items.length) setEmpty(); toast(`Stopped. Nothing was opened from ${dir.name}.`); return; }
+      const skippedNote = walkSkipped ? ` ${walkSkipped.toLocaleString()} file${walkSkipped === 1 ? '' : 's'} couldn\u2019t be read (in use by another program, or online-only) and ${walkSkipped === 1 ? 'was' : 'were'} skipped.` : '';
+      if (!state.items.length) setEmpty();
+      if (!out.some(e => !e.xmp)) { toast(`No photos FledgeView can open were found in ${dir.name} or its subfolders.${skippedNote}`); return; }
+      out = await chooseScope(dir, out, rs && rs.scope); if (!out) { if (!state.items.length) setEmpty(); return; }
+      if (skippedNote) setTimeout(() => toast(skippedNote.trim()), 2500);
+      if (state.items.length && out.length) $('clearAll').click();
+      state.roots.add(dir);
+      addFiles(out);
+      if (rs && resumeAt(rs)) return;
+      if (out.length) setTimeout(() => toast(`Opened ${out.length} photo${out.length === 1 ? '' : 's'} with folder access. Move picks and rejects and Write ratings are available.`), 50);
+}
 /* Some browsers label their folder button “Upload.” Say plainly, once, that nothing leaves the computer. */
 /* the start screen's message; when nothing is loaded, a second line answers the browser's “Upload” wording before anyone worries */
 function setEmpty(filtered) {
@@ -7679,8 +7738,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.76 beta';
+const VERSION = '0.9.77 beta';
 const RELEASES = [
+  { v: '0.9.77 beta', date: 'November 2026', groups: [
+    ['New', [
+      'In the desktop program, Start where I left off now goes all the way back: the photo you were on, with the same filter, sort, 4-up or Photo view, and the same choice of subfolders, without asking again. Turn it off or on in the View menu.',
+    ]],
+  ] },
   { v: '0.9.76 beta', date: 'November 2026', groups: [
     ['Fixed', [
       'Print sizes now round down, so \u201cprints to\u201d never promises more than the photo can give: a photo 8,640 pixels long at 300 ppi prints to 28 in (it said 29).',
