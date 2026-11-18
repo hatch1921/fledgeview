@@ -943,7 +943,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
     <span class="tgap" aria-hidden="true"></span>
     <button class="btn out" id="webBtn" data-f="web" title="Export resized copies for the web and social media"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>Export</button>
     <div class="menu">
-      <button class="btn mbtn" id="presetMenuBtn" aria-haspopup="true" aria-expanded="false" title="Lightroom presets and recipe cards from the current photo"><span class="lrdot" id="lrDot" hidden></span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="13" height="15" rx="2"/><path d="M4 7v12a2 2 0 0 0 2 2h10"/></svg><span class="lbl">Presets</span> ▾</button>
+      <button class="btn mbtn" id="presetMenuBtn" aria-haspopup="true" aria-expanded="false" title="Recipes: recipe cards, Lightroom presets and Lightroom settings from the current photo"><span class="lrdot" id="lrDot" hidden></span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="13" height="15" rx="2"/><path d="M4 7v12a2 2 0 0 0 2 2h10"/></svg><span class="lbl">Recipes</span> ▾</button>
       <div class="mpanel" hidden>
         <button class="mi" id="pmCard">Make recipe card…</button>
         <button class="mi" id="pmPreset">Save as Lightroom preset</button>
@@ -1602,7 +1602,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
           <li>Works with JPEG, PNG, WebP, and RAW files from most cameras: Sony ARW, Nikon NEF, Canon CR2 and CR3, DNG, Olympus ORF, Panasonic RW2, Fuji RAF, and more.</li>
           <li><strong>RAW files show the JPEG preview the camera stores inside the file.</strong> It’s great for culling, but it isn’t the full raw data, so judge critical sharpness in your raw editor when it matters.</li>
           <li>The slider above the thumbnails changes their size. The <kbd>‹</kbd> button hides the sidebar for a bigger screen, and <strong>Photo info</strong> at the bottom expands the full EXIF details.</li>
-          <li><strong>Presets ▾</strong> (top toolbar) lights up with a dot when the photo you’re on carries Lightroom adjustments: make a recipe card, save a Lightroom preset, or show the settings. The recipe card’s <strong>Shape</strong> makes ready-to-post versions: portrait 4:5 for Instagram and Facebook, square, or 9:16 for Stories and Reels. In Chrome and Edge, <strong>Save to</strong> lets you choose a folder for cards and presets; FledgeView remembers it and never replaces a file that’s already there. Frame’s <strong>Save to</strong> works the same way for framed prints.</li>
+          <li><strong>Recipes ▾</strong> (top toolbar) lights up with a dot when the photo you’re on carries Lightroom adjustments: make a recipe card, save a Lightroom preset, or show the settings. The recipe card’s <strong>Shape</strong> makes ready-to-post versions: portrait 4:5 for Instagram and Facebook, square, or 9:16 for Stories and Reels. In Chrome and Edge, <strong>Save to</strong> lets you choose a folder for cards and presets; FledgeView remembers it and never replaces a file that’s already there. Frame’s <strong>Save to</strong> works the same way for framed prints.</li>
           <li><strong>Lightroom edits:</strong> for a JPEG or TIFF exported from Lightroom with full metadata (in Lightroom Classic’s Export window, Metadata → Include: All Metadata), Photo info lists the adjustments that were made, and <strong>Save as Lightroom preset</strong> turns them into a preset to import in Lightroom (Develop → Presets → + → Import Presets). The crop, masks and spot removal belong to that one photo and are left out.</li>
         </ul>
         <div class="tip">Moving files and saving to folders need <strong>Chrome or Edge</strong>. Safari and Firefox can view, rate, and export, but not organize. On a Mac, the downloaded copy opens in Safari by default: right-click it and choose <strong>Open With → Google Chrome</strong>.</div>
@@ -3692,7 +3692,7 @@ setTimeout(syncScopeReset, 0);
 function syncPairBtn() { const on2 = S.pairs !== false; $('pairBtn').setAttribute('aria-pressed', String(on2)); $('pairBtn').setAttribute('aria-checked', String(on2)); }
 syncPairBtn();
 $('pairBtn').onclick = () => { S.pairs = S.pairs === false; saveS(); syncPairBtn(); toast(S.pairs ? 'RAW + JPEG pairs will show as one photo the next time you open a folder' : 'RAW and JPEG files will show separately the next time you open a folder'); };
-/* the Presets menu: lit when the current photo carries Lightroom adjustments, dimmed with a reason when it doesn't */
+/* the Recipes menu: lit when the current photo carries Lightroom adjustments, dimmed with a reason when it doesn't */
 function lrAdjusted(it) { return !!(it && it.lr && lrRows(it.lr).length); }
 function syncPresetMenu() {
   const it = cur(), ok = lrAdjusted(it);
@@ -3700,7 +3700,7 @@ function syncPresetMenu() {
   for (const id of ['pmCard', 'pmPreset', 'pmShow']) $(id).disabled = !ok;
   const note = !it ? 'Open a photo first.' : it.lr === undefined && LR_EXT.has(it.ext) ? 'Checking this photo\u2026' : !it.lr ? 'No Lightroom settings in this photo. Export from Lightroom with Metadata \u2192 Include: All Metadata, or try a JPEG or TIFF.' : !ok ? 'This photo\u2019s Lightroom settings are all at their defaults, so there\u2019s nothing to save.' : '';
   $('pmNote').textContent = note; $('pmNote').hidden = !note;
-  $('presetMenuBtn').title = ok ? 'This photo has Lightroom adjustments: make a recipe card or save a preset' : 'Lightroom presets and recipe cards from the current photo';
+  $('presetMenuBtn').title = ok ? 'This photo has Lightroom adjustments: make a recipe card or save a Lightroom preset' : 'Recipes: recipe cards, Lightroom presets and Lightroom settings from the current photo';
   if (it && it.lr === undefined && LR_EXT.has(it.ext)) lrSettings(it).then(() => { if (cur() === it) syncPresetMenu(); });
 }
 $('pmCard').onclick = () => openRecipe(cur());
@@ -8191,8 +8191,13 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.81 beta';
+const VERSION = '0.9.82 beta';
 const RELEASES = [
+  { v: '0.9.82 beta', date: 'November 2026', groups: [
+    ['Changed', [
+      'Presets \u25be in the top toolbar is now Recipes \u25be: make a recipe card, save a Lightroom preset, or show the Lightroom settings, the same as before. "Presets" now means export presets only.',
+    ]],
+  ] },
   { v: '0.9.81 beta', date: 'November 2026', groups: [
     ['Changed', [
       'Plans are now Export presets (desktop program): the Presets\u2026 button in Export. New starts your own preset, Edit changes one (editing a built-in makes your own copy, so the built-ins stay as they are), and Duplicate and Delete work on yours. Your saved presets carry over.',
