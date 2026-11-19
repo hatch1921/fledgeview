@@ -553,7 +553,7 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;white-space:no
   box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -2px 0 rgba(0,0,0,.35),0 20px 40px -20px rgba(0,0,0,.65);
 }
 .bezel{background:#000;border-radius:10px;padding:10px;box-shadow:inset 0 0 0 1px #46494d}
-.screen{position:relative;width:var(--scr-w,60vw);aspect-ratio:3/2;background:#000;overflow:hidden;border-radius:3px;outline:none;user-select:none;-webkit-user-select:none}
+.screen{position:relative;width:var(--scr-w,60vw);height:var(--scr-h,auto);aspect-ratio:3/2;background:#000;overflow:hidden;border-radius:3px;outline:none;user-select:none;-webkit-user-select:none}
 .screen.dragging{box-shadow:inset 0 0 0 2px var(--amber)}
 .screen.zoomed{cursor:grab}
 .screen.panning{cursor:grabbing}
@@ -816,6 +816,12 @@ dialog .end{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
 #statsDlg{width:min(1000px,94vw)}
 dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;color:inherit;background:var(--page);border:1px solid var(--panel-line);border-radius:6px;padding:5px 8px}
 #webDlg{width:min(1120px,95vw)}
+#wform[inert]{opacity:.55}
+.wprog{margin:8px 0 0}.wprog .impbar span{background:var(--blue,#2f7de1)}
+#wFolder{width:110px;min-width:0}
+.expchip{display:inline-flex;align-items:center;gap:8px}.expchip[hidden]{display:none}
+.expbar{display:block;width:54px;height:6px;border-radius:3px;background:rgba(0,0,0,.35);overflow:hidden}
+#expChipFill{display:block;height:100%;width:0;background:#4f9bf0;transition:width .2s}
 .webgrid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(290px,1fr);gap:22px;margin-top:12px}
 .wprev{background:#111;border-radius:8px;display:flex;align-items:center;justify-content:center;min-height:280px;padding:12px}
 .wprev canvas{max-width:100%;max-height:58vh;display:block;box-shadow:0 2px 10px rgba(0,0,0,.5)}
@@ -941,7 +947,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
     </div>
     <button class="btn" id="editBtn" aria-pressed="false" title="Adjust: simple edits applied when you export"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h8M16 6h4M4 12h2M10 12h10M4 18h11M19 18h1"/><circle cx="14" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg>Edit</button>
     <span class="tgap" aria-hidden="true"></span>
-    <button class="btn out" id="webBtn" data-f="web" title="Export resized copies for the web and social media"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>Export</button>
+    <button class="btn out" id="webBtn" data-f="web" title="Export resized copies for the web and social media"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>Export</button><button class="btn expchip" id="expChip" hidden title="Export running: click to open"><span class="expbar"><span id="expChipFill"></span></span><span id="expChipTxt"></span></button>
     <div class="menu">
       <button class="btn mbtn" id="presetMenuBtn" aria-haspopup="true" aria-expanded="false" title="Recipes: recipe cards, Lightroom presets and Lightroom settings from the current photo"><span class="lrdot" id="lrDot" hidden></span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="13" height="15" rx="2"/><path d="M4 7v12a2 2 0 0 0 2 2h10"/></svg><span class="lbl">Recipes</span> ▾</button>
       <div class="mpanel" hidden>
@@ -1116,7 +1122,6 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <div class="slabel">Edit and share</div>
         <button class="knob sharebtn eopen" id="editTab" aria-expanded="false" aria-controls="editPanel" title="Adjust: exposure, contrast, color, and more, in a panel to the right (open or close)"><span>Adjust</span></button>
         <div class="eopenrow"><button class="knob sharebtn eopen" id="cropTab" aria-expanded="false" aria-controls="editPanel" title="Crop and straighten, in a panel to the right (R)"><span>Crop</span></button><button class="knob sharebtn" id="undoBtn" disabled title="Undo the last crop or adjustment on this photo, one step at a time (Ctrl+Z)">Undo</button></div>
-        <button class="knob sharebtn" id="plansBtn" title="Export presets: web JPEGs, full-size JPEGs or 16-bit TIFFs from many photos at once">Presets…</button>
         <button class="knob sharebtn" id="editInBtn" title="Edit in Photoshop, Topaz, DxO, Affinity or Luminar (Ctrl+E)">Edit in…</button>
         <button class="knob sharebtn" id="shareGal" title="Make a gallery page to email or post">Web gallery</button>
         <button class="knob sharebtn" id="shareSocial" title="Resize and crop copies for Instagram, Facebook, and the web">Social media</button>
@@ -1213,9 +1218,9 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
 </dialog>
 
 <dialog id="webDlg">
-  <div style="display:flex;align-items:center;gap:12px"><h2 style="margin-right:auto">Export</h2><button class="btn" id="galOpen" title="Make a shareable gallery page of your photos">Make a web gallery…</button></div>
+  <div style="display:flex;align-items:center;gap:12px"><h2 style="margin-right:auto">Export</h2><button class="btn" id="wSpeed" hidden title="How much of this computer FledgeView uses while it exports">Speed</button><button class="btn" id="galOpen" title="Make a shareable gallery page of your photos">Make a web gallery…</button></div>
   <div class="wresume" id="wResume" hidden><span id="wResumeText"></span><button class="btn go" id="wResumeBtn">Resume</button><button class="btn" id="wFresh">Start fresh</button><button class="btn" id="wResumeX" aria-label="Dismiss">✕</button></div>
-  <p class="sub">Resizes finished photos for websites and social media. Your originals are never changed.</p>
+  <p class="sub">Finished copies for websites, social media, prints and editing, from one photo or many. Your originals are never changed.</p>
   <div class="webgrid">
     <div>
       <div class="walltabs" id="wAllTabs" hidden role="group" aria-label="Shape to preview"></div>
@@ -1233,7 +1238,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
       <p class="sub" id="webInfo"></p>
     </div>
     <div class="wform" id="wform">
-      <div class="wrow wpreset"><label for="wPreset">Preset</label><select id="wPreset" title="Saved export settings"></select><span class="pbtns"><button class="btn" id="wPresetSave" title="Save the current settings to this preset">Save</button><span class="pwrap"><button class="btn" id="wPresetMore" aria-haspopup="true" aria-expanded="false" title="More preset options">⋯</button><span class="pmenu" id="wPresetMenu" hidden><button class="mi" data-p="new">Save as new preset…</button><button class="mi" data-p="rename">Rename…</button><button class="mi" data-p="delete">Delete</button><button class="mi" data-p="export">Export preset file…</button><button class="mi" data-p="import">Import preset file…</button></span></span></span><input type="file" id="wPresetFile" accept=".fvpreset,.json,application/json" hidden></div>
+      <div class="wrow wpreset"><label for="wPreset">Preset</label><select id="wPreset" title="Saved export settings"></select><span class="pbtns"><button class="btn" id="wPresetSave" title="Save the current settings to this preset">Save</button><span class="pwrap"><button class="btn" id="wPresetMore" aria-haspopup="true" aria-expanded="false" title="More preset options">⋯</button><span class="pmenu" id="wPresetMenu" hidden><button class="mi" data-p="new">New preset from these settings…</button><button class="mi" data-p="dup">Duplicate</button><button class="mi" data-p="rename">Rename…</button><button class="mi" data-p="delete">Delete</button><button class="mi" data-p="export">Share as a file…</button><button class="mi" data-p="import">Add from a file…</button></span></span></span><input type="file" id="wPresetFile" accept=".fvpreset,.json,application/json" hidden></div>
       <div class="wrow"><label for="wSrc">Photos</label><select id="wSrc"></select><button class="btn" id="wPick">Choose folder</button></div>
       <input type="file" id="wDirInput" webkitdirectory multiple hidden>
       <div class="wrow"><label for="wShape">Shape</label><select id="wShape"><option value="orig">Original shape</option><option value="4x5">4:5 – Instagram and Facebook feed (1080 × 1350)</option><option value="3x4">3:4 – Instagram grid, tallest (1080 × 1440)</option><option value="1x1">1:1 – Square posts (1080 × 1080)</option><option value="191x1">1.91:1 – Instagram landscape (1080 × 566)</option><option value="9x16">9:16 – Stories, Reels, TikTok, Shorts (1080 × 1920)</option><option value="16x9">16:9 – YouTube, X, websites (1920 × 1080)</option><option value="all">All platforms – one of each shape</option></select></div>
@@ -1244,8 +1249,9 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
       </div>
       <div class="wrow"><label for="wFramed">Frame</label><label class="chk"><input type="checkbox" id="wFramed"> Show each photo framed on a wall</label></div>
       <p class="wnote" id="wFramedNote">Uses your Frame settings from the camera view: frame, mat, size, wall, and any zoom you set there.</p>
-      <div class="wrow"><label for="wSize">Long edge</label><select id="wSize"><option value="1080">1080 px</option><option value="1600">1600 px</option><option value="2000">2000 px</option><option value="p50">Half size (50%)</option><option value="p75">75% size</option><option value="orig">Original size</option><option value="custom">Custom</option></select><input type="number" id="wCustom" min="200" max="16000" step="10" aria-label="Custom long edge in pixels, up to the photo's own size" title="Never larger than the photo itself" style="width:90px"></div>
-      <div class="wrow"><label for="wFmt">Format</label><select id="wFmt"><option value="jpeg">JPEG</option><option value="webp">WebP</option></select></div>
+      <div class="wrow"><label for="wSize">Long edge</label><select id="wSize"><option value="1080">1080 px</option><option value="1600">1600 px</option><option value="2000">2000 px</option><option value="2048">2048 px</option><option value="p50">Half size (50%)</option><option value="p75">75% size</option><option value="orig">Original size</option><option value="custom">Custom</option></select><input type="number" id="wCustom" min="200" max="16000" step="10" aria-label="Custom long edge in pixels, up to the photo's own size" title="Never larger than the photo itself" style="width:90px"></div>
+      <div class="wrow"><label for="wFmt">Format</label><select id="wFmt"><option value="jpeg">JPEG</option><option value="webp">WebP</option><option value="tiff">16-bit TIFF</option></select></div>
+      <p class="wnote" id="wTiffNote" hidden>16-bit TIFFs are made by the desktop program from raw files and camera JPEGs, with each photo’s Quick finish, in the photo’s own shape (no frame or info bar). Good for printing or finishing in another editor.</p>
       <div class="wrow"><label for="wQ">Quality</label><input type="range" id="wQ" min="60" max="100" step="1"><span class="tl" id="wQv"></span></div>
       <div class="wrow"><label for="wSharp">Sharpen</label><select id="wSharp"><option value="0">Off</option><option value="0.35">Low</option><option value="0.7">Standard</option></select></div>
       <fieldset class="wset" id="wBarSet">
@@ -1268,11 +1274,12 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
       </div>
       <div class="wrow"><label for="wSeqStart">Numbering</label><div class="wseq">Start at <input type="number" id="wSeqStart" min="0" max="999999" style="width:84px"> with <select id="wSeqDigits"><option value="2">2 digits</option><option value="3">3 digits</option><option value="4">4 digits</option></select></div></div>
       <p class="wnote" id="wSuffixEx"></p>
-      <div class="wrow" id="wOutRow" hidden><label for="wOut">Save to</label><div class="wout"><select id="wOut"><option value="ask">Ask each time</option><option value="fixed">Always: choose a folder…</option></select><button class="btn" id="wOutPick">Choose folder…</button></div></div>
+      <div class="wrow" id="wOutRow" hidden><label for="wOut">Save to</label><div class="wout"><select id="wOut"><option value="preset">A folder in the photo folder</option><option value="ask">Ask each time</option><option value="fixed">Always: choose a folder…</option></select><input type="text" id="wFolder" maxlength="40" spellcheck="false" autocomplete="off" aria-label="Folder name" hidden><button class="btn" id="wOutPick">Choose folder…</button></div></div>
       <p class="sub" id="wDest"></p>
     </div>
   </div>
-  <div class="end"><span class="tl grow" id="webStatus" role="status"></span><button class="btn" data-close>Close</button><button class="btn go" id="webGo">Export</button></div>
+  <div class="impprog wprog" id="wProg" hidden><div class="impbar"><span id="wBarFill"></span></div></div>
+  <div class="end"><span class="tl grow" id="webStatus" role="status"></span><button class="btn" id="wShow" hidden>Show folder</button><button class="btn" id="wMin" hidden title="Keep exporting in the background; the progress shows in the toolbar">Minimize</button><button class="btn" data-close id="wClose">Close</button><button class="btn go" id="webGo">Export</button></div>
 </dialog>
 
 <dialog id="newsDlg">
@@ -1622,7 +1629,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
           <li><strong>View:</strong> the Info dial (<kbd>I</kbd> cycles full info, exposure only, and the photo alone), zoom, and the review tools.</li>
           <li><strong>Rate:</strong> position and file name, rating icons, <strong>◀ Pick Reject ▶</strong> (the arrows move to the previous or next photo, like the arrow keys), the <strong>Advance</strong> switch under them (click to change: Auto moves to the next photo after you rate; Manual stays put), and the <strong>Show</strong> filter.</li>
           <li><strong>Edit and share:</strong> <strong>Adjust</strong>, <strong>Crop</strong> with <strong>Undo</strong> beside it, <strong>Edit in…</strong> (desktop program), <strong>Web gallery</strong>, and <strong>Social media</strong>.</li>
-          <li><strong>Presets…</strong> in Export (desktop program) runs an <strong>export preset</strong>: finished files from many photos at once: <strong>Web JPEGs of my picks</strong> (2048 px, sharpened for screens, without location), <strong>Full-size JPEGs of everything</strong>, or <strong>16-bit TIFFs of my picks</strong>. <strong>New</strong> starts your own preset; <strong>Edit</strong> changes one (editing a built-in preset makes your own copy, so the built-ins stay as they are); <strong>Duplicate</strong> and <strong>Delete</strong> work on yours. A preset sets size, quality, sharpening, camera data, which photos and the folder it goes into. Raw files are made from the raw with each photo’s Quick finish, a few at a time. The files go into a folder named for the preset (like <strong>_web</strong>) inside the folder you opened; <strong>Show folder</strong> opens it. FledgeView doesn’t open those folders as photos.</li>
+          <li><strong>Export presets</strong> live in the Export window. The <strong>Built in</strong> ones: <strong>Web JPEGs of my picks</strong> (2048 px, sharpened for screens, without location, into <strong>_web</strong>), <strong>Full-size JPEGs of everything</strong> (into <strong>_jpeg</strong>), and <strong>16-bit TIFFs of my picks</strong> (desktop program, into <strong>_tiff</strong>). In the desktop program, raw files are made from the raw with each photo’s Quick finish, a few at a time as <strong>Speed</strong> allows. FledgeView doesn’t open those folders as photos.</li>
           <li><strong>Speed</strong> (desktop program, View menu): <strong>Full speed</strong> uses every core, <strong>Balanced</strong> (the default) leaves a couple free so other programs stay responsive, <strong>Light</strong> uses half. Advanced sets an exact number of cores.</li>
           <li><strong>Edit in…</strong> (desktop program, <kbd>Ctrl</kbd>+<kbd>E</kbd>) sends the photo you’re on to Photoshop, Topaz, DxO, Affinity, Luminar, or any editing program you choose with <strong>Add a program</strong>. Choose once per program what it gets: the <strong>raw file</strong> (it develops the raw its own way) or a <strong>16-bit TIFF with your edits</strong> (your crop and Quick finish, with the camera data). The file goes into an <strong>_edits</strong> folder beside the photo; the original is never changed. Whatever the program saves in _edits shows up here beside the original when you come back to FledgeView. If a program saves somewhere else, set its save or export folder to _edits. Organize and Move picks and rejects leave _edits alone.</li>
         </ul>
@@ -1702,10 +1709,10 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
           <li>Pick a <strong>Shape</strong>: the original shape, a platform size (Instagram feed, grid, square, Stories and Reels, landscape, YouTube), or <strong>All platforms</strong> for one copy in every shape.</li>
           <li>For social shapes, the crop starts on your subject. Drag the preview to reposition, use Crop zoom, and step through photos with ◀ ▶. Press <kbd>S</kbd> to skip a photo, and <kbd>G</kbd> for composition guides.</li>
           <li>Turn on the <strong>Info bar</strong> to add a slim strip with your camera settings and your text under each photo.</li>
-          <li>Set the file names, choose where to save (<strong>Save to</strong>: ask each time, or always a folder you pick once with <strong>Choose folder…</strong>), then click the Export button, which says how many photos it will export. Exporting one photo saves a single file; several are saved into the folder, or as a ZIP where folders aren’t available.</li>
+          <li>Set the file names, choose where to save (<strong>Save to</strong>: <strong>a folder in the photo folder</strong>, named as you like, such as <code>_web</code>; ask each time; or always a folder you pick once with <strong>Choose folder…</strong>), then click the Export button, which says how many photos it will export. Exporting one photo saves a single file; several are saved into the folder, or as a ZIP where folders aren’t available. While it runs, <strong>Stop</strong> ends it and <strong>Minimize</strong> keeps it going in the background: a progress chip beside the toolbar’s Export button reopens the window, and a note says when it’s done.</li>
         </ol>
         <ul>
-          <li><strong>Presets</strong> at the top of the Export window save your settings by name (shape, size, info bar, metadata, file names). Pick one to fill everything in; change anything and it shows <em>(modified)</em> with <strong>Save</strong> to update it. Use the <strong>⋯</strong> menu to save a new preset, rename, delete, or export and import <code>.fvpreset</code> files to share. Presets never include which photos or their crops.</li>
+          <li><strong>Presets</strong> at the top of the Export window save your settings by name (shape, size, format, info bar, metadata, file names, which photos, and where they go). Pick one to fill everything in; change anything and it shows <em>(modified)</em> with <strong>Save</strong> to update it. Built-in presets stay as they are: their Save button says <strong>Save as mine</strong> and makes your own copy. The <strong>⋯</strong> menu makes a new preset from the current settings, duplicates, renames, deletes, and shares presets as <code>.fvpreset</code> files. Presets never include crops.</li>
           <li><strong>All platforms:</strong> each shape keeps its own crop (use the shape buttons above the preview), and the info bar can be on or off per shape. File names say where each goes, like <code>A1209362_Instagram-Feed_4x5.jpg</code>. With several photos, each shape gets its own folder.</li>
           <li><strong>Long edge</strong> for the original shape: 1080, 1600, or 2000 px, 50% or 75%, the original size, or custom. Nothing is ever enlarged.</li>
           <li>Exports are saved as sRGB. If a photo uses Adobe RGB or ProPhoto, FledgeView says so; for print copies, resize in your editor.</li>
@@ -1792,36 +1799,9 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
   <div class="end"><label class="chk" style="margin-right:auto;font-size:14px"><input type="checkbox" id="sortAsk"> Ask each time I open photos</label><button class="btn go" id="sortGo">Sort</button></div>
 </dialog>
 
-<dialog id="plansDlg" class="eidlg" aria-labelledby="plH">
-  <h2 id="plH">Export presets</h2>
-  <p class="sub">Finished files from many photos at once. Raw files are made from the raw with each photo’s Quick finish. The files go into a folder named for the preset, inside the folder you opened.</p>
-  <div class="eilist" id="plList" role="radiogroup" aria-label="Export preset"></div>
-  <div class="plnewrow" id="plNewRow"><button type="button" class="btn" id="plNew" title="Start your own export preset">New preset</button></div>
-  <div class="pledit" id="plEdit" hidden>
-    <div class="wrow"><label for="plName">Name</label><input id="plName" type="text" autocomplete="off" maxlength="60"></div>
-    <div class="wrow"><label for="plFmt">Make</label><select id="plFmt"><option value="jpeg">JPEG</option><option value="tiff">16-bit TIFF</option></select></div>
-    <div class="wrow"><label for="plSize">Size</label><select id="plSize"><option value="0">Full size</option><option value="1080">1080 px long edge</option><option value="2048">2048 px long edge</option><option value="3000">3000 px long edge</option><option value="4096">4096 px long edge</option><option value="custom">Other…</option></select><input id="plSizeN" type="number" min="200" max="16000" step="1" hidden aria-label="Long edge in pixels"></div>
-    <div class="wrow" id="plQRow"><label for="plQ">Quality</label><input id="plQ" type="number" min="30" max="100" step="1"></div>
-    <div class="wrow" id="plSharpRow"><label for="plSharp">Sharpen for screens</label><select id="plSharp"><option value="0">Off</option><option value="0.35">Low</option><option value="0.7">Standard</option></select></div>
-    <div class="wrow"><label for="plMeta">Camera data</label><select id="plMeta"><option value="all">Keep, with location</option><option value="nogps">Keep, without location</option><option value="none">Remove</option></select></div>
-    <div class="wrow"><label for="plWhichDef">Photos</label><select id="plWhichDef"><option value="picks">Your picks</option><option value="all">Everything</option></select></div>
-    <div class="wrow"><label for="plWhen">From a card</label><select id="plWhen"><option value="after">After I cull</option><option value="now">Right after the import</option></select></div>
-    <div class="wrow"><label for="plFolder">Folder</label><input id="plFolder" type="text" autocomplete="off" maxlength="40" spellcheck="false"></div>
-    <label class="chk"><input type="checkbox" id="plEdits"> Apply each photo’s Quick finish (crop and adjustments)</label>
-    <p class="sub" id="plEditNote"></p>
-    <div class="end"><button class="btn" id="plEditCancel">Cancel</button><button class="btn go" id="plEditSave">Save preset</button></div>
-  </div>
-  <div id="plRunBox">
-    <div class="wrow"><label for="plWhich">Photos</label><select id="plWhich"></select></div>
-    <p class="einote" id="plNote"></p>
-    <div class="impprog" id="plProg" hidden><div class="impbar"><span id="plBar"></span></div><div class="sub" id="plProgTxt"></div></div>
-  </div>
-  <div class="end"><button class="btn" id="plSpeed" style="margin-right:auto" title="How much of this computer FledgeView uses">Speed</button><button class="btn" id="plShow" hidden>Show folder</button><button class="btn" id="plStop" hidden>Stop</button><button class="btn" data-close id="plClose">Close</button><button class="btn go" id="plGo">Run</button></div>
-</dialog>
-
 <dialog id="speedDlg" class="eidlg" aria-labelledby="spH">
   <h2 id="spH">Speed</h2>
-  <p class="sub">How much of this computer FledgeView uses for Quick finish, exports, Edit in and Export presets. It changes straight away.</p>
+  <p class="sub">How much of this computer FledgeView uses for Quick finish, exports and Edit in. It changes straight away.</p>
   <div class="eilist" role="radiogroup" aria-labelledby="spH">
     <label class="eirow sprow"><input type="radio" name="spMode" value="full"><span><strong>Full speed</strong><small id="spFullTxt"></small></span></label>
     <label class="eirow sprow"><input type="radio" name="spMode" value="balanced"><span><strong>Balanced</strong> (recommended)<small id="spBalTxt"></small></span></label>
@@ -2391,199 +2371,65 @@ async function eiRefresh(quiet) {
 let eiT = 0;
 const eiSoon = () => { if (!eiWatch.size && !state.items.some(x => x.ed)) return; clearTimeout(eiT); eiT = setTimeout(() => eiRefresh(false), 400); };
 if (window.FV_DESKTOP) { addEventListener('focus', eiSoon); document.addEventListener('visibilitychange', () => { if (!document.hidden) eiSoon(); }); }
-/* ---------- Plans (desktop program): finished files from many photos at once. Raw files and camera JPEGs are made by
-   the program (developed, Quick finish, resized, sharpened, written straight to disk with the camera data), a few at a
-   time as Speed allows; other formats go through the web export for JPEG plans. Files go into a folder named for the
-   plan inside the folder that was opened; FledgeView skips those folders when opening photos. ---------- */
+/* ---------- Export presets, the desktop side. The Export window runs presets on one photo or many; in the desktop program,
+   raw files and camera JPEGs are made by the program (developed, Quick finish, resized, sharpened, written straight to disk
+   with the camera data), a few at a time as Speed allows; other formats go through the web export. 0.9.79-0.9.82 kept these
+   presets in their own Plans window (S.plans); 0.9.83 moves them into the Export window's list once. PLAN_BUILTIN and
+   S.plans.used stay so the folders they made are still recognized and skipped when opening photos. ---------- */
 const PLAN_BUILTIN = [
   { id: 'web', name: 'Web JPEGs of my picks', fmt: 'jpeg', size: 2048, q: 85, sharp: 0.7, meta: 'nogps', edits: true, which: 'picks', when: 'after', folder: '_web' },
   { id: 'jpeg', name: 'Full-size JPEGs of everything', fmt: 'jpeg', size: 0, q: 92, sharp: 0, meta: 'all', edits: true, which: 'all', when: 'now', folder: '_jpeg' },
   { id: 'tiff', name: '16-bit TIFFs of my picks', fmt: 'tiff', size: 0, q: 0, sharp: 0, meta: 'all', edits: true, which: 'picks', when: 'after', folder: '_tiff' },
 ];
 const plPrefs = () => (S.plans && typeof S.plans === 'object') ? S.plans : (S.plans = { custom: [], last: 'web' });
-const plAll = () => [...PLAN_BUILTIN, ...(plPrefs().custom || [])];
-/* every folder a plan has made files in stays recognized, even after that plan is deleted or renamed */
-function planFolders() { const pr = plPrefs(), f = new Set(PLAN_BUILTIN.map(p => p.folder)); for (const p of pr.custom || []) if (p.folder) f.add(p.folder); for (const x of pr.used || []) f.add(x); return f; }
-function planSummary(p) {
-  const parts = [p.fmt === 'tiff' ? '16-bit TIFF' : 'JPEG', p.size ? `${p.size} px long edge` : 'full size'];
-  if (p.fmt !== 'tiff') { parts.push(`quality ${p.q}`); if (+p.sharp > 0) parts.push(+p.sharp >= 0.7 ? 'sharpened for screens' : 'lightly sharpened'); }
-  parts.push(p.meta === 'none' ? 'no camera data' : p.meta === 'nogps' ? 'camera data without location' : 'camera data');
-  if (!p.edits) parts.push('without Quick finish');
-  parts.push(p.which === 'all' ? 'everything' : 'your picks', `into ${p.folder}`);
-  return parts.join(' \u00b7 ');
+/* every folder a preset has made files in stays recognized, even after that preset is deleted or renamed */
+function planFolders() {
+  const pr = plPrefs(), f = new Set(PLAN_BUILTIN.map(p => p.folder));
+  for (const p of pr.custom || []) if (p.folder) f.add(p.folder);
+  for (const x of pr.used || []) f.add(x);
+  for (const p of Array.isArray(S.presets) ? S.presets : []) if (p && p.s && p.s.out === 'preset' && p.s.folder) f.add(p.s.folder);
+  if (S.web && S.web.out === 'preset' && S.web.folder) f.add(S.web.folder);
+  return f;
 }
-let plBusy = false, plStop = false, plEditing = null, plOutPath = null, plSpeedNow = null;
-const plPicked = () => { const r = document.querySelector('#plList input:checked'); return r ? plAll().find(p => p.id === r.value) : null; };
-function plSources() {
-  return { picks: state.items.filter(i => cullOf(i).f === 1), all: state.items, sel: state.sel ? state.view.filter(i => state.sel.has(i.key)) : [] };
-}
-function plSyncWhich() {
-  const p = plPicked(), src = plSources(), sel = $('plWhich'), keep = sel.value;
-  sel.textContent = '';
-  for (const [v, label] of [['picks', 'Your picks'], ['all', 'Everything open'], ['sel', 'Selected']]) {
-    if (v === 'sel' && !src.sel.length) continue;
-    const o = document.createElement('option'); o.value = v; o.textContent = `${label} (${src[v].length.toLocaleString()})`; sel.append(o);
-  }
-  sel.value = plBusy && keep ? keep : (p && p.which === 'all' ? 'all' : src.picks.length ? 'picks' : 'all');
-  if (!sel.value) sel.value = 'all';
-  plExplain();
-}
-function plExplain() {
-  const p = plPicked(); if (!p || plBusy) { if (!p) $('plNote').textContent = ''; return; }
-  const list = plSources()[$('plWhich').value] || [], noFolder = list.filter(it => !it.root).length;
-  let t = list.length ? `${planSummary(p)}.` : 'No photos to make files from: pick some first, or choose Everything open.';
-  if (noFolder) t += ` ${noFolder.toLocaleString()} weren\u2019t opened with Open folder, so they\u2019ll be skipped.`;
-  if (p.fmt === 'tiff') { const other = list.filter(it => !RAW.has((eiRawOf(it) || it).ext) && !['jpg', 'jpeg'].includes(it.ext)).length; if (other) t += ` TIFFs are made from raw files and JPEGs; ${other.toLocaleString()} other file${other === 1 ? '' : 's'} will be skipped.`; }
-  $('plNote').textContent = t;
-  $('plGo').disabled = !list.length;
-}
-function plRender() {
-  const box = $('plList'), pr = plPrefs(), all = plAll(), busy = plBusy; box.textContent = '';
-  const pick = all.find(p => p.id === pr.last) || all[0];
-  for (const p of all) {
-    const row = document.createElement('label'); row.className = 'eirow plrow';
-    const r = document.createElement('input'); r.type = 'radio'; r.name = 'plProg'; r.value = p.id; r.checked = p === pick; r.disabled = busy;
-    r.onchange = () => { pr.last = p.id; saveS(); plSyncWhich(); };
-    const body = document.createElement('span'); body.className = 'plbody';
-    const nm = document.createElement('strong'); nm.textContent = p.name;
-    const sum = document.createElement('small'); sum.className = 'plsum'; sum.textContent = planSummary(p);
-    body.append(nm, sum);
-    const btns = document.createElement('span'); btns.className = 'plbtns';
-    const mk = (label, title, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = label; b.title = title; b.disabled = busy; b.onclick = e => { e.preventDefault(); fn(); }; btns.append(b); };
-    const newId = () => 'my-' + Date.now().toString(36);
-    if (PLAN_BUILTIN.includes(p)) {
-      mk('Edit', 'Make your own copy of this built-in preset and change it (the built-in stays as it is)', () => plEdit({ ...p, id: newId(), name: p.name + ' (mine)', builtin: false }, true));
-    } else {
-      mk('Edit', 'Change this preset', () => plEdit({ ...p }, false));
-      mk('Duplicate', 'Make another preset starting from this one', () => plEdit({ ...p, id: newId(), name: p.name + ' copy' }, true));
-      mk('Delete', 'Delete this preset (files it made stay where they are)', () => { pr.custom = pr.custom.filter(x => x.id !== p.id); if (pr.last === p.id) pr.last = 'web'; saveS(); plRender(); });
-    }
-    row.append(r, body, btns); box.append(row);
-  }
-  plSyncWhich();
-}
-function plEdit(p, isNew) {
-  plEditing = { p, isNew };
-  $('plName').value = p.name; $('plFmt').value = p.fmt;
-  const std = ['0', '1080', '2048', '3000', '4096'].includes(String(p.size || 0));
-  $('plSize').value = std ? String(p.size || 0) : 'custom'; $('plSizeN').value = p.size || 2048; $('plSizeN').hidden = std;
-  $('plQ').value = p.q || 90; $('plSharp').value = String(+p.sharp >= 0.7 ? 0.7 : +p.sharp > 0 ? 0.35 : 0);
-  $('plMeta').value = p.meta || 'all'; $('plWhichDef').value = p.which === 'all' ? 'all' : 'picks'; $('plWhen').value = p.when === 'now' ? 'now' : 'after';
-  $('plFolder').value = p.folder; $('plEdits').checked = p.edits !== false;
-  plEditSync(); $('plEdit').hidden = false; $('plNewRow').hidden = true; $('plRunBox').hidden = true; $('plGo').hidden = true; $('plName').focus(); $('plName').select();
-}
-function plEditSync() {
-  const tiff = $('plFmt').value === 'tiff';
-  $('plQRow').hidden = tiff; $('plSharpRow').hidden = tiff; $('plSizeN').hidden = $('plSize').value !== 'custom';
-  $('plEditNote').textContent = '"From a card" is used when you choose this preset while importing a card: right after the import, or when you\u2019re done culling.';
-}
-function plEditClose() { plEditing = null; $('plEdit').hidden = true; $('plRunBox').hidden = false; $('plGo').hidden = false; $('plNewRow').hidden = false; plRender(); }
-$('plNew').onclick = () => plEdit({ id: 'my-' + Date.now().toString(36), name: 'My preset', fmt: 'jpeg', size: 2048, q: 90, sharp: 0.35, meta: 'nogps', which: 'picks', when: 'after', folder: '', edits: true }, true);
-$('plFmt').onchange = plEditSync; $('plSize').onchange = plEditSync;
-$('plEditCancel').onclick = plEditClose;
-$('plEditSave').onclick = () => {
-  if (!plEditing) return;
-  const pr = plPrefs(), p = plEditing.p;
-  const name = $('plName').value.trim() || 'My preset';
-  let folder = $('plFolder').value.trim().replace(/[\\/:*?"<>|]+/g, '').replace(/^\.+/, '');
-  if (!folder) folder = '_' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30);
-  if (['_picks', '_rejects', '_edits'].includes(folder.toLowerCase())) { toast(`${folder} is used by FledgeView itself; choose another folder name.`); return; }
-  const size = $('plSize').value === 'custom' ? Math.min(16000, Math.max(200, Math.round(+$('plSizeN').value) || 2048)) : +$('plSize').value;
-  Object.assign(p, { name, fmt: $('plFmt').value, size, q: Math.min(100, Math.max(30, Math.round(+$('plQ').value) || 90)), sharp: +$('plSharp').value,
-    meta: $('plMeta').value, which: $('plWhichDef').value, when: $('plWhen').value, folder, edits: $('plEdits').checked });
-  delete p.builtin;
-  pr.custom = (pr.custom || []).filter(x => x.id !== p.id); pr.custom.push(p); pr.last = p.id; saveS();
-  plEditClose();
-};
-async function openPlans() {
-  if (!deskHas('plans')) { toast('Export presets (web JPEGs, full-size JPEGs and 16-bit TIFFs of many photos at once): in the FledgeView desktop program.'); return; }
-  if (!state.items.length) { toast('Open a folder first, then run a preset on its photos.'); return; }
-  if (!plBusy) { $('plProg').hidden = true; $('plShow').hidden = true; $('plStop').hidden = true; }
-  plEditClose(); spLabel();
-  $('plansDlg').showModal();
-}
-$('plansBtn').onclick = openPlans;
-if (!window.FV_DESKTOP) $('plansBtn').classList.add('dim');
-$('plWhich').onchange = plExplain;
-$('plSpeed').onclick = () => openSpeed();
-$('plStop').onclick = () => { plStop = true; $('plStop').disabled = true; $('plProgTxt').textContent = 'Stopping after the photos already being made\u2026'; };
-$('plShow').onclick = () => { if (plOutPath) window.FV_DESKTOP.reveal(plOutPath).catch(() => toast('Couldn\u2019t open that folder.')); };
-$('plansDlg').addEventListener('cancel', e => { if (plBusy) { e.preventDefault(); toast('The preset keeps running. Stop it first, or leave this open.'); } });
-$('plClose').addEventListener('click', e => { if (plBusy) { e.preventDefault(); e.stopPropagation(); toast('The preset keeps running. Stop it first, or leave this open.'); } }, true);
+let plSpeedNow = null;
 const joinPath = (dir, name) => dir + (/[\\/]$/.test(dir) ? '' : dir.includes('\\') ? '\\' : '/') + name;
-$('plGo').onclick = async () => {
-  const plan = plPicked(); if (!plan || plBusy) return;
-  const all = plSources()[$('plWhich').value] || [];
-  const jobs = [], used = new Set(); let skipped = 0, noFolder = 0;
-  const outs = new Map();   // root handle -> { path, dir handle }
-  for (const it of all) {
-    const src = eiRawOf(it) || it;
-    if (!it.root || !src.handle) { noFolder++; continue; }
-    const byProgram = RAW.has(src.ext) || ['jpg', 'jpeg'].includes(src.ext);
-    if (plan.fmt === 'tiff' && !byProgram) { skipped++; continue; }
-    jobs.push({ it, src, byProgram });
-  }
-  if (!jobs.length) { toast(noFolder ? 'These photos weren\u2019t opened with Open folder, so there\u2019s nowhere to save the files.' : 'Nothing to make for this preset.'); return; }
-  { const pr = plPrefs(); pr.used = [...new Set([...(pr.used || []), plan.folder])].slice(-50); saveS(); }
-  plBusy = true; plStop = false; plRender();
-  $('plGo').disabled = true; $('plStop').hidden = false; $('plStop').disabled = false; $('plShow').hidden = true; $('plProg').hidden = false;
-  $('plBar').style.width = '0%'; $('plProgTxt').textContent = 'Starting\u2026';
+/* the program can make the files itself when the photo keeps its own shape, without frame or info bar */
+const deskFast = o => deskHas('plans') && !isAll(o) && !SHAPES[o.shape] && !o.framed && !o.bar && !['p50', 'p75'].includes(o.size) && ['jpeg', 'tiff'].includes(o.fmt);
+const webPx = o => o.size === 'orig' ? 0 : o.size === 'custom' ? (+o.custom || 2000) : (+o.size || 0);
+/* runs jobs [{ it, src, byProgram, dirPath, dirHandle, name }] through the program, Speed's number at a time */
+async function deskRun(jobs, o, onProgress) {
   let speed = { files_at_once: 2 }; try { speed = await window.FV_DESKTOP.speed(); } catch {}
-  const ext = plan.fmt === 'tiff' ? '.tif' : '.jpg', t0 = performance.now();
+  const t0 = performance.now(), size = webPx(o), sharpen = o.fmt === 'tiff' ? 0 : (+o.sharp || 0);
   let next = 0, done = 0, made = 0; const failed = [];
-  const nameFor = src => { const stem = src.name.replace(/\.[^.]+$/, ''); let n = stem, k = 2; while (used.has((n + ext).toLowerCase())) n = `${stem}-${k++}`; used.add((n + ext).toLowerCase()); return n + ext; };
-  const outFor = async it => {
-    let o = outs.get(it.root);
-    if (!o) { const base = await window.FV_DESKTOP.pathOf(it.root); if (!base) throw new Error('can\u2019t find the opened folder on disk'); o = { path: joinPath(base, plan.folder), dir: await it.root.getDirectoryHandle(plan.folder, { create: true }) }; outs.set(it.root, o); }
-    return o;
-  };
-  const progress = () => {
-    const el = (performance.now() - t0) / 1000, left = done ? el / done * (jobs.length - done) : 0;
-    $('plBar').style.width = (done / jobs.length * 100).toFixed(1) + '%';
-    $('plProgTxt').textContent = `${done.toLocaleString()} of ${jobs.length.toLocaleString()}` + (done && done < jobs.length ? ` \u00b7 about ${fmtTime(left)} left` : '') + ` \u00b7 ${speed.files_at_once || 1} at a time`;
-  };
   const worker = async () => {
     for (;;) {
-      if (plStop || next >= jobs.length) break;   // plStop is set by the Stop button while this runs
+      if (webStop || next >= jobs.length) break;   // webStop is set by Stop while this runs
       const j = jobs[next++];
       try {
-        const o = await outFor(j.it), name = nameFor(j.src);
         await getMeta(j.it);
         if (j.byProgram) {
-          await window.FV_DESKTOP.planRender(j.src.handle, { out: joinPath(o.path, name), fmt: plan.fmt, size: plan.size, quality: plan.q, sharpen: plan.sharp,
-            edit: plan.edits ? (editOf(j.it) || {}) : {}, orient: j.src === j.it ? (j.it.orient || 1) : 1, meta: plan.meta });
+          await window.FV_DESKTOP.planRender(j.src.handle, { out: joinPath(j.dirPath, j.name), fmt: o.fmt, size, quality: o.q, sharpen,
+            edit: editOf(j.it) || {}, orient: j.src === j.it ? (j.it.orient || 1) : 1, meta: o.meta });
         } else {
-          const wo = { ...S.web, shape: 'orig', size: plan.size ? 'custom' : 'orig', custom: plan.size || 2000, fmt: 'jpeg', q: plan.q, sharp: String(plan.sharp || 0), bar: false, meta: plan.meta, framed: false, text: '' };
-          const r = await exportOne(j.it, wo, { raw: false, noEdits: !plan.edits });
-          const w = await (await o.dir.getFileHandle(name, { create: true })).createWritable(); await w.write(r.blob); await w.close();
+          const r = await exportOne(j.it, { ...o, fmt: 'jpeg' }, { raw: false });
+          const w = await (await j.dirHandle.getFileHandle(j.name, { create: true })).createWritable(); await w.write(r.blob); await w.close();
         }
-        made++;
-        plOutPath = o.path;
+        made++; webOutPath = j.dirPath;
       } catch (e) { failed.push(`${j.src.name}: ${(e && e.message) || e}`); }
-      done++; progress();
+      done++; onProgress(done, jobs.length, speed, t0);
     }
   };
-  progress();
+  onProgress(0, jobs.length, speed, t0);
   await Promise.all(Array.from({ length: Math.max(1, Math.min(speed.files_at_once || 1, jobs.length)) }, worker));
-  plBusy = false;
-  const secs = (performance.now() - t0) / 1000;
-  $('plStop').hidden = true; $('plGo').disabled = false; $('plShow').hidden = !made;
-  $('plBar').style.width = '100%';
-  let t = plStop ? `Stopped. Made ${made.toLocaleString()} of ${jobs.length.toLocaleString()} in ${fmtTime(secs)}.` : `Made ${made.toLocaleString()} ${plan.fmt === 'tiff' ? 'TIFF' : 'JPEG'}${made === 1 ? '' : 's'} in ${plan.folder}, in ${fmtTime(secs)}.`;
-  if (skipped) t += ` Skipped ${skipped.toLocaleString()} that aren\u2019t raw files or JPEGs.`;
-  if (noFolder) t += ` Skipped ${noFolder.toLocaleString()} not opened with Open folder.`;
-  if (failed.length) { t += ` ${failed.length.toLocaleString()} couldn\u2019t be made (${failed.slice(0, 2).join('; ')}${failed.length > 2 ? '\u2026' : ''}).`; console.warn('Plan failures', failed); }
-  $('plProgTxt').textContent = t;
-  plRender();
-  if (!$('plansDlg').open) toast(t);
-};
+  return { made, failed, secs: (performance.now() - t0) / 1000 };
+}
 
 /* ---------- Speed (desktop program): how much of the computer FledgeView uses. Saved; sent to the program at start. ---------- */
 const spPrefs = () => (S.speed && typeof S.speed === 'object') ? S.speed : { mode: 'balanced', cores: null };
 function spLabel() {
   const s = plSpeedNow, names = { full: 'Full speed', balanced: 'Balanced', light: 'Light', exact: 'Custom' };
   const t = s ? `Speed: ${names[s.mode] || 'Balanced'}` : 'Speed';
-  $('plSpeed').textContent = t; $('speedBtn').textContent = t + '\u2026';
+  $('wSpeed').textContent = t; $('speedBtn').textContent = t + '\u2026';
 }
 async function spApply(mode, cores) {
   try { plSpeedNow = await window.FV_DESKTOP.setSpeed(mode, cores); } catch { return; }
@@ -2593,13 +2439,13 @@ async function spApply(mode, cores) {
 function spExplain() {
   const s = plSpeedNow; if (!s) return;
   const n = s.cores, bal = n >= 8 ? n - 2 : n >= 4 ? n - 1 : n;
-  $('spFullTxt').textContent = `All ${n} cores, 3 photos at a time in Export presets. Fastest; other programs may feel slow while FledgeView works.`;
+  $('spFullTxt').textContent = `All ${n} cores, 3 photos at a time when exporting. Fastest; other programs may feel slow while FledgeView works.`;
   $('spBalTxt').textContent = `${bal} of ${n} cores, 2 photos at a time, so Photoshop, Lightroom and your browser stay responsive.`;
   $('spLightTxt').textContent = `${Math.max(1, Math.floor(n / 2))} of ${n} cores, 1 photo at a time. For when you\u2019re working on something else heavy.`;
   $('spExactTxt').textContent = ` (this computer has ${n})`;
   $('spCores').max = n; if (!$('spCores').value) $('spCores').value = s.threads;
   for (const r of document.querySelectorAll('input[name=spMode]')) r.checked = r.value === s.mode;
-  $('spNow').textContent = `Now using ${s.threads} of ${n} cores, ${s.files_at_once} photo${s.files_at_once === 1 ? '' : 's'} at a time in Export presets.`;
+  $('spNow').textContent = `Now using ${s.threads} of ${n} cores, ${s.files_at_once} photo${s.files_at_once === 1 ? '' : 's'} at a time when exporting.`;
 }
 async function openSpeed() {
   if (!deskHas('speed')) return;
@@ -2609,9 +2455,10 @@ async function openSpeed() {
 for (const r of document.querySelectorAll('input[name=spMode]')) r.addEventListener('change', () => { if (r.checked) spApply(r.value, r.value === 'exact' ? +$('spCores').value : null); });
 $('spCores').addEventListener('change', () => { const r = document.querySelector('input[name=spMode][value=exact]'); r.checked = true; spApply('exact', +$('spCores').value); });
 $('speedBtn').onclick = () => { closeMenus(); openSpeed(); };
+$('wSpeed').onclick = () => openSpeed();
 setTimeout(() => {   // after the page has loaded: send the saved choice to the program
   if (!deskHas('speed')) return;
-  $('speedBtn').hidden = false;
+  $('speedBtn').hidden = false; $('wSpeed').hidden = false;
   const p = spPrefs();
   spApply(p.mode || 'balanced', p.mode === 'exact' ? p.cores : null);
 }, 0);
@@ -6022,20 +5869,26 @@ function webSources() {
 }
 const canFolder = () => !!window.showDirectoryPicker && !framed;
 let webSrcOnce = null;
-/* Save to: a folder FledgeView remembers, like Import's main folder, so exports go straight there; or ask each time */
 let webOutDir = null, webOutLoaded = false;
 async function loadWebOut() { if (webOutLoaded) return; webOutLoaded = true; try { webOutDir = await idbKV.get('exportDest') || null; } catch {} syncWebOut(); }
+/* Save to: a folder named for the preset inside each photo's own folder (like _web), a folder FledgeView remembers, or ask
+   each time. Kept in S.web.out (before 0.9.83: S.webOut, ask or fixed) so presets can carry it */
+const cleanFolder = f => String(f || '').trim().replace(/[\\/:*?"<>|]+/g, '').replace(/^\.+/, '').slice(0, 40);
 function syncWebOut() {
   const row = $('wOutRow'); if (!row) return;
   row.hidden = !canFolder();
   if (!canFolder()) { $('wDest').textContent = 'Exports download as one ZIP file, or as a single image when you export one photo.'; return; }
-  const fixed = S.webOut === 'fixed' && !!webOutDir;
-  $('wOut').options[1].textContent = webOutDir ? 'Always: ' + webOutDir.name : 'Always: choose a folder\u2026';
-  $('wOut').value = fixed ? 'fixed' : 'ask';
-  $('wDest').textContent = fixed ? `Files are saved straight into ${webOutDir.name}. Change it with Choose folder.` : 'When you export, you\u2019ll pick a folder and the files are saved straight into it.';
+  const o = S.web; let out = ['preset', 'ask', 'fixed'].includes(o.out) ? o.out : 'ask';
+  if (out === 'fixed' && !webOutDir) out = 'ask';
+  $('wOut').options[2].textContent = webOutDir ? 'Always: ' + webOutDir.name : 'Always: choose a folder\u2026';
+  $('wOut').value = out;
+  $('wFolder').hidden = out !== 'preset'; if (document.activeElement !== $('wFolder')) $('wFolder').value = o.folder || '_export';
+  $('wOutPick').hidden = out === 'preset';
+  $('wDest').textContent = out === 'preset' ? `Files go into a folder named ${cleanFolder(o.folder) || '_export'} inside each photo\u2019s folder. FledgeView doesn\u2019t open that folder as photos, and exporting again replaces the files in it.`
+    : out === 'fixed' ? `Files are saved straight into ${webOutDir.name}. Change it with Choose folder.` : 'When you export, you\u2019ll pick a folder and the files are saved straight into it.';
 }
 async function pickWebOut() {
-  try { const h = await window.showDirectoryPicker({ mode: 'readwrite', id: 'fv-export' }); webOutDir = h; idbKV.set('exportDest', h); S.webOut = 'fixed'; saveS(); }
+  try { const h = await window.showDirectoryPicker({ mode: 'readwrite', id: 'fv-export' }); webOutDir = h; idbKV.set('exportDest', h); S.web.out = 'fixed'; saveS(); renderPresetMenu(); }
   catch (e) { if (e.name !== 'AbortError') toast('That folder can\u2019t be used. Try another.'); }
   syncWebOut();
 }
@@ -6060,7 +5913,10 @@ function fillWebForm() {
   if (webSrcOnce && (webSrcOnce !== 'sel' || src.sel.length)) { o.src = webSrcOnce; } webSrcOnce = null;
   if (state.webFolder) opts.unshift(['folder', 'Folder: ' + state.webFolder.name]);
   if (o.src === 'folder' && !state.webFolder) o.src = 'view';
-  if (!['1080', '1600', '2000', 'p50', 'p75', 'orig', 'custom'].includes(o.size)) o.size = '2000';
+  if (!['1080', '1600', '2000', '2048', 'p50', 'p75', 'orig', 'custom'].includes(o.size)) o.size = '2000';
+  { const t = $('wFmt').querySelector('[value=tiff]'), d = deskHas('plans'); t.disabled = !d; t.textContent = d ? '16-bit TIFF' : '16-bit TIFF: in the FledgeView desktop program'; if (o.fmt === 'tiff' && !d) o.fmt = 'jpeg'; }
+  if (!['preset', 'ask', 'fixed'].includes(o.out)) o.out = S.webOut === 'fixed' ? 'fixed' : 'ask';
+  if (!cleanFolder(o.folder)) o.folder = '_export';
   o.custom = Math.min(WEB_CUSTOM_MAX, Math.max(200, +o.custom || WEB_MAX));
   for (const [v, label] of opts) {
     const op = document.createElement('option'); op.value = v; op.textContent = `${label} (${src[v].length})`; sel.append(op);
@@ -6110,13 +5966,21 @@ function readWebForm() {
   $('wAllRows').querySelectorAll('[data-allbar]').forEach(cb => o.allBar[cb.dataset.allbar] = cb.checked);
   o.allFolders = $('wAllFolders').checked;
   o.meta = $('wMeta').value; o.pattern = $('wPattern').value; o.seqStart = Math.max(0, parseInt($('wSeqStart').value, 10) || 0); o.seqDigits = $('wSeqDigits').value;
-  saveS(); syncWebUi();
+  if (!$('wFolder').hidden) o.folder = cleanFolder($('wFolder').value) || o.folder;
+  saveS(); syncWebUi(); syncWebOut();
 }
 /* ---------- export presets: saved settings (never photos or crops), shareable as .fvpreset files ---------- */
 const PRESET_KEYS = ['shape', 'allShapes', 'allBar', 'allFolders', 'size', 'custom', 'fmt', 'q', 'sharp', 'bar', 'fields', 'text', 'color', 'tsize', 'meta', 'pattern', 'seqStart', 'seqDigits', 'framed'];
 const clone = v => JSON.parse(JSON.stringify(v));
 const stable = v => JSON.stringify(v, (k, x) => x && typeof x === 'object' && !Array.isArray(x) ? Object.keys(x).sort().reduce((a, kk) => (a[kk] = x[kk], a), {}) : x);
-function pickPreset(o) { const s = {}; for (const k of PRESET_KEYS) if (o[k] !== undefined) s[k] = clone(o[k]); return s; }
+/* since 0.9.83 a preset can also say which photos and where they go: the built-ins and presets saved in the merged window do */
+const PRESET_EXTRA = ['src', 'out', 'folder'];
+function pickPreset(o) { const s = {}; for (const k of [...PRESET_KEYS, ...PRESET_EXTRA]) if (o[k] !== undefined) s[k] = clone(o[k]); return s; }
+const BUILTIN_EXPORTS = [
+  { name: 'Web JPEGs of my picks', builtin: true, s: { shape: 'orig', framed: false, size: '2048', fmt: 'jpeg', q: 85, sharp: '0.7', bar: false, meta: 'nogps', pattern: '{name}', src: 'picks', out: 'preset', folder: '_web' } },
+  { name: 'Full-size JPEGs of everything', builtin: true, s: { shape: 'orig', framed: false, size: 'orig', fmt: 'jpeg', q: 92, sharp: '0', bar: false, meta: 'all', pattern: '{name}', src: 'all', out: 'preset', folder: '_jpeg' } },
+  { name: '16-bit TIFFs of my picks', builtin: true, s: { shape: 'orig', framed: false, size: 'orig', fmt: 'tiff', q: 92, sharp: '0', bar: false, meta: 'all', pattern: '{name}', src: 'picks', out: 'preset', folder: '_tiff' } },
+];
 function cleanPreset(src) {
   const d = pickPreset(WEB_DEF), s = src && typeof src === 'object' ? src : {};
   const opt = id => [...$(id).options].map(o => o.value);
@@ -6140,6 +6004,10 @@ function cleanPreset(src) {
   if (Number.isFinite(+s.seqStart)) d.seqStart = Math.min(999999, Math.max(0, Math.round(+s.seqStart)));
   if (opt('wSeqDigits').includes(String(s.seqDigits))) d.seqDigits = String(s.seqDigits);
   if (typeof s.framed === 'boolean') d.framed = s.framed;
+  for (const k of PRESET_EXTRA) delete d[k];
+  if (['current', 'view', 'all', 'picks', 'sel'].includes(s.src)) d.src = s.src;
+  if (['preset', 'ask', 'fixed'].includes(s.out)) d.out = s.out;
+  if (cleanFolder(s.folder)) d.folder = cleanFolder(s.folder);
   return d;
 }
 function starterPresets() {
@@ -6153,28 +6021,53 @@ function starterPresets() {
 }
 if (!Array.isArray(S.presets)) { S.presets = starterPresets(); S.presetCur = ''; }
 S.presets = S.presets.filter(p => p && typeof p.name === 'string').map(p => ({ name: p.name.slice(0, 60), s: cleanPreset(p.s) }));
-const curPreset = () => S.presets.find(p => p.name === S.presetCur);
+const allPresets = () => [...BUILTIN_EXPORTS, ...S.presets];
+const curPreset = () => allPresets().find(p => p.name === S.presetCur);
+/* modified: any setting the preset holds differs from the window (a preset saved before 0.9.83 holds no photos or Save to) */
+const presetModified = p => { const now = pickPreset(S.web); return Object.keys(p.s).some(k => stable(now[k]) !== stable(p.s[k])); };
 function renderPresetMenu() {
   const sel = $('wPreset'), p = curPreset();
-  const modified = p && stable(pickPreset(S.web)) !== stable(p.s);
+  const modified = p && presetModified(p);
   sel.innerHTML = '';
   const none = document.createElement('option'); none.value = ''; none.textContent = p ? '— No preset —' : '— Custom settings —'; sel.append(none);
-  for (const q of S.presets) { const op = document.createElement('option'); op.value = q.name; op.textContent = q.name + (q === p && modified ? ' (modified)' : ''); sel.append(op); }
+  for (const [label, list] of [['Built in', BUILTIN_EXPORTS], ['Yours', S.presets]]) {
+    if (!list.length) continue;
+    const g = document.createElement('optgroup'); g.label = label;
+    for (const q of list) { const op = document.createElement('option'); op.value = q.name; op.textContent = q.name + (q === p && modified ? ' (modified)' : ''); if (q.builtin && !deskHas('plans') && q.s.fmt === 'tiff') { op.disabled = true; op.textContent += ': in the desktop program'; } g.append(op); }
+    sel.append(g);
+  }
   sel.value = p ? p.name : '';
   $('wPresetSave').disabled = !p || !modified;
-  $('wPresetMenu').querySelectorAll('[data-p=rename],[data-p=delete],[data-p=export]').forEach(b => b.disabled = !p);
+  $('wPresetSave').textContent = p && p.builtin ? 'Save as mine' : 'Save';
+  $('wPresetSave').title = p && p.builtin ? 'Built-in presets stay as they are: save these settings as your own preset' : 'Save the current settings to this preset';
+  $('wPresetMenu').querySelectorAll('[data-p=dup],[data-p=export]').forEach(b => b.disabled = !p);
+  $('wPresetMenu').querySelectorAll('[data-p=rename],[data-p=delete]').forEach(b => { b.disabled = !p || !!p.builtin; b.title = p && p.builtin ? 'Built-in presets can\u2019t be renamed or deleted' : ''; });
 }
 function applyPreset(name) {
-  const p = S.presets.find(q => q.name === name);
+  const p = allPresets().find(q => q.name === name);
   S.presetCur = p ? p.name : '';
   if (p) Object.assign(S.web, clone(p.s));
   saveS(); fillWebForm(); syncWebUi(); renderPreview();
 }
-function uniqueName(n) { let name = n.trim().slice(0, 60) || 'My preset', i = 2; const base = name; while (S.presets.some(p => p.name.toLowerCase() === name.toLowerCase())) name = `${base} (${i++})`; return name; }
+function uniqueName(n) { let name = n.trim().slice(0, 60) || 'My preset', i = 2; const base = name; while (allPresets().some(p => p.name.toLowerCase() === name.toLowerCase())) name = `${base} (${i++})`; return name; }
+/* the Plans window's own presets (0.9.79-0.9.82) join this list once, as presets that keep the photo's shape */
+if (!S.plansMoved) {
+  for (const q of (S.plans && Array.isArray(S.plans.custom)) ? S.plans.custom : []) {
+    if (!q || typeof q.name !== 'string') continue;
+    const size = !q.size ? 'orig' : ['1080', '1600', '2000', '2048'].includes(String(q.size)) ? String(q.size) : 'custom';
+    S.presets.push({ name: uniqueName(q.name), s: { ...cleanPreset({}), shape: 'orig', framed: false, bar: false, size, custom: +q.size || 2000, fmt: q.fmt === 'tiff' ? 'tiff' : 'jpeg', q: Math.min(100, Math.max(60, +q.q || 90)),
+      sharp: +q.sharp >= 0.7 ? '0.7' : +q.sharp > 0 ? '0.35' : '0', meta: ['all', 'nogps', 'none'].includes(q.meta) ? q.meta : 'all', pattern: '{name}', src: q.which === 'all' ? 'all' : 'picks', out: 'preset', folder: cleanFolder(q.folder) || '_export' } });
+  }
+  S.plansMoved = true; saveS();
+}
 $('wPreset').addEventListener('input', e => e.stopPropagation());
 $('wPresetFile').addEventListener('input', e => e.stopPropagation());
 $('wPreset').onchange = e => { e.stopPropagation(); applyPreset(e.target.value); };
-$('wPresetSave').onclick = () => { const p = curPreset(); if (!p) return; p.s = pickPreset(S.web); saveS(); renderPresetMenu(); toast(`Saved “${p.name}”`); };
+$('wPresetSave').onclick = () => {
+  const p = curPreset(); if (!p) return;
+  if (p.builtin) { const name = uniqueName(p.name + ' (mine)'); S.presets.push({ name, s: pickPreset(S.web) }); S.presetCur = name; saveS(); renderPresetMenu(); toast(`Saved as your own preset, \u201c${name}\u201d. The built-in stays as it was.`); return; }
+  p.s = pickPreset(S.web); saveS(); renderPresetMenu(); toast(`Saved \u201c${p.name}\u201d`);
+};
 const closePresetMenu = () => { $('wPresetMenu').hidden = true; $('wPresetMore').setAttribute('aria-expanded', 'false'); };
 $('wPresetMore').onclick = e => { e.stopPropagation(); const m = $('wPresetMenu'); m.hidden = !m.hidden; $('wPresetMore').setAttribute('aria-expanded', String(!m.hidden)); };
 document.addEventListener('click', e => { if (!e.target.closest('.pwrap')) closePresetMenu(); });
@@ -6183,14 +6076,16 @@ $('wPresetMenu').onclick = async e => {
   closePresetMenu();
   const act = b.dataset.p, p = curPreset();
   if (act === 'new') {
-    const n = prompt('Name for this preset:', p ? p.name + ' copy' : 'My export');
+    const n = prompt('Name for this preset:', p ? p.name + ' (mine)' : 'My export');
     if (n === null || !n.trim()) return;
     const name = uniqueName(n); S.presets.push({ name, s: pickPreset(S.web) }); S.presetCur = name; saveS(); renderPresetMenu(); toast(`Saved “${name}”`);
-  } else if (act === 'rename' && p) {
+  } else if (act === 'dup' && p) {
+    const name = uniqueName(p.name + ' copy'); S.presets.push({ name, s: pickPreset(S.web) }); S.presetCur = name; saveS(); renderPresetMenu(); toast(`Made \u201c${name}\u201d. Change any setting, then Save.`);
+  } else if (act === 'rename' && p && !p.builtin) {
     const n = prompt('New name:', p.name);
     if (n === null || !n.trim() || n.trim() === p.name) return;
     p.name = ''; p.name = uniqueName(n); S.presetCur = p.name; saveS(); renderPresetMenu();
-  } else if (act === 'delete' && p) {
+  } else if (act === 'delete' && p && !p.builtin) {
     if (!confirm(`Delete the preset “${p.name}”? Your current settings stay as they are.`)) return;
     S.presets = S.presets.filter(q => q !== p); S.presetCur = ''; saveS(); renderPresetMenu();
   } else if (act === 'export' && p) {
@@ -6213,18 +6108,28 @@ $('wPresetFile').onchange = async e => {
 };
 function syncWebUi() {
   const o = S.web;
+  /* 16-bit TIFF: made by the program in the photo's own shape, with no frame or info bar */
+  const tiff = o.fmt === 'tiff';
+  if (tiff) {
+    if (SHAPES[o.shape] || isAll(o)) { o.shape = 'orig'; $('wShape').value = 'orig'; }
+    if (o.framed) { o.framed = false; $('wFramed').checked = false; }
+    if (o.bar) { o.bar = false; $('wBar').checked = false; }
+    if (['p50', 'p75'].includes(o.size)) { o.size = 'orig'; $('wSize').value = 'orig'; }
+  }
+  $('wTiffNote').hidden = !tiff; $('wShape').disabled = tiff; $('wBar').disabled = tiff; $('wQ').disabled = tiff; $('wSharp').disabled = tiff;
+  for (const v of ['p50', 'p75']) $('wSize').querySelector(`[value=${v}]`).disabled = tiff;
   renderPresetMenu();
   $('wCustom').hidden = o.size !== 'custom';
   $('wSize').disabled = $('wCustom').disabled = !!SHAPES[o.shape] || isAll(o);
-  $('wAll').hidden = !isAll(o); $('wFramed').disabled = isAll(o);
+  $('wAll').hidden = !isAll(o); $('wFramed').disabled = isAll(o) || tiff;
   $('wAllRows').querySelectorAll('[data-allbar]').forEach(cb => cb.disabled = !o.bar);
   renderAllTabs();
   $('wQv').textContent = o.q;
   $('wBarSet').querySelectorAll('.wchecks input, .wrow input, .wrow select').forEach(el => el.disabled = !o.bar);
-  $('wMeta').disabled = o.fmt !== 'jpeg';
+  $('wMeta').disabled = o.fmt === 'webp';
   const exList = webSources()[o.src] || [];
   const ex = exList[0] || cur() || state.items[0];
-  const ext = o.fmt === 'webp' ? 'webp' : 'jpg';
+  const ext = o.fmt === 'webp' ? 'webp' : tiff ? 'tif' : 'jpg';
   if (ex && isAll(o)) { $('wSuffixEx').textContent = `Example: ${allName(ex, o, 0, curAllShape(o))}.${ext}, one file per shape. Your originals keep their names.`; return; }
   $('wSuffixEx').textContent = ex ? `Example: ${webName(ex, o, 0)}.${ext}` + (exList.length > 1 ? `, then ${webName(exList[1], o, 1)}.${ext}` : '') + '. Your originals keep their names.' : 'Click the buttons to add parts, or type your own text.';
 }
@@ -6241,8 +6146,10 @@ function webName(it, o, seq) {
   };
   let s = String(o.pattern || '{name}_web').replace(/\{(\w+)\}/g, (all, k) => k in map ? map[k] : all);
   s = s.replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '-').replace(/-{2,}/g, '-').replace(/^[-.\s]+|[-.\s]+$/g, '');
-  if (!s) s = baseOf(it.name) + '_web';
-  if (s.toLowerCase() === baseOf(it.name).toLowerCase()) s += '_web';
+  /* into a folder of its own (Save to: a folder in the photo folder) a copy can keep the original's name */
+  const own = o.out === 'preset' && canFolder();
+  if (!s) s = baseOf(it.name) + (own ? '' : '_web');
+  if (s.toLowerCase() === baseOf(it.name).toLowerCase() && !own) s += '_web';
   return s;
 }
 document.querySelectorAll('#wTokens .tok').forEach(b => b.onclick = e => {
@@ -6445,7 +6352,7 @@ $('webPrev').addEventListener('pointercancel', endCropDrag);
 $('wform').addEventListener('input', () => { readWebForm(); schedulePreview(); });
 $('wform').addEventListener('change', () => { readWebForm(); schedulePreview(); });
 $('wBar').addEventListener('change', () => { readWebForm(); schedulePreview(); });
-$('webBtn').onclick = () => { loadWebOut(); fillWebForm(); resetWebDone(); webStatus(''); { const l = webList(), i = l.indexOf(cur()); webIdx = i >= 0 ? i : 0; } resumeSnap = webLast ? { ...webLast } : null; checkResume(); $('webDlg').showModal(); schedulePreview(); };
+$('webBtn').onclick = () => { if (webBusy) { $('webDlg').showModal(); syncChip(); return; } loadWebOut(); fillWebForm(); resetWebDone(); webStatus(''); { const l = webList(), i = l.indexOf(cur()); webIdx = i >= 0 ? i : 0; } resumeSnap = webLast ? { ...webLast } : null; checkResume(); $('webDlg').showModal(); schedulePreview(); };
 function setWebFolder(name, files) {
   const list = files.map(en => { const f = en.file || en; return { file: f, name: f.name, ext: extOf(f.name), key: keyOf(f), meta: null, metaP: null, orient: 1, cache: null, af: undefined, burst: null }; })
     .filter(i => SUPPORTED.has(i.ext))
@@ -6498,25 +6405,52 @@ async function saveFile(name, blob) {
   }
   return 'failed';
 }
-let webBusy = false, webStop = false, raws0 = 0;
+let webBusy = false, webStop = false;
 $('wOutPick').onclick = pickWebOut;
-$('wOut').onchange = e => { if (e.target.value === 'fixed' && !webOutDir) { pickWebOut(); return; } S.webOut = e.target.value; saveS(); syncWebOut(); };
+$('wOut').onchange = e => { e.stopPropagation(); if (e.target.value === 'fixed' && !webOutDir) { pickWebOut(); return; } S.web.out = e.target.value; saveS(); syncWebOut(); syncWebUi(); };
+$('wOut').addEventListener('input', e => e.stopPropagation());
+$('wShow').onclick = () => { if (webOutPath && window.FV_DESKTOP && window.FV_DESKTOP.reveal) window.FV_DESKTOP.reveal(webOutPath).catch(() => toast('Couldn\u2019t open that folder.')); };
 $('wSrc').addEventListener('change', () => { resetWebDone(); webGoLabel(); });
+/* While an export runs the settings are locked, Export becomes Stop, and Minimize (or Escape) hides the window: the export
+   keeps going and a chip beside the toolbar's Export button shows the progress; clicking it, or Export, reopens the window */
+let webOutPath = null;
+function setWebBusy(on) {
+  webBusy = on;
+  $('wform').inert = on; $('wPreset').disabled = on;
+  $('wMin').hidden = !on; $('wClose').hidden = on; $('wProg').hidden = !on && $('wProg').hidden;
+  if (on) { $('wShow').hidden = true; $('wProg').hidden = false; $('wBarFill').style.width = '0%'; $('webGo').textContent = 'Stop'; $('webGo').disabled = false; $('webGo').classList.add('stop'); }
+  else { $('webGo').classList.remove('stop'); $('webGo').disabled = false; }
+  syncChip();
+}
+function syncChip() { $('expChip').hidden = !webBusy || $('webDlg').open; }
+function webProgress(done, total, extra) {
+  const pct = total ? (done / total * 100).toFixed(1) + '%' : '0%';
+  $('wBarFill').style.width = pct; $('expChipFill').style.width = pct;
+  $('expChipTxt').textContent = `${done.toLocaleString()} of ${total.toLocaleString()}`;
+  webStatus(`${done.toLocaleString()} of ${total.toLocaleString()}` + (extra ? ` · ${extra}` : ''));
+}
+$('wMin').onclick = () => $('webDlg').close();
+$('webDlg').addEventListener('close', syncChip);
+$('expChip').onclick = () => { $('webDlg').showModal(); syncChip(); };
 $('webGo').onclick = async () => {
-  if (webBusy && raws0) { webStop = true; $('webGo').textContent = 'Stopping…'; return; }   // a long batch of raws can be stopped
-  if (webBusy || $('webGo').classList.contains('done')) return;
+  if (webBusy) { webStop = true; $('webGo').disabled = true; $('webGo').textContent = 'Stopping…'; return; }
+  if ($('webGo').classList.contains('done')) return;
   readWebForm();
   const o = S.web, all = webSources()[o.src].slice();
   const list = all.filter(it => !WEB_SKIP.has(cropKey(it, o)));
   const nSkipped = all.length - list.length;
   if (!list.length) return webStatus(all.length ? 'Every photo is skipped. Include at least one to export.' : 'No photos to export.');
   if (!String(o.pattern || '').trim()) return webStatus('Add a file name pattern first.');
+  if (o.fmt === 'tiff' && !deskHas('plans')) return webStatus('16-bit TIFFs are made by the FledgeView desktop program.');
   const shapes = isAll(o) ? allList(o) : [null];
   if (isAll(o) && !shapes.length) return webStatus('Check at least one shape to export.');
   const useSub = isAll(o) && o.allFolders !== false && list.length > 1;
+  const own = canFolder() && o.out === 'preset', folderName = own ? cleanFolder(o.folder) : '';
+  if (own && !folderName) return webStatus('Type a name for the folder to save into.');
+  if (own && ['_picks', '_rejects', '_edits'].includes(folderName.toLowerCase())) return webStatus(`${folderName} is used by FledgeView itself; choose another folder name.`);
   let dir = null;
-  if (canFolder()) {
-    if (S.webOut === 'fixed' && webOutDir) {
+  if (canFolder() && !own) {
+    if (o.out === 'fixed' && webOutDir) {
       try { if ((await webOutDir.queryPermission({ mode: 'readwrite' })) === 'granted' || (await webOutDir.requestPermission({ mode: 'readwrite' })) === 'granted') dir = webOutDir; } catch {}
     }
     if (!dir) {
@@ -6524,62 +6458,122 @@ $('webGo').onclick = async () => {
       catch (e) { if (e.name === 'AbortError') return; dir = null; }
     }
   }
-  raws0 = list.filter(deskRaw).length;
-  webBusy = true; $('webGo').disabled = !raws0; $('webGo').classList.remove('done'); $('webGo').textContent = raws0 ? 'Stop' : 'Exporting…';
-  const used = new Set(), files = [], subs = new Map();
-  const total = list.length * shapes.length;
-  let ok = 0, fail = 0, n0 = 0;
-  for (let i = 0; i < list.length; i++) {
-    for (const sh of shapes) {
-      if (webStop) break;
-      webStatus(`${deskRaw(list[i]) ? 'Developing' : 'Exporting'} ${++n0} of ${total}…`);
-      try {
-        const oo = sh ? effOpts(o, sh) : o;
-        const r = await exportOne(list[i], oo, { raw: true });
-        const base = sh ? allName(list[i], o, i, sh) : webName(list[i], o, i);
-        const folder = sh && useSub ? ALL_TAG[sh] : '';
-        let d = dir;
-        if (dir && folder) { if (!subs.has(folder)) subs.set(folder, await dir.getDirectoryHandle(folder, { create: true })); d = subs.get(folder); }
-        let name = `${base}.${r.ext}`, n = 2;
-        const taken = async nm => {
-          const key = (folder + '/' + nm).toLowerCase();
-          if (used.has(key) || (!folder && nm.toLowerCase() === list[i].name.toLowerCase())) return true;
-          if (d) { try { await d.getFileHandle(nm); return true; } catch {} }
-          return false;
-        };
-        while (await taken(name)) name = `${base}-${n++}.${r.ext}`;
-        used.add((folder + '/' + name).toLowerCase());
-        if (d) { const fh = await d.getFileHandle(name, { create: true }); const w = await fh.createWritable(); await w.write(r.blob); await w.close(); }
-        else files.push({ name: folder ? `${folder}/${name}` : name, blob: r.blob });
-        ok++;
-      } catch { fail++; }
+  /* a folder of its own inside each photo's folder: asked for once per opened folder */
+  const ownDirs = new Map();
+  const ownDir = async it => {
+    if (!it.root) return null;
+    if (!ownDirs.has(it.root)) {
+      let d = null;
+      try { if ((await it.root.queryPermission({ mode: 'readwrite' })) === 'granted' || (await it.root.requestPermission({ mode: 'readwrite' })) === 'granted') d = await it.root.getDirectoryHandle(folderName, { create: true }); } catch {}
+      ownDirs.set(it.root, d);
     }
-    if (webStop) break;
+    return ownDirs.get(it.root);
+  };
+  if (own) { const pr = plPrefs(); pr.used = [...new Set([...(pr.used || []), folderName])].slice(-50); saveS(); }
+  const fast = deskFast(o) && (own || !!dir);
+  if (o.fmt === 'tiff' && !fast) return webStatus('16-bit TIFFs need a folder to save into: choose one in Save to.');
+  webOutPath = null; webStop = false; setWebBusy(true);
+  let ok = 0, fail = 0, noFolder = 0, otherFmt = 0, stopped = false, note = '', total = list.length * shapes.length;
+  const failed = [];
+  if (fast) {
+    /* the program makes the files, Speed's number at a time */
+    const jobs = [], used = new Set(), paths = new Map(), ext = o.fmt === 'tiff' ? 'tif' : 'jpg';
+    webStatus('Starting…');
+    for (let i = 0; i < list.length; i++) {
+      const it = list[i], src = eiRawOf(it) || it;
+      const d = own ? await ownDir(it) : dir;
+      if (!d || !src.handle) { noFolder++; continue; }
+      const byProgram = RAW.has(src.ext) || ['jpg', 'jpeg'].includes(src.ext);
+      if (o.fmt === 'tiff' && !byProgram) { otherFmt++; continue; }
+      if (!paths.has(d)) { let pth = null; try { pth = await window.FV_DESKTOP.pathOf(d); } catch {} paths.set(d, pth); }
+      const pth = paths.get(d); if (!pth) { noFolder++; continue; }
+      const base = webName(it, o, i); let name = `${base}.${ext}`, n = 2;
+      const taken = async nm => { if (used.has((pth + '/' + nm).toLowerCase())) return true; if (own) return false; try { await d.getFileHandle(nm); return true; } catch { return false; } };
+      while (await taken(name)) name = `${base}-${n++}.${ext}`;
+      used.add((pth + '/' + name).toLowerCase());
+      jobs.push({ it, src, byProgram, dirPath: pth, dirHandle: d, name });
+    }
+    total = jobs.length;
+    if (jobs.length) {
+      const r = await deskRun(jobs, o, (done, tot, speed, t0) => {
+        const el = (performance.now() - t0) / 1000, left = done ? el / done * (tot - done) : 0;
+        webProgress(done, tot, (done && done < tot ? `about ${fmtTime(left)} left · ` : '') + `${speed.files_at_once || 1} at a time`);
+      });
+      ok = r.made; fail = r.failed.length; failed.push(...r.failed); stopped = webStop;
+      note = ` in ${fmtTime(r.secs)}`;
+    }
+  } else {
+    const used = new Set(), files = [], subs = new Map();
+    let n0 = 0;
+    for (let i = 0; i < list.length; i++) {
+      for (const sh of shapes) {
+        if (webStop) break;
+        webProgress(n0++, total, deskRaw(list[i]) ? 'developing' : '');
+        try {
+          const oo = sh ? effOpts(o, sh) : o;
+          const base0 = own ? await ownDir(list[i]) : dir;
+          if (own && !base0) { noFolder++; continue; }
+          const r = await exportOne(list[i], oo, { raw: true });
+          const base = sh ? allName(list[i], o, i, sh) : webName(list[i], o, i);
+          const folder = sh && useSub ? ALL_TAG[sh] : '';
+          let d = base0;
+          if (d && folder) { let m = subs.get(d); if (!m) subs.set(d, m = new Map()); if (!m.has(folder)) m.set(folder, await d.getDirectoryHandle(folder, { create: true })); d = m.get(folder); }
+          let name = `${base}.${r.ext}`, n = 2;
+          const taken = async nm => {
+            const key = (folder + '/' + nm).toLowerCase();
+            if (used.has(key) || (!folder && !own && nm.toLowerCase() === list[i].name.toLowerCase())) return true;
+            if (d && !own) { try { await d.getFileHandle(nm); return true; } catch {} }
+            return false;
+          };
+          while (await taken(name)) name = `${base}-${n++}.${r.ext}`;
+          used.add((folder + '/' + name).toLowerCase());
+          if (d) {
+            const fh = await d.getFileHandle(name, { create: true }); const w = await fh.createWritable(); await w.write(r.blob); await w.close();
+            if (!webOutPath && window.FV_DESKTOP && window.FV_DESKTOP.pathOf) { try { webOutPath = await window.FV_DESKTOP.pathOf(base0); } catch {} }
+          } else files.push({ name: folder ? `${folder}/${name}` : name, blob: r.blob });
+          ok++;
+        } catch { fail++; }
+      }
+      if (webStop) break;
+    }
+    webProgress(Math.min(n0, total), total, '');
+    stopped = webStop;
+    if (!dir && !own && files.length) {
+      let res, dlName = '';
+      if (files.length === 1) { res = await saveFile(files[0].name, files[0].blob); dlName = files[0].name; }
+      else if (window.JSZip) {
+        webStatus('Packing ZIP…');
+        const zip = new JSZip();
+        files.forEach(f => zip.file(f.name, f.blob));
+        const zb = await zip.generateAsync({ type: 'blob', compression: 'STORE' });
+        dlName = isAll(o) ? 'fledgeview-all-platforms.zip' : 'fledgeview-web-export.zip';
+        res = await saveFile(dlName, zb);
+      } else res = 'failed';
+      if (res === 'saved' && dlName) note = ' ' + dlNote(dlName);
+      else if (res === 'declined') note = ' Download was cancelled.';
+      else if (res === 'failed') note = ' Saving files isn’t available in this view.';
+    }
   }
-  const stopped = webStop; webStop = false; $('webGo').classList.remove('stop');
-  let note = '', dlName = '';
-  if (!dir && files.length) {
-    let res;
-    if (files.length === 1) { res = await saveFile(files[0].name, files[0].blob); dlName = files[0].name; }
-    else if (window.JSZip) {
-      webStatus('Packing ZIP…');
-      const zip = new JSZip();
-      files.forEach(f => zip.file(f.name, f.blob));
-      const zb = await zip.generateAsync({ type: 'blob', compression: 'STORE' });
-      dlName = isAll(o) ? 'fledgeview-all-platforms.zip' : 'fledgeview-web-export.zip';
-      res = await saveFile(dlName, zb);
-    } else res = 'failed';
-    if (res === 'saved' && dlName) note = ' ' + dlNote(dlName);
-    else if (res === 'declined') note = ' Download was cancelled.';
-    else if (res === 'failed') note = ' Saving files isn’t available in this view.';
-  }
-  webBusy = false; $('webGo').disabled = false;
-  const allGood = ok > 0 && !fail && !note && !stopped;
+  webStop = false; setWebBusy(false);
+  const allGood = ok > 0 && !fail && !stopped && !/cancelled|isn’t available/.test(note);
   if (allGood) { webLast = null; resumeSnap = null; $('wResume').hidden = true; saveCrops(); tipNudge(); }
-  if (allGood) $('webGo').textContent = '\u2713 Exported'; else webGoLabel();
+  if (allGood) $('webGo').textContent = '✓ Exported'; else webGoLabel();
   $('webGo').classList.toggle('done', allGood);
-  webStatus((allGood ? '✓ ' : '') + (isAll(o) ? `Exported ${ok} file${ok === 1 ? '' : 's'} (${list.length} photo${list.length === 1 ? '' : 's'} × ${shapes.length} shape${shapes.length === 1 ? '' : 's'})` + (useSub ? ', in a folder for each shape' : '') : `Exported ${ok} photo${ok === 1 ? '' : 's'}`) + (dir ? ` to ${dir.name}` : '') + '.' + (nSkipped ? ` Skipped ${nSkipped}.` : '') + (fail ? ` ${fail} couldn’t be exported.` : '') + note + (allGood ? ' Change any setting to export again.' : ''), allGood);
-  if (stopped) webStatus(`Stopped after ${ok} of ${total}.` + note);
+  $('wShow').hidden = !(ok && webOutPath && window.FV_DESKTOP && window.FV_DESKTOP.reveal);
+  const where = own ? ` into ${folderName}` : dir ? ` to ${dir.name}` : '';
+  const kind = fast ? `${o.fmt === 'tiff' ? 'TIFF' : 'JPEG'}${ok === 1 ? '' : 's'}` : `photo${ok === 1 ? '' : 's'}`;
+  let t = stopped ? `Stopped after ${ok.toLocaleString()} of ${total.toLocaleString()}${where}.`
+    : isAll(o) && !fast ? `Exported ${ok} file${ok === 1 ? '' : 's'} (${list.length} photo${list.length === 1 ? '' : 's'} × ${shapes.length} shape${shapes.length === 1 ? '' : 's'})` + (useSub ? ', in a folder for each shape' : '') + `${where}.`
+    : `${fast ? 'Made' : 'Exported'} ${ok.toLocaleString()} ${kind}${where}${fast ? note : ''}.`;
+  if (!fast && note) t += note;
+  if (nSkipped) t += ` Skipped ${nSkipped}.`;
+  if (otherFmt) t += ` Skipped ${otherFmt.toLocaleString()} that aren’t raw files or JPEGs.`;
+  if (noFolder) t += ` Skipped ${noFolder.toLocaleString()} not opened with Open folder (or the folder couldn’t be written).`;
+  if (fail) { t += ` ${fail.toLocaleString()} couldn’t be exported${failed.length ? ` (${failed.slice(0, 2).join('; ')}${failed.length > 2 ? '…' : ''})` : ''}.`; if (failed.length) console.warn('Export failures', failed); }
+  if (allGood) t += ' Change any setting to export again.';
+  webStatus((allGood ? '✓ ' : '') + t, allGood);
+  $('wProg').hidden = false; $('wBarFill').style.width = '100%';
+  if (!$('webDlg').open) toast(t);
 };
 
 /* ---------- quick finish: simple per-photo edits, saved as a recipe and applied on export ---------- */
@@ -8084,13 +8078,24 @@ function fitLayout() {
   let w = Math.min(availW, narrow ? availW : availH * 1.5);
   if (S.size < 100) w = Math.min(w, vw * S.size / 100);
   w = Math.max(220, Math.floor(w));
+  /* a wide window limits the viewer by its width: then it also grows taller than 3:2, down to the bottom of the window,
+     so it lines up with the left panel (photos keep their own shape inside it) */
+  const h = narrow || S.size < 100 ? Math.round(w / 1.5) : Math.max(Math.round(w / 1.5), Math.floor(availH));
   document.documentElement.style.setProperty('--scr-w', w + 'px');
+  document.documentElement.style.setProperty('--scr-h', h + 'px');
   if (!stacked) $('side').style.height = Math.max(300, vh - top - 24) + 'px'; else $('side').style.height = '';
   /* on short windows the control column scrolls inside itself instead of stretching the page */
   const ctl = document.querySelector('.controls'), und = document.querySelector('.under');
   if (ctl) ctl.style.maxHeight = stacked ? '' : Math.max(320, vh - top - 28 - camPad * 2 - (und ? und.offsetHeight + 12 : 48)) + 'px';
   /* the edit drawer shares the control column's height, so it never stretches the camera body; it scrolls inside itself */
   $('editPanel').style.maxHeight = stacked ? '' : Math.max(280, vh - top - 28 - camPad * 2 - (und ? und.offsetHeight + 12 : 48)) + 'px';
+  /* then make the camera body end exactly where the left panel ends (the row under the screen can wrap to two lines) */
+  if (h > Math.round(w / 1.5) && !stacked) {
+    const cam = document.querySelector('.camera');
+    const gap = $('side').getBoundingClientRect().bottom - (cam ? cam.getBoundingClientRect().bottom : 0);
+    const h2 = Math.max(Math.round(w / 1.5), h + Math.floor(gap));
+    if (cam && h2 !== h) document.documentElement.style.setProperty('--scr-h', h2 + 'px');
+  }
 }
 function setSize(n) {
   if (![25, 50, 100].includes(n)) n = 100;
@@ -8191,8 +8196,22 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.82 beta';
+const VERSION = '0.9.84 beta';
 const RELEASES = [
+  { v: '0.9.84 beta', date: 'November 2026', groups: [
+    ['Changed', [
+      'On wide screens and in full screen the viewer now uses the whole height of the window, down to the bottom of the photo list, instead of stopping at a 3:2 shape and leaving empty space below. Photos keep their own shape inside it; Size below 100% keeps the classic 3:2 screen.',
+    ]],
+  ] },
+  { v: '0.9.83 beta', date: 'November 2026', groups: [
+    ['Changed', [
+      'One Export window for everything: the export presets that had their own Presets\u2026 window now live in the Export window\u2019s preset list, under Built in and Yours, with your saved presets from both places. Presets can now also say which photos (your picks, everything) and where the files go.',
+      'Save to has a new choice: a folder in the photo folder, named as you like (_web, _tiff, _instagram\u2026). Exporting again replaces the files there, and FledgeView doesn\u2019t open that folder as photos.',
+      'Format adds 16-bit TIFF (desktop program), made from raw files and camera JPEGs with each photo\u2019s Quick finish.',
+      'Long exports: Stop ends one part-way, and Minimize keeps it running in the background, with a progress chip beside the toolbar\u2019s Export button. In the desktop program, photos that keep their own shape are made several at a time, as Speed allows; Speed is in the Export window.',
+      'Built-in presets stay as they are: changing one and pressing Save as mine makes your own copy. The \u22ef menu makes, duplicates, renames, deletes and shares presets.',
+    ]],
+  ] },
   { v: '0.9.82 beta', date: 'November 2026', groups: [
     ['Changed', [
       'Presets \u25be in the top toolbar is now Recipes \u25be: make a recipe card, save a Lightroom preset, or show the Lightroom settings, the same as before. "Presets" now means export presets only.',
