@@ -911,6 +911,9 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
 .wform{display:flex;flex-direction:column;gap:10px;max-height:66vh;overflow:auto;padding-right:4px}
 .wrow{display:grid;grid-template-columns:118px 1fr auto;gap:8px;align-items:center;font-size:14px}
 .wrow>label{color:var(--ink-soft)}
+html:not(.fvdesk) .deskonly,html.fvdesk .webonly{display:none}
+.rsum{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-soft)}.rsum.set{color:inherit}
+#rightsDlg,#binDlg{width:min(520px,94vw)}#rightsDlg .wrow{margin-top:8px}#rightsDlg input[type=text]{width:100%}
 .wrow input[type=range]{accent-color:var(--amber)}
 .wset{border:1px solid var(--panel-line);border-radius:8px;padding:8px 12px 12px;margin:0;display:flex;flex-direction:column;gap:10px}
 .wset legend{padding:0 4px}
@@ -1010,6 +1013,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
         <button class="mi" id="autoBtn" data-f="sharp">Auto-pick sharpest…</button>
         <button class="mi" id="writeXmp" data-f="cull">Write ratings</button>
         <button class="mi" id="moveRej" data-f="cull">Move picks and rejects…</button>
+        <button class="mi" id="emptyRej" data-f="cull" hidden>Empty rejects to Recycle Bin…</button>
         <button class="mi" id="orgBtn" data-f="cull">Organize into lens folders…</button>
         <button class="mi" id="copyList" data-f="cull">Copy list</button>
         <div class="msep"></div>
@@ -1359,6 +1363,7 @@ dialog select,dialog input[type=text],dialog input[type=number]{font:inherit;col
       </fieldset>
       <div class="wrow"><label for="wMeta">Metadata</label><select id="wMeta"><option value="none">Remove all</option><option value="nogps">Keep EXIF, remove location</option><option value="all">Keep EXIF and location</option></select></div>
       <p class="wnote">Removing location helps protect nest sites and sensitive species.</p>
+      <div class="wrow" id="wRightsRow"><label for="wRightsBtn">Name and ©</label><span class="rsum" id="wRightsTxt"></span><button class="btn" id="wRightsBtn">Change…</button></div>
       <div class="wrow"><label for="wPattern">File names</label><input type="text" id="wPattern" spellcheck="false" aria-describedby="wSuffixEx"></div>
       <div class="wtokens" id="wTokens" role="group" aria-label="Insert into file name">
         <button class="btn tok" data-tok="{name}">Original name</button>
@@ -1624,7 +1629,7 @@ INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
-  <p class="sub" style="font-size:13px;margin-top:14px">© 2026 HatchApps LLC. All rights reserved. Free to use for your photography. Please don’t resell, rebrand, or redistribute it without permission.</p>
+  <p class="sub" id="aboutRights" style="font-size:13px;margin-top:14px">© 2026 HatchApps LLC. All rights reserved. Free to use for your photography. Please don’t resell, rebrand, or redistribute it without permission.</p>
   <div class="end"><button class="btn primary" data-close>Close</button></div>
 </dialog>
 
@@ -1644,6 +1649,30 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
   <label class="chk" style="margin-top:6px"><input type="checkbox" id="aKeep"> Leave photos I already rated or flagged alone</label>
   <p class="sub" id="aInfo" style="margin-top:12px"></p>
   <div class="end"><span class="tl grow" id="aStatus" role="status"></span><button class="btn" id="aStop" hidden>Stop</button><button class="btn" data-close>Close</button><button class="btn go" id="aRun">Score and pick</button></div>
+</dialog>
+
+<dialog id="rightsDlg" aria-labelledby="rightsH">
+  <h2 id="rightsH">Your name and copyright</h2>
+  <p class="sub">Set it once. FledgeView writes it into the files it makes, where Lightroom, Photoshop, Windows (Properties → Details) and most photo sites read it.</p>
+  <label class="chk" style="margin-top:10px"><input type="checkbox" id="rtOn"> Add my name and copyright</label>
+  <div class="wrow"><label for="rtName">Name</label><input type="text" id="rtName" autocomplete="name" maxlength="120" placeholder="Your Name"></div>
+  <div class="wrow"><label for="rtCopy">Copyright</label><input type="text" id="rtCopy" maxlength="200" placeholder="© {year} Your Name"></div>
+  <p class="sub" style="margin-top:6px"><strong>{year}</strong> becomes the year each photo was taken. Leave Copyright empty to use “© {year}” and your name.</p>
+  <p class="sub" id="rtExample" style="margin-top:6px"></p>
+  <ul class="sub" style="margin:8px 0 0 18px;padding:0">
+    <li>Exported JPEGs<span class="deskonly"> and TIFFs</span>: always, even when Metadata is set to Remove all<span class="webonly"> (WebP files can’t carry it)</span>.</li>
+    <li>Import and Write ratings: into the .xmp sidecars of raw files, which Lightroom reads when it imports them.</li>
+    <li>Your originals are never changed.</li>
+  </ul>
+  <div class="end"><button class="btn" data-close>Cancel</button><button class="btn primary" id="rtSave">Save</button></div>
+</dialog>
+
+<dialog id="binDlg" aria-labelledby="binH">
+  <h2 id="binH">Empty rejects to the Recycle Bin</h2>
+  <p id="binTxt"></p>
+  <ul class="sub" id="binList" style="margin:8px 0 0 18px;padding:0"></ul>
+  <p class="sub" style="margin-top:10px">Each <code>_rejects</code> folder goes to the Recycle Bin whole, sidecars and all. Changed your mind? Open the Recycle Bin, right-click the folder, and choose <strong>Restore</strong>. If a drive has no Recycle Bin (some network and card drives), Windows asks before deleting anything for good.</p>
+  <div class="end"><button class="btn" data-close>Cancel</button><button class="btn go" id="binGo">Send to Recycle Bin</button></div>
 </dialog>
 
 <dialog id="keepDlg">
@@ -1678,7 +1707,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
 
 <dialog id="guideDlg">
   <h2>Getting started with FledgeView</h2>
-  <p class="sub">A free photo viewer, culler, organizer, and exporter for photographers.</p>
+  <p class="sub" id="guideSub">A free photo viewer, culler, organizer, and exporter for photographers.</p>
   <div class="guide">
     <nav class="gnav" id="gNav" aria-label="Guide sections"></nav>
     <div class="gbody" id="gBody">
@@ -1757,6 +1786,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
           <li><strong>Filter</strong>, under Sort in the sidebar, shows only one lens, camera, or file type. Teleconverter combinations are listed separately, and filters combine with ratings and picks. <strong>Clear</strong> shows everything again.</li>
           <li><strong>Bursts:</strong> frames shot within half a second of each other are grouped, shown by a colored bar under the thumbnails. Each frame is labeled compared with the sharpest one in its burst: <strong>Best</strong>, then a percentage (green from 90%, which the eye can’t tell apart from the best). It’s a comparison, not a verdict: a sharp subject on a soft background is exactly what a wide aperture is for. On Sony files straight from the camera, sharpness is measured at the focus point (usually the eye). Other files, including most exports, are measured across the whole frame, so a busy background or foreground can outscore your subject; their labels show <strong>≈</strong> (about) and are dimmer, as a rough guide. <strong>Best</strong> is where to look first; the keeper is always your call.</li>
           <li><strong>Auto-pick sharpest</strong> scores every burst and picks the frames nearly as sharp as the best one. It never rejects anything unless you turn that option on, and it leaves photos you’ve already rated alone.</li>
+          <li class="deskonly"><strong>Empty rejects to Recycle Bin…</strong> (desktop, after Move picks and rejects) sends each <code>_rejects</code> folder to the Recycle Bin, where Restore brings it back.</li>
           <li><strong>Move picks and rejects…</strong> moves picks into a <code>_picks</code> folder and rejects into <code>_rejects</code>, next to your originals. Choose <strong>Picks and rejects</strong>, <strong>Rejects only</strong> (keepers stay where they are), or <strong>Picks only</strong>. Run it again after changing your mind, and photos move back. Nothing is ever deleted: once you’re sure, delete <code>_rejects</code> yourself in File Explorer or Finder, which sends it to the Recycle Bin or Trash.</li>
           <li><strong>Import</strong> (the first button in the toolbar) copies a card into your main photo folder, organized the way you choose: <code>date / lens</code> by default, or year, month, and day, lens first, a shoot name, or your own <strong>Custom</strong> pattern using words like <code>{year}</code>, <code>{date}</code>, <code>{lens}</code>, <code>{camera}</code>, and <code>{shoot}</code>. A live example shows where photos will go. Teleconverter shots can get their own subfolder, and sidecars travel with their photos. Choose the card and your main folder, check the plan, then click Import. Tick <strong>Backup</strong> and choose a second folder (ideally on another drive) to write a verified second copy at the same time. Every copy is checked, photos already imported are skipped, and the card is never changed. Then cull the new folders and import them into Lightroom when you’re ready. At the top, <strong>What do you want from this card?</strong>: <strong>Just bring them in</strong> (copy only), <strong>Bring them in and cull</strong> (opens them; at the last photo FledgeView offers an export preset for your picks), or <strong>Bring them in and make files</strong> (runs an export preset on all of them right after copying). In the desktop program, a card going in, or already in when FledgeView starts, shows a bar with <strong>Import…</strong>, <strong>Choose on the card</strong>, <strong>View on the card</strong> and <strong>Not now</strong>.</li>
           <li><strong>Grid</strong> (G, the Grid button beside 4-up, or View ▾ → Grid) shows whatever is open the same way as Choose on the card below, filtered as the viewer is, with Export, Move picks and rejects and Write ratings at the bottom; Done goes back to the viewer on the photo you were on.</li>
@@ -1983,6 +2013,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.</pre></details>
   </fieldset>
   <div class="improw" style="margin-top:12px"><span class="implab">Card</span><span class="impval" id="impSrcName">Not chosen</span><button class="btn" id="impChoose" disabled title="Pick and rate the card’s photos in a grid first, then import just the ones you want">Choose on the card…</button><button class="btn" id="impSrcBtn">Choose card…</button></div>
   <div class="improw" id="impWhichRow" hidden><span class="implab">Photos</span><select id="impWhich"><option value="all">Everything</option><option value="keep">Everything except rejects</option><option value="picks">Only my picks</option><option value="rated3">Rated 3 stars or more</option></select><label class="chk" id="impXmpLab" title="Lightroom reads these when it imports raw files"><input type="checkbox" id="impXmp" checked> Write ratings to .xmp for Lightroom</label></div>
+  <div class="improw"><span class="implab">Name and ©</span><span class="impval" id="impRightsTxt"></span><button class="btn" id="impRightsBtn">Change…</button></div>
   <div class="improw"><span class="implab">Main folder</span><span class="impval" id="impDstName">Not chosen</span><button class="btn" id="impDstBtn">Choose folder…</button></div>
   <div class="improw"><label class="implab impbk" title="Also copy every photo to a second place, ideally another drive, and check each copy"><input type="checkbox" id="impBkOn"> Backup</label><span class="impval" id="impBkName">Off</span><button class="btn" id="impBkBtn">Choose backup…</button></div>
   <div class="wrow" style="margin-top:10px"><label for="impPreset">Folders</label><select id="impPreset"><option value="{lens}">Lens only (Sony 600mm F6.3), the same folders as Organize into lens folders</option><option value="{date}/{lens}">Date / Lens (2026-11-02 / Sony 600mm F6.3)</option><option value="{year}/{date}/{lens}">Year / Date / Lens (2026 / 2026-11-02 / Sony 600mm F6.3)</option><option value="{year}/{month}/{day}">Year / Month / Day (2026 / 11 / 02)</option><option value="{lens}/{date}">Lens / Date (Sony 600mm F6.3 / 2026-11-02)</option><option value="{shoot}/{lens}">Shoot name / Lens (Bosque Dec 2026 / Sony 600mm F6.3)</option><option value="custom">Custom…</option></select></div>
@@ -2543,7 +2574,7 @@ async function deskRun(jobs, o, onProgress) {
         await getMeta(j.it);
         if (j.byProgram) {
           await window.FV_DESKTOP.planRender(j.src.handle, { out: joinPath(j.dirPath, j.name), fmt: o.fmt, size, quality: o.q, sharpen,
-            edit: editOf(j.it) || {}, orient: j.src === j.it ? (j.it.orient || 1) : 1, meta: o.meta });
+            edit: editOf(j.it) || {}, orient: j.src === j.it ? (j.it.orient || 1) : 1, meta: o.meta, ...(rightsFor(j.it.meta) || {}) });
         } else {
           const r = await exportOne(j.it, { ...o, fmt: 'jpeg' }, { raw: false });
           const w = await (await j.dirHandle.getFileHandle(j.name, { create: true })).createWritable(); await w.write(r.blob); await w.close();
@@ -4795,27 +4826,111 @@ async function ensureWrite() {
   }
   return true;
 }
+/* ---------- your name and copyright (0.9.96) ----------
+   Set once (S.rights: { on, creator, copyright }). Written as XMP dc:creator and dc:rights into the .xmp sidecars Import
+   and Write ratings make, and into exported JPEGs (the desktop program's own exports also get EXIF Artist and Copyright,
+   and TIFFs too). {year} in the copyright becomes the year the photo was taken. Originals are never changed. */
+if (window.FV_DESKTOP) document.documentElement.classList.add('fvdesk');
+const rClean = (v, n) => String(v || '').replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, n);
+const rightsOn = () => { const r = S.rights || {}; return !!(r.on && (rClean(r.creator, 120) || rClean(r.copyright, 200))); };
+function yearOf(m) {
+  const d = m && (m.DateTimeOriginal || m.CreateDate);
+  const y = d instanceof Date && !isNaN(d) ? d.getFullYear() : parseInt(String(d || '').slice(0, 4), 10);
+  return y > 1825 && y < 3000 ? y : new Date().getFullYear();
+}
+/* { creator, copyright } for a photo (its metadata, for {year}), or null when it's off or empty */
+function rightsFor(m, r = S.rights) {
+  r = r || {};
+  if (!r.on) return null;
+  const creator = rClean(r.creator, 120), y = yearOf(m);
+  let copyright = rClean(r.copyright, 200).replace(/\{year\}/gi, y);
+  if (!copyright && creator) copyright = `\u00a9 ${y} ${creator}`;
+  return creator || copyright ? { creator, copyright } : null;
+}
+const xEsc = v => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const DC_NS = 'http://purl.org/dc/elements/1.1/';
+const dcBlock = rt => `  <rdf:Description rdf:about="" xmlns:dc="${DC_NS}">`
+  + (rt.creator ? `<dc:creator><rdf:Seq><rdf:li>${xEsc(rt.creator)}</rdf:li></rdf:Seq></dc:creator>` : '')
+  + (rt.copyright ? `<dc:rights><rdf:Alt><rdf:li xml:lang="x-default">${xEsc(rt.copyright)}</rdf:li></rdf:Alt></dc:rights>` : '')
+  + '</rdf:Description>\n';
+/* puts your name and copyright into an XMP packet, replacing any dc:creator and dc:rights already there */
+function withRights(text, rt) {
+  if (!rt) return text;
+  let t = text.replace(/[ \t]*<dc:creator>[\s\S]*?<\/dc:creator>\s*/g, '').replace(/[ \t]*<dc:rights>[\s\S]*?<\/dc:rights>\s*/g, '')
+    .replace(/[ \t]*<dc:creator\/>\s*/g, '').replace(/[ \t]*<dc:rights\/>\s*/g, '');
+  t = t.split(`  <rdf:Description rdf:about="" xmlns:dc="${DC_NS}"></rdf:Description>\n`).join('');   // one of ours, now empty
+  if (!/<\/rdf:RDF>/.test(t)) throw new Error('Unrecognized sidecar');
+  return t.replace(/[ \t]*<\/rdf:RDF>/, dcBlock(rt) + ' </rdf:RDF>');
+}
+/* an XMP APP1 segment for a JPEG, holding just your name and copyright */
+function xmpSeg(rt) {
+  const enc = new TextEncoder();
+  const head = enc.encode('http://ns.adobe.com/xap/1.0/\u0000');
+  const body = enc.encode(`<?xpacket begin="\uFEFF" id="W5M0MpCehiHzreSzNTczkc9d"?>\n<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="FledgeView">\n <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n${dcBlock(rt)} </rdf:RDF>\n</x:xmpmeta>\n<?xpacket end="w"?>`);
+  const n = 2 + head.length + body.length, seg = new Uint8Array(2 + n);
+  seg.set([0xFF, 0xE1, n >> 8, n & 255], 0); seg.set(head, 4); seg.set(body, 4 + head.length);
+  return seg;
+}
+/* puts a segment into a JPEG right after its JFIF and EXIF segments */
+async function injectXmp(blob, seg) {
+  const b = new Uint8Array(await blob.arrayBuffer());
+  let p = 2;
+  while (p + 9 < b.length && b[p] === 0xFF && (b[p + 1] === 0xE0 || (b[p + 1] === 0xE1 && b[p + 4] === 0x45 && b[p + 5] === 0x78 && b[p + 6] === 0x69 && b[p + 7] === 0x66))) p += 2 + ((b[p + 2] << 8) | b[p + 3]);
+  const out = new Uint8Array(b.length + seg.length);
+  out.set(b.subarray(0, p), 0); out.set(seg, p); out.set(b.subarray(p), p + seg.length);
+  return new Blob([out], { type: 'image/jpeg' });
+}
+function rightsSummary() {
+  const rt = rightsFor({ DateTimeOriginal: new Date() });
+  return rt ? [rt.creator, rt.copyright].filter(Boolean).join(' \u00b7 ') : 'Off';
+}
+function syncRights() {
+  const t = rightsSummary(), on = rightsOn();
+  for (const id of ['wRightsTxt', 'impRightsTxt']) { const e = $(id); if (e) { e.textContent = t; e.title = t; e.classList.toggle('set', on); } }
+}
+function rightsExample() {
+  const r = { on: true, creator: $('rtName').value, copyright: $('rtCopy').value };
+  const rt = rightsFor({ DateTimeOriginal: new Date() }, r);
+  $('rtExample').textContent = rt ? 'This year’s photos get: ' + [rt.creator && `Creator “${rt.creator}”`, rt.copyright && `Copyright “${rt.copyright}”`].filter(Boolean).join(', ') : '';
+}
+function openRights() {
+  const r = S.rights || {};
+  $('rtOn').checked = r.on == null ? true : !!r.on;
+  $('rtName').value = r.creator || ''; $('rtCopy').value = r.copyright || '';
+  rightsExample();
+  $('rightsDlg').showModal(); setTimeout(() => (r.creator ? $('rtCopy') : $('rtName')).focus(), 30);
+}
+$('rtName').oninput = $('rtCopy').oninput = () => { if (!$('rtOn').checked && ($('rtName').value || $('rtCopy').value)) $('rtOn').checked = true; rightsExample(); };
+$('rtSave').onclick = () => {
+  S.rights = { on: $('rtOn').checked, creator: rClean($('rtName').value, 120), copyright: rClean($('rtCopy').value, 200) };
+  saveS(); syncRights(); $('rightsDlg').close();
+};
+$('wRightsBtn').onclick = $('impRightsBtn').onclick = openRights;
+syncRights();
+
 const xmpNew = r => `<?xpacket begin="\uFEFF" id="W5M0MpCehiHzreSzNTczkc9d"?>
 <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="FledgeView">
  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-  <rdf:Description rdf:about="" xmlns:xmp="http://ns.adobe.com/xap/1.0/" xmp:Rating="${r}"/>
- </rdf:RDF>
+${r == null ? '' : `  <rdf:Description rdf:about="" xmlns:xmp="http://ns.adobe.com/xap/1.0/" xmp:Rating="${r}"/>\n`} </rdf:RDF>
 </x:xmpmeta>
 <?xpacket end="w"?>
 `;
-async function writeSidecar(it) {
+/* rt: your name and copyright for this photo (rightsFor), or undefined to work it out; noRating: leave the rating alone */
+async function writeSidecar(it, rt, noRating) {
   const name = baseOf(it.name) + '.xmp';
   const c = cullOf(it); const r = c.f === -1 ? -1 : (c.r || 0);
   let fh, text = null;
   try { fh = await it.dir.getFileHandle(name); text = await (await fh.getFile()).text(); }
   catch { fh = await it.dir.getFileHandle(name, { create: true }); }
   let out;
-  if (text) {
+  if (text && noRating) out = text;
+  else if (text) {
     if (/xmp:Rating="[^"]*"/.test(text)) out = text.replace(/xmp:Rating="[^"]*"/, `xmp:Rating="${r}"`);
     else if (/<xmp:Rating>[^<]*<\/xmp:Rating>/.test(text)) out = text.replace(/<xmp:Rating>[^<]*<\/xmp:Rating>/, `<xmp:Rating>${r}</xmp:Rating>`);
     else if (/<rdf:Description\b/.test(text)) out = text.replace(/<rdf:Description\b/, `<rdf:Description${/xmlns:xmp=/.test(text) ? '' : ' xmlns:xmp="http://ns.adobe.com/xap/1.0/"'} xmp:Rating="${r}"`);
     else throw new Error('Unrecognized sidecar');
-  } else out = xmpNew(r);
+  } else out = xmpNew(noRating ? null : r);
+  out = withRights(out, rt === undefined ? rightsFor(it.meta) : rt);
   const w = await fh.createWritable(); await w.write(out); await w.close();
 }
 $('writeXmp').onclick = async () => {
@@ -4827,7 +4942,7 @@ $('writeXmp').onclick = async () => {
   if (!await ensureWrite()) return toast('Write permission wasn’t granted, so nothing was written');
   let ok = 0, fail = 0;
   for (const it of targets) {
-    try { await writeSidecar(it); it.sidecarWritten = true; ok++; } catch { fail++; }
+    try { if (rightsOn() && !it.meta) { try { await getMeta(it); } catch {} } await writeSidecar(it); it.sidecarWritten = true; ok++; } catch { fail++; }
     status(`Writing sidecars ${ok + fail} of ${targets.length}`);
   }
   status('');
@@ -5004,6 +5119,53 @@ $('moveRej').onclick = async () => {
   saveCull(); status(''); refreshRows();
   toast(`Moved ${ok} photo${ok === 1 ? '' : 's'}.` + (skip ? ` ${skip} skipped because a file with the same name was already there.` : '') + (fail ? ` ${fail} couldn’t be moved (${firstErr}).` : '') + (ok ? ' Already in Lightroom? Relink with Library → Find Missing Photos.' : ''));
   if (ok) tipNudge();
+};
+
+/* ---------- Empty rejects to Recycle Bin (desktop, Windows; 0.9.96) ----------
+   Sends each open _rejects folder to the Recycle Bin whole, so Restore there brings it all back. The program refuses any
+   folder not named _rejects. The photos in them leave the session. */
+if (deskHas('recycle') && window.FV_DESKTOP.recycleRejects) $('emptyRej').hidden = false; else $('emptyRej').style.display = 'none';   // display: the Features switches set hidden on [data-f] items
+function rejectFolders() {
+  const by = new Map();
+  for (const it of state.items) if (it.zone === 'rejects' && it.dir) {
+    let g = null; for (const [d, v] of by) if (d === it.dir) g = v;
+    if (!g) { g = { dir: it.dir, home: it.home, items: [] }; by.set(it.dir, g); }
+    g.items.push(it);
+  }
+  return [...by.values()];
+}
+$('emptyRej').onclick = async () => {
+  closeMenus();
+  const groups = rejectFolders();
+  if (!groups.length) return toast('No _rejects folder is open. Use Cull \u25be \u2192 Move picks and rejects first, then empty them from here.');
+  const n = groups.reduce((a, g) => a + g.items.length, 0);
+  $('binTxt').textContent = `Send ${n.toLocaleString()} rejected photo${n === 1 ? '' : 's'} in ${groups.length === 1 ? 'one _rejects folder' : `${groups.length} _rejects folders`} to the Recycle Bin?`;
+  const ul = $('binList'); ul.innerHTML = '';
+  for (const g of groups.slice(0, 8)) { const li = document.createElement('li'); li.textContent = `${g.home ? g.home.name + ' \u203a ' : ''}_rejects: ${g.items.length.toLocaleString()} photo${g.items.length === 1 ? '' : 's'}`; ul.append(li); }
+  if (groups.length > 8) { const li = document.createElement('li'); li.textContent = `and ${groups.length - 8} more`; ul.append(li); }
+  const go = await new Promise(res => {
+    const d = $('binDlg'); let done = false;
+    const fin = v => { if (done) return; done = true; d.removeEventListener('close', onClose); if (d.open) d.close(); res(v); };
+    const onClose = () => fin(false);
+    d.addEventListener('close', onClose); $('binGo').onclick = () => fin(true);
+    d.showModal(); setTimeout(() => d.querySelector('[data-close]').focus(), 30);
+  });
+  if (!go) return;
+  let sent = 0, files = 0; const gone = new Set(), problems = [];
+  for (const g of groups) {
+    status(`Sending to the Recycle Bin: ${sent + 1} of ${groups.length}`);
+    try { const r = await window.FV_DESKTOP.recycleRejects(g.dir); files += (r && r.files) || 0; sent++; g.items.forEach(it => gone.add(it)); }
+    catch (e) { problems.push(`${g.home ? g.home.name + ' \u203a ' : ''}_rejects: ${(e && e.message) || e}`); }
+  }
+  status('');
+  if (gone.size) {
+    const keep = cur() && !gone.has(cur()) ? cur() : null;
+    state.items = state.items.filter(it => !gone.has(it));
+    if (state.sel) for (const it of gone) state.sel.delete(it.key);
+    computeBursts(); rebuildView(keep); refreshFilterOptions(); refreshRows();
+  }
+  const msg = sent ? `Sent ${gone.size.toLocaleString()} rejected photo${gone.size === 1 ? '' : 's'} (${files.toLocaleString()} file${files === 1 ? '' : 's'} with sidecars) to the Recycle Bin.` : 'Nothing was sent to the Recycle Bin.';
+  toast(msg + (problems.length ? ` Couldn\u2019t send ${problems.length}: ${problems[0]}` : ''));
 };
 
 /* ---------- organize by lens ---------- */
@@ -6223,7 +6385,8 @@ async function sourceExif(file) {
   }
   return null;
 }
-function patchExif(seg, w, h, nogps) {
+/* clearMine: blank the camera's own Artist and Copyright, so they can't disagree with your name and copyright */
+function patchExif(seg, w, h, nogps, clearMine) {
   try {
     const dv = new DataView(seg.buffer, seg.byteOffset, seg.byteLength), base = 10;
     const le = dv.getUint16(base) === 0x4949;
@@ -6234,6 +6397,7 @@ function patchExif(seg, w, h, nogps) {
     each(u32(4), e => {
       const tag = u16(e);
       if (tag === 0x0112) s16(e + 8, 1);
+      if (clearMine && (tag === 0x013B || tag === 0x8298) && u16(e + 2) === 2) { const n = u32(e + 4), at = n <= 4 ? e + 8 : u32(e + 8); for (let i = 0; i < n; i++) dv.setUint8(base + at + i, 0); }
       if (tag === 0x8769) each(u32(e + 8), x => {
         const t = u16(x), type = u16(x + 2);
         if (t === 0xA002 || t === 0xA003) { const v = t === 0xA002 ? w : h; if (type === 3) s16(x + 8, v); else if (type === 4) s32(x + 8, v); }
@@ -6259,8 +6423,12 @@ async function exportOne(it, o, opts = {}) {
   if (!blob || blob.type !== type) { blob = await new Promise(res => r.canvas.toBlob(res, 'image/jpeg', o.q / 100)); ext = 'jpg'; type = 'image/jpeg'; }
   if (type === 'image/jpeg' && o.meta !== 'none' && ['jpg', 'jpeg'].includes(it.ext)) {
     const seg = await sourceExif(it.file);
-    const patched = seg && patchExif(seg, r.canvas.width, r.canvas.height, o.meta === 'nogps');
+    const patched = seg && patchExif(seg, r.canvas.width, r.canvas.height, o.meta === 'nogps', rightsOn());
     if (patched) blob = await injectExif(blob, patched);
+  }
+  if (type === 'image/jpeg' && rightsOn()) {
+    if (!it.meta) { try { await getMeta(it); } catch {} }
+    const rt = rightsFor(it.meta); if (rt) blob = await injectXmp(blob, xmpSeg(rt));
   }
   return { blob, ext, w: r.w, h: r.h, canvas: r.canvas, crop: r.crop };
 }
@@ -8672,10 +8840,10 @@ $('impGo').onclick = async () => {
   /* the ratings you gave on the card come along: to the copies here, and for raw files into .xmp sidecars Lightroom reads */
   let xmpN = 0;
   for (const { p, res, dir } of carry) {
-    const c = impCullOf(p, cm); if (!c.r && !c.f) continue;
+    const c = impCullOf(p, cm), rt = rightsFor(p.meta && (p.meta.DateTimeOriginal || p.meta.CreateDate) ? p.meta : { DateTimeOriginal: p.date }); if (!c.r && !c.f && !rt) continue;
     const it = { name: res.file.name, dir, key: keyOf(res.file) };
-    CULL[it.key] = { ...c };
-    if (xmp && SIDECAR.has(extOf(it.name))) { try { await writeSidecar(it); xmpN++; } catch (e) { problems.push(`${it.name}.xmp: ${e.message || e.name}`); } }
+    if (c.r || c.f) CULL[it.key] = { ...c };
+    if ((xmp || rt) && SIDECAR.has(extOf(it.name))) { try { await writeSidecar(it, rt, !(xmp && (c.r || c.f))); xmpN++; } catch (e) { problems.push(`${it.name}.xmp: ${e.message || e.name}`); } }
   }
   if (carry.length) saveCull();
   imp.xmpN = xmpN;
@@ -8690,7 +8858,7 @@ $('impGo').onclick = async () => {
   imp.busy = false;
   $('impClose').disabled = $('impSrcBtn').disabled = $('impDstBtn').disabled = $('impBkBtn').disabled = $('impBkOn').disabled = false; $('impStop').hidden = true; $('impGo').disabled = false;
   const stopped = imp.stop ? ' Stopped before the end; run Import again to copy the rest.' : '';
-  const bkText = (bk ? ` Backup: ${bCopied.toLocaleString()} copied${bSkipped ? `, ${bSkipped.toLocaleString()} already there` : ''}.` : '') + (imp.xmpN ? ` Ratings written to ${imp.xmpN.toLocaleString()} .xmp sidecar${imp.xmpN === 1 ? '' : 's'} for Lightroom.` : '');
+  const bkText = (bk ? ` Backup: ${bCopied.toLocaleString()} copied${bSkipped ? `, ${bSkipped.toLocaleString()} already there` : ''}.` : '') + (imp.xmpN ? ` ${imp.xmpN.toLocaleString()} .xmp sidecar${imp.xmpN === 1 ? '' : 's'} written for Lightroom.` : '');
   $('impProgTxt').textContent = `Done. Copied ${copied.toLocaleString()} photo${copied === 1 ? '' : 's'}${sameN ? `. ${sameN.toLocaleString()} had the same name as ${sameN === 1 ? 'a different photo' : 'different photos'} already there: placed in that folder\u2019s ${SAME_DIR} folder` : ''}${skipped ? `. ${skipped.toLocaleString()} ${skipped === 1 ? 'was' : 'were'} already imported: skipped` : ''}${problems.length ? `, ${problems.length} problem${problems.length === 1 ? '' : 's'}` : ''}.${bkText}${stopped}`;
   $('impNote').textContent = problems.length ? 'Problems: ' + problems.slice(0, 5).join('; ') + (problems.length > 5 ? `; and ${problems.length - 5} more.` : '') : `Every copy was checked against the original${bk ? ', in both places' : ''}. The card was not changed.`;
   const want = impWant(), then = $('impThen').value;
@@ -8700,7 +8868,7 @@ $('impGo').onclick = async () => {
     state.roots.add(imp.dst);
     addFiles(opened);
     cullOffer = want === 'cull' && then ? { preset: then, shown: false } : null;
-    setTimeout(() => toast(`Imported ${copied.toLocaleString()} photo${copied === 1 ? '' : 's'} into ${imp.dst.name}${bk ? ` with a backup in ${bk.name}` : ''}.${imp.xmpN ? ` Ratings written to ${imp.xmpN.toLocaleString()} .xmp sidecar${imp.xmpN === 1 ? '' : 's'}.` : ''} The card was not changed.`
+    setTimeout(() => toast(`Imported ${copied.toLocaleString()} photo${copied === 1 ? '' : 's'} into ${imp.dst.name}${bk ? ` with a backup in ${bk.name}` : ''}.${imp.xmpN ? ` ${imp.xmpN.toLocaleString()} .xmp sidecar${imp.xmpN === 1 ? '' : 's'} written for Lightroom.` : ''} The card was not changed.`
       + (want === 'make' ? ` Making \u201c${then}\u201d of all of them\u2026` : '')), 60);
     if (want === 'make' && then) setTimeout(() => exportWithPreset(then, { run: true, src: 'all' }), 900);
     else setTimeout(() => benchOffer(copied), 2500);
@@ -9190,8 +9358,18 @@ $('csvBtn').onclick = () => $('copyCsv').click();
 $('csvDlBtn').onclick = () => $('dlCsv').click();
 $('aboutBtn').onclick = () => $('aboutDlg').showModal();
 /* ---------- version and release notes ---------- */
-const VERSION = '0.9.95 beta';
+const VERSION = '0.9.96 beta';
 const RELEASES = [
+  { v: '0.9.96 beta', date: 'November 2026', groups: [
+    ['New', [
+      'Your name and copyright: set them once (Export → Name and ©, or Import → Name and ©). FledgeView writes them into every JPEG it exports, even with Metadata set to Remove all, and into the .xmp sidecars of raw files it imports, which Lightroom reads. {year} becomes the year each photo was taken.',
+      'Desktop program: exported JPEGs and TIFFs get your name and copyright as EXIF Artist and Copyright too, so Windows shows them under Properties → Details.',
+      'Desktop program (Windows): Cull ▾ → Empty rejects to Recycle Bin sends each _rejects folder there whole. Restore in the Recycle Bin brings it all back.',
+    ]],
+    ['Better', [
+      'Contact support from the desktop program includes your Speed setting and the last timings, so a slow export can be looked into without a back-and-forth.',
+    ]],
+  ] },
   { v: '0.9.95 beta', date: 'November 2026', groups: [
     ['Better', [
       'Help ▾ → Contact support (was Send feedback) emails support@hatchappsllc.com, with your version and system filled in. It works in the desktop program too.',
@@ -9199,6 +9377,7 @@ const RELEASES = [
       'fledgeview.com has a Help & contact page, and a Privacy page.',
       'Lens tools: the depth of field calculator now looks like the rest of FledgeView (same colours and type, no separate title bar) and has no links to other sites.',
       'About no longer links to frankhatcher.com.',
+      'The desktop program no longer calls itself free in Getting started and About.',
     ]],
   ] },
   { v: '0.9.94 beta', date: 'November 2026', groups: [
@@ -9821,13 +10000,20 @@ function browserName() {
   return pick ? `${pick[1]} ${ua.match(pick[0])[1]}` : 'Unknown browser';
 }
 function osName() { const ua = navigator.userAgent; return /Windows/.test(ua) ? 'Windows' : /Mac OS X/.test(ua) ? (navigator.maxTouchPoints > 1 ? 'iPad' : 'Mac') : /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iOS' : /Linux/.test(ua) ? 'Linux' : 'Unknown system'; }
-$('feedbackBtn').onclick = () => {
+$('feedbackBtn').onclick = async () => {
   closeMenus();
   const to = ['support', 'hatchappsllc.com'].join('@');
   const desk = !!window.FV_DESKTOP;
   const where = desk ? `desktop program on ${osName()}` : location.protocol === 'file:' ? 'downloaded copy' : location.hostname;
   const sys = desk ? `${osName()}, ${navigator.hardwareConcurrency || '?'} cores` : `${browserName()} on ${osName()}`;
-  const body = ['What happened, or what would you like FledgeView to do? (For raw files, the camera model helps.)', '', '', '', '---', `FledgeView ${VERSION} (${where})`, sys, `Window ${window.innerWidth} \u00d7 ${window.innerHeight}, screen ${screen.width} \u00d7 ${screen.height}`, `Look: ${S.look === 'clean' ? 'Clean' : 'Camera'} \u00b7 Photos loaded: ${state.items.length}`].join('\n');
+  let body = ['What happened, or what would you like FledgeView to do? (For raw files, the camera model helps.)', '', '', '', '---', `FledgeView ${VERSION} (${where})`, sys, `Window ${window.innerWidth} \u00d7 ${window.innerHeight}, screen ${screen.width} \u00d7 ${screen.height}`, `Look: ${S.look === 'clean' ? 'Clean' : 'Camera'} \u00b7 Photos loaded: ${state.items.length}`].join('\n');
+  /* the desktop program adds its Speed setting and the last timings (the same text as Ctrl+Shift+D), kept short enough
+     for a mail link */
+  if (desk && window.FV_DESKTOP.timings) {
+    let t = ''; try { t = await Promise.race([window.FV_DESKTOP.timings(), new Promise(r => setTimeout(() => r(''), 2000))]) || ''; } catch {}
+    t = String(t).trim(); if (t.length > 1400) t = t.slice(0, 1400).replace(/\n[^\n]*$/, '') + '\n(more in Ctrl+Shift+D)';
+    if (t) body += '\n' + t;
+  }
   const url = `mailto:${to}?subject=${encodeURIComponent('FledgeView support')}&body=${encodeURIComponent(body)}`;
   if (window.FV_openExternal) window.FV_openExternal(url); else location.href = url;
 };
@@ -9846,6 +10032,11 @@ if (window.FV_DESKTOP) document.querySelectorAll('#empty .emptynote').forEach(e 
 if (deskHas('bursts')) $('keepBest').hidden = false;
 else { $('keepBest').style.display = 'none'; $('sortBsf').disabled = true; $('sortBsf').textContent = 'Sharpest-first bursts: in the FledgeView desktop program'; if (S.sort === 'bsf') { S.sort = 'burst'; $('sortSel').value = 'burst'; } }
 if (window.FV_DESKTOP) document.querySelectorAll('#tipBtn, .tiplink, #aboutDlg .tipbox, #helpTip').forEach(e => { e.style.display = 'none'; });
+/* ...and isn't described as free */
+if (window.FV_DESKTOP) {
+  $('guideSub').textContent = 'A photo viewer, culler, organizer, and exporter for photographers.';
+  $('aboutRights').textContent = '\u00a9 2026 HatchApps LLC. All rights reserved. Licensed for your own photography; please don\u2019t resell, rebrand, or redistribute it.';
+}
 $('tipGo').addEventListener('click', () => setTimeout(() => $('tipDlg').close(), 50));
 function tipNudge() {
   if (S.tipShown || window.FV_DESKTOP) return;   // the desktop program skips the one-time thank-you note
